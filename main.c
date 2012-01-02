@@ -1210,6 +1210,9 @@ void sdl_read_thread(SDL_Event *event) {
        buf[1] = 0;
        c_write(buf,1);
      }
+     #endif
+
+     #if defined(OSX_BUILD)
      if(scancode == SDL_SCANCODE_RETURN) {
        char buf[4];
        buf[0] = 13;
@@ -1222,6 +1225,9 @@ void sdl_read_thread(SDL_Event *event) {
        buf[1] = 0;
        c_write(buf,1);
      }
+     #endif
+
+     #if defined(OSX_BUILD) || defined(LINUX_BUILD)
      if((scancode == SDL_SCANCODE_LCTRL) || (scancode == SDL_SCANCODE_RCTRL)) {
        hterm_ctrl_pressed=true;
      }
@@ -1281,7 +1287,6 @@ void sdl_read_thread(SDL_Event *event) {
      if(((event->key.keysym.sym == 'v') && (mod | KMOD_CTRL)) || 
         ((event->key.keysym.sym == 'v') && (mod | KMOD_GUI)) 
        ) {
-       printf("paste pressed\n");
        // perform text paste
        uint8_t *text = paste_text();
        if(text != 0) {
