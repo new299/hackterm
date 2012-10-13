@@ -5,12 +5,9 @@
 #include <stdio.h>
 
 using namespace std;
-#include "nfont.h"
+#include "nunifont.h"
 
 int main(int argc, char **argv) {
-
-
-  nfont_init();
 
   SDL_Surface *screen;
  
@@ -35,7 +32,7 @@ int main(int argc, char **argv) {
 
     for(int n=0;n<16;n++) text[n] = s+n;
     text[16]=0;
-    draw_text(screen,x,y,text,0);
+    draw_unitext(screen,x,y,text,0);
 
     x += 16*16 + 2;
     if(x > 500) { x = 0; y+=18;}

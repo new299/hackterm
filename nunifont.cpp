@@ -1,4 +1,4 @@
-#include "nfont.h"
+#include "nunifont.h"
 #include <stdio.h>
 #include <string.h>
 #include <SDL/SDL.h>
@@ -10,11 +10,13 @@ typedef struct fontchar {
 
 fontchar *fontmap;
 uint8_t  *widthmap;
+bool     initialised=false;
 
 void load_fonts(char *filename,fontchar **fontmap,uint8_t **widthmap);
 
 void nfont_init() {
   load_fonts("unifont.hex",&fontmap,&widthmap);
+  initialised = true;
 }
 
 uint32_t get_pixel(uint16_t c,int c_x,int c_y) {
@@ -55,7 +57,9 @@ void draw_character(SDL_Surface *screen,int x,int y,uint16_t c,uint32_t backgrou
   }
 }
 
-void draw_text(SDL_Surface *screen,int x,int y,const uint16_t *text,int16_t background) {
+void draw_unitext(SDL_Surface *screen,int x,int y,const uint16_t *text,int16_t background) {
+
+  if(!initialised) nfont_init();
 
   int length=0;
   for(int n=0;n<10000;n++) {if(text[n] == 0) {length=n; break;}}
