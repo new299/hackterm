@@ -38,7 +38,6 @@ void dump_row(int row) {
 
   vterm_screen_get_text(vts, text, len, rect);
 
-//  printf("%s\n", text);
   uint16_t atext[100];
   for(int a=0;a<=len;a++) {atext[a] = text[a];}
   draw_unitext(screen,0,row*18,atext,0);
@@ -85,10 +84,30 @@ int main(int argc, char **argv) {
   }
    
   // grab pts
-  int fd = open("/dev/ptmx",O_RDWR | O_NOCTTY | O_NONBLOCK);
+  //int fd = open("/dev/ptmx",O_RDWR | O_NOCTTY | O_NONBLOCK);
+  int fd;
+  int pid = forkpty(&fd,NULL,NULL,NULL);
+  int flag=fcntl(fd,F_GETFL,0);
+  flag|=O_NONBLOCK;
+  fcntl(fd,F_SETFL,flag);
 
-  grantpt(fd);
-  unlockpt(fd);
+  //fcntl(fd, F_SETFL, FNDELAY);
+
+  printf("fd: %d",fd);
+  if(pid == 0) {
+    char args[3];
+    args[0] = "/bin/bash";
+    args[1] =""; 
+    args[2] = 0;
+
+    //execv("/bin/bash",args);
+    execl("/bin/bash","bash",NULL);
+    return 0;
+  }
+
+
+//  grantpt(fd);
+//  unlockpt(fd);
   printf("fd: %d",fd);
  
   SDL_EnableUNICODE(1);

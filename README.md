@@ -1,4 +1,4 @@
-hacksh
-======
+hackterm
+========
 
-move along, nothing to see here.
+a strange experimental terminal emulator.
