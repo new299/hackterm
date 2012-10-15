@@ -1,0 +1,22 @@
+INIT
+WANTSTATE p
+
+RESET
+  settermprop 1 true
+  settermprop 2 true
+  settermprop 7 1
+
+!Cursor visibility
+PUSH "\e[?25h"
+  settermprop 1 true
+PUSH "\e[?25l"
+  settermprop 1 false
+
+!Cursor shape
+PUSH "\e[3 q"
+  settermprop 2 true
+  settermprop 7 2
+
+!Title
+PUSH "\e]2;Here is my title\a"
+  settermprop 4 "Here is my title"

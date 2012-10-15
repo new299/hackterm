@@ -1,0 +1,27 @@
+INIT
+WANTSTATE
+
+!DA
+RESET
+PUSH "\e[c"
+  output "\e[?1;2c"
+
+!DSR
+RESET
+PUSH "\e[5n"
+  output "\e[0n"
+
+!CPR
+PUSH "\e[6n"
+  output "\e[1;1R"
+PUSH "\e[10;10H\e[6n"
+  output "\e[10;10R"
+
+!DECRQSS on DECSTBM
+PUSH "\eP\$qr\e\\"
+  output "\eP1\$r1;25r\e\\"
+
+!DECRQSS on DECSCUSR
+PUSH "\e[3 q"
+PUSH "\eP\$q q\e\\"
+  output "\eP1\$r3 q\e\\"

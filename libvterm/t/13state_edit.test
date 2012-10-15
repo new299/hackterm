@@ -1,0 +1,177 @@
+INIT
+UTF8 1
+WANTSTATE se
+
+!ICH
+RESET
+  erase 0..25,0..80
+  ?cursor = 0,0
+PUSH "ACD"
+PUSH "\e[2D"
+  ?cursor = 0,1
+PUSH "\e[@"
+  scrollrect 0..1,1..80 => +0,-1
+  ?cursor = 0,1
+PUSH "B"
+  ?cursor = 0,2
+PUSH "\e[3@"
+  scrollrect 0..1,2..80 => +0,-3
+
+!DCH
+RESET
+  erase 0..25,0..80
+  ?cursor = 0,0
+PUSH "ABBC"
+PUSH "\e[3D"
+  ?cursor = 0,1
+PUSH "\e[P"
+  scrollrect 0..1,1..80 => +0,+1
+  ?cursor = 0,1
+PUSH "\e[3P"
+  scrollrect 0..1,1..80 => +0,+3
+  ?cursor = 0,1
+
+!ECH
+RESET
+  erase 0..25,0..80
+  ?cursor = 0,0
+PUSH "ABC"
+PUSH "\e[2D"
+  ?cursor = 0,1
+PUSH "\e[X"
+  erase 0..1,1..2
+  ?cursor = 0,1
+PUSH "\e[3X"
+  erase 0..1,1..4
+  ?cursor = 0,1
+
+!IL
+RESET
+  erase 0..25,0..80
+  ?cursor = 0,0
+PUSH "A\r\nC"
+  ?cursor = 1,1
+PUSH "\e[L"
+  scrollrect 1..25,0..80 => -1,+0
+  # TODO: ECMA-48 says we should move to line home, but neither xterm nor
+  # xfce4-terminal do this
+  ?cursor = 1,1
+PUSH "\rB"
+  ?cursor = 1,1
+PUSH "\e[3L"
+  scrollrect 1..25,0..80 => -3,+0
+
+!DL
+RESET
+  erase 0..25,0..80
+  ?cursor = 0,0
+PUSH "A\r\nB\r\nB\r\nC"
+  ?cursor = 3,1
+PUSH "\e[2H"
+  ?cursor = 1,0
+PUSH "\e[M"
+  scrollrect 1..25,0..80 => +1,+0
+  ?cursor = 1,0
+PUSH "\e[3M"
+  scrollrect 1..25,0..80 => +3,+0
+  ?cursor = 1,0
+
+!EL 0
+RESET
+  erase 0..25,0..80
+  ?cursor = 0,0
+PUSH "ABCDE"
+PUSH "\e[3D"
+  ?cursor = 0,2
+PUSH "\e[0K"
+  erase 0..1,2..80
+  ?cursor = 0,2
+
+!EL 1
+RESET
+  erase 0..25,0..80
+  ?cursor = 0,0
+PUSH "ABCDE"
+PUSH "\e[3D"
+  ?cursor = 0,2
+PUSH "\e[1K"
+  erase 0..1,0..3
+  ?cursor = 0,2
+
+!EL 2
+RESET
+  erase 0..25,0..80
+  ?cursor = 0,0
+PUSH "ABCDE"
+PUSH "\e[3D"
+  ?cursor = 0,2
+PUSH "\e[2K"
+  erase 0..1,0..80
+  ?cursor = 0,2
+
+!ED 0
+RESET
+  erase 0..25,0..80
+  ?cursor = 0,0
+PUSH "\e[2;2H"
+  ?cursor = 1,1
+PUSH "\e[0J"
+  erase 1..2,1..80
+  erase 2..25,0..80
+  ?cursor = 1,1
+
+!ED 1
+RESET
+  erase 0..25,0..80
+  ?cursor = 0,0
+PUSH "\e[2;2H"
+  ?cursor = 1,1
+PUSH "\e[1J"
+  erase 0..1,0..80
+  erase 1..2,0..2
+  ?cursor = 1,1
+
+!ED 2
+RESET
+  erase 0..25,0..80
+  ?cursor = 0,0
+PUSH "\e[2;2H"
+  ?cursor = 1,1
+PUSH "\e[2J"
+  erase 0..25,0..80
+  ?cursor = 1,1
+
+WANTSTATE -s+m
+
+!ICH move+erase emuation
+RESET
+  erase 0..25,0..80
+  ?cursor = 0,0
+PUSH "ACD"
+PUSH "\e[2D"
+  ?cursor = 0,1
+PUSH "\e[@"
+  moverect 0..1,1..79 -> 0..1,2..80
+  erase 0..1,1..2
+  ?cursor = 0,1
+PUSH "B"
+  ?cursor = 0,2
+PUSH "\e[3@"
+  moverect 0..1,2..77 -> 0..1,5..80
+  erase 0..1,2..5
+
+!DCH move+erase emulation
+RESET
+  erase 0..25,0..80
+  ?cursor = 0,0
+PUSH "ABBC"
+PUSH "\e[3D"
+  ?cursor = 0,1
+PUSH "\e[P"
+  moverect 0..1,2..80 -> 0..1,1..79
+  erase 0..1,79..80
+  ?cursor = 0,1
+PUSH "\e[3P"
+  moverect 0..1,4..80 -> 0..1,1..77
+  erase 0..1,77..80
+  ?cursor = 0,1

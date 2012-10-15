@@ -1,0 +1,22 @@
+INIT
+WANTSCREEN
+
+!Resize wider preserves cells
+RESET
+PUSH "AB\r\nCD"
+  ?screen_chars 0,0,1,80 = 0x41,0x42
+  ?screen_chars 1,0,2,80 = 0x43,0x44
+RESIZE 30,100
+  ?screen_chars 0,0,1,100 = 0x41,0x42
+  ?screen_chars 1,0,2,100 = 0x43,0x44
+
+!Resize wider allows print in new area
+RESET
+PUSH "AB\e[79GCD"
+  ?screen_chars 0,0,1,2 = 0x41,0x42
+  ?screen_chars 0,78,1,80 = 0x43,0x44
+RESIZE 30,100
+  ?screen_chars 0,0,1,2 = 0x41,0x42
+  ?screen_chars 0,78,1,80 = 0x43,0x44
+PUSH "E"
+  ?screen_chars 0,78,1,81 = 0x43,0x44,0x45

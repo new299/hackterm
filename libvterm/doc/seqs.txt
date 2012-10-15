@@ -1,0 +1,190 @@
+Sequences documented in parens are implicit ones from parser.c, which move
+between states.
+
+1 = VT100
+2 = VT220
+ 
+  C0 controls
+   
+12   0x00             = NUL
+12   0x07             = BEL
+12   0x08             = BS
+12   0x09             = HT
+12   0x0A             = LF
+12   0x0B             = VT
+12   0x0C             = FF
+12   0x0D             = CR
+12   0x0E             = LS1
+12   0x0F             = LS0
+    (0x18             = CAN)
+    (0x1A             = SUB)
+    (0x1B             = ESC)
+
+12   0x7f             = DEL (ignored)
+   
+  C1 controls
+   
+12   0x84             = IND
+12   0x85             = NEL
+12   0x88             = HTS
+12   0x8D             = RI
+    (0x90             = DCS)
+    (0x9B             = CSI)
+    (0x9D             = OSC)
+   
+  Escape sequences
+   - excluding sequences that are C1 aliases
+   
+12   ESC ()           = SCS, select character set (G0, G1)
+ 2   ESC *+           = SCS, select character set (G2, G3)
+12   ESC 7            = DECSC - save cursor
+12   ESC 8            = DECRC - restore cursor
+12   ESC # 8          = DECALN
+12   ESC =            = DECKPAM, keypad application mode
+12   ESC >            = DECKPNM, keypad numeric mode
+    (ESC P            = DCS)
+    (ESC [            = CSI)
+    (ESC ]            = OSC)
+12   ESC c            = RIS, reset initial state
+     ESC n            = LS2
+     ESC o            = LS3
+   
+  DCSes
+
+     DCS $q           = DECRQSS
+           SP q       = Request DECSCUSR
+           r          = Request DECSTBM
+   
+  CSIs
+ 2   CSI @            = ICH
+12   CSI A            = CUU
+12   CSI B            = CUD
+12   CSI C            = CUF
+12   CSI D            = CUB
+     CSI E            = CNL
+     CSI F            = CPL
+     CSI G            = CHA
+12   CSI H            = CUP
+     CSI I            = CHT
+12   CSI J            = ED
+12   CSI K            = EL
+ 2   CSI L            = IL
+ 2   CSI M            = DL
+ 2   CSI P            = DCH
+     CSI S            = SU
+     CSI T            = SD
+ 2   CSI X            = ECH
+     CSI Z            = CBT
+     CSI `            = HPA
+     CSI a            = HPR
+12   CSI c            = DA
+ 2   CSI > c          = DECSDA
+     CSI d            = VPA
+     CSI e            = VPR
+12   CSI f            = HVP
+12   CSI g            = TBC
+1    CSI h            = SM, Set mode
+1    CSI ? h          = DECSM, DEC set mode
+     CSI j            = HPB
+     CSI k            = VPB
+1    CSI l            = RM, Reset mode
+1    CSI ? l          = DECRM, DEC reset mode
+12   CSI m            = SGR, Set Graphic Rendition
+12   CSI n            = DSR, Device Status Report
+ 2   CSI ! p          = DECSTR, soft terminal reset
+     CSI SP q         = DECSCUSR
+12   CSI r            = DECSTBM
+     CSI s            = ANSI SAVE
+     CSI u            = ANSI RESTORE
+   
+  OSCs
+   
+     OSC 0;           = Set icon name and title
+     OSC 1;           = Set icon name
+     OSC 2;           = Set title
+   
+  Standard modes
+   
+ 2   SM 4             = IRM
+12   SM 20            = NLM, linefeed/newline
+   
+  DEC modes
+   
+12   DECSM 1          = DECCKM, cursor keys
+12   DECSM 5          = DECSCNM, screen
+12   DECSM 6          = DECOM, origin
+12   DECSM 7          = DECAWM, autowrap
+     DECSM 12         = Cursor blink
+ 2   DECSM 25         = DECTCEM, text cursor enable
+     DECSM 1000       = Mouse click/release tracking
+     DECSM 1002       = Mouse click/release/drag tracking
+     DECSM 1003       = Mouse all movements tracking
+     DECSM 1005       = Mouse protocol extended (UTF-8) - not recommended
+     DECSM 1006       = Mouse protocol SGR
+     DECSM 1015       = Mouse protocol rxvt
+     DECSM 1047       = Altscreen
+     DECSM 1048       = Save cursor
+     DECSM 1049       = 1047 + 1048
+   
+  Graphic Renditions
+   
+12   SGR 0            = Reset
+12   SGR 1            = Bold on
+     SGR 3            = Italic on
+12   SGR 4            = Underline single
+12   SGR 5            = Blink on
+12   SGR 7            = Reverse on
+     SGR 9            = Strikethrough on
+     SGR 10-19        = Select font
+     SGR 21           = Underline double
+ 2   SGR 22           = Bold off
+     SGR 23           = Italic off
+ 2   SGR 24           = Underline off
+ 2   SGR 25           = Blink off
+ 2   SGR 27           = Reverse off
+     SGR 29           = Strikethrough off
+     SGR 30-37        = Foreground ANSI
+     SGR 38           = Foreground alternative palette
+     SGR 39           = Foreground default
+     SGR 40-47        = Background ANSI
+     SGR 48           = Background alternative palette
+     SGR 49           = Background default
+     SGR 90-97        = Foreground ANSI high-intensity
+     SGR 100-107      = Background ANSI high-intensity
+ 
+The state storage used by CSI s, ESC 7 and DECSM 1048/1049 is shared.
+
+  Unimplemented sequences:
+
+The following sequences are not recognised by libvterm.
+
+12   0x05             = ENQ
+ 2   0x8e             = SS2
+ 2   0x8f             = SS3
+12   ESC # 3          = DECDHL, double-height line (top half)
+12   ESC # 4          = DECDHL, double-height line (bottom half)
+12   ESC # 5          = DECSWL, single-width line
+12   ESC # 6          = DECDWL, double-width line
+ 2   ESC Sp F         = S7C1T
+ 2   ESC Sp G         = S8C1T
+12   ESC Z            = DECID, identify terminal
+ 2   DCS (            = DECDLD, down-line-loadable character set
+ 2   DCS |            = DECUDK, user-defined key
+ 2   CSI ? J          = DECSED, selective erase in display
+ 2   CSI ? K          = DECSEL, selective erase in line
+ 2   CSI i            = DEC printer control
+ 2   CSI " p          = DECSCL, set compatibility level
+1    CSI q            = DECLL, load LEDs
+ 2   CSI " q          = DECSCA, select character attributes
+1    CSI x            = DECREQTPARM, request terminal parameters
+12   CSI y            = DECTST, invoke confidence test
+ 2   SM 2             = KAM, keyboard action
+12   SM 12            = SRM, send/receive
+12   DECSM 2          = DECANM, ANSI/VT52
+12   DECSM 3          = DECCOLM, 132 column
+12   DECSM 4          = DECSCLM, scrolling
+12   DECSM 8          = DECARM, auto-repeat
+12   DECSM 9          = DECINLM, interlace
+ 2   DECSM 18         = DECPFF, print form feed
+ 2   DECSM 19         = DECPEX, print extent
+ 2   DECSM 42         = DECNRCM, national/multinational character

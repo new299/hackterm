@@ -1,5 +1,5 @@
-hterm: main.cpp nunifont.cpp nunifont.h
-	g++ -g main.cpp nunifont.cpp -o hterm -lSDL
+hterm: main.c nunifont.c nunifont.h
+	gcc -g main.c nunifont.c -o hterm -I./libvterm/include -L./libvterm/.libs -lvterm -lSDL -std=c99
 
 clean:
 	rm hterm

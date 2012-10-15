@@ -1,0 +1,95 @@
+INIT
+WANTSTATE M
+
+!Mouse in simple button report mode
+RESET
+PUSH "\e[?1000h"
+  setmousefunc func
+
+!Press 1
+MOUSE 0 1 1 0,0
+  output "\e[M\x20\x21\x21"
+
+!Release 1
+MOUSE 0 0 1 0,0
+  output "\e[M\x23\x21\x21"
+
+!Ctrl-Press 1
+MOUSE C 1 1 0,0
+  output "\e[M\x30\x21\x21"
+MOUSE C 0 1 0,0
+  output "\e[M\x33\x21\x21"
+
+!Button 2
+MOUSE 0 1 2 0,0
+  output "\e[M\x21\x21\x21"
+MOUSE 0 0 2 0,0
+  output "\e[M\x23\x21\x21"
+
+!Position
+MOUSE 0 1 1 10,20
+  output "\e[M\x20\x35\x2b"
+
+MOUSE 0 0 0 10,21
+  # no output
+
+!Wheel events
+MOUSE 0 1 4 10,21
+  output "\e[M\x60\x36\x2b"
+MOUSE 0 1 4 10,21
+  output "\e[M\x60\x36\x2b"
+MOUSE 0 1 5 10,21
+  output "\e[M\x61\x36\x2b"
+
+!Drag events
+RESET
+PUSH "\e[?1002h"
+  setmousefunc func
+
+MOUSE 0 1 1 5,5
+  output "\e[M\x20\x26\x26"
+MOUSE 0 0 0 5,6
+  output "\e[M\x40\x27\x26"
+MOUSE 0 0 0 6,6
+  output "\e[M\x40\x27\x27"
+MOUSE 0 0 0 6,6
+  # no output
+MOUSE 0 0 1 6,6
+  output "\e[M\x23\x27\x27"
+MOUSE 0 0 0 6,7
+  # no output
+
+!Non-drag motion events
+PUSH "\e[?1003h"
+  setmousefunc func
+
+MOUSE 0 0 0 6,8
+  output "\e[M\x43\x29\x27"
+
+!Bounds checking
+MOUSE 0 1 1 300,300
+  output "\e[M\x20\xff\xff"
+MOUSE 0 0 1 300,300
+  output "\e[M\x23\xff\xff"
+
+!UTF-8 extended encoding mode
+# 300 + 32 + 1 = 333 = U+014d = \xc5\x8d
+PUSH "\e[?1005h"
+MOUSE 0 1 1 300,300
+  output "\e[M\x20\xc5\x8d\xc5\x8d"
+MOUSE 0 0 1 300,300
+  output "\e[M\x23\xc5\x8d\xc5\x8d"
+
+!SGR extended encoding mode
+PUSH "\e[?1006h"
+MOUSE 0 1 1 300,300
+  output "\e[<0;301;301M"
+MOUSE 0 0 1 300,300
+  output "\e[<0;301;301m"
+
+!rxvt extended encoding mode
+PUSH "\e[?1015h"
+MOUSE 0 1 1 300,300
+  output "\e[0;301;301M"
+MOUSE 0 0 1 300,300
+  output "\e[3;301;301M"

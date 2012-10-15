@@ -1,0 +1,149 @@
+INIT
+WANTSCREEN d
+
+!Putglyph
+RESET
+  damage 0..25,0..80
+PUSH "123"
+  damage 0..1,0..1
+  damage 0..1,1..2
+  damage 0..1,2..3
+  ?screen_chars 0,0,1,3 = 0x31,0x32,0x33
+
+!Erase
+PUSH "\e[H"
+PUSH "\e[3X"
+  damage 0..1,0..3
+  ?screen_chars 0,0,1,3 = 
+
+!Scroll damages entire line in two chunks
+PUSH "\e[H\e[5@"
+  damage 0..1,5..80
+  damage 0..1,0..5
+
+!Scroll down damages entire screen in two chunks
+PUSH "\e[T"
+  damage 1..25,0..80
+  damage 0..1,0..80
+
+!Altscreen damages entire area
+PUSH "\e[?1049h"
+  damage 0..25,0..80
+PUSH "\e[?1049l"
+  damage 0..25,0..80
+
+WANTSCREEN ms
+
+!Scroll invokes moverect but not damage
+PUSH "\e[5@"
+  prescroll 0..1,75..80
+  moverect 0..1,0..75 -> 0..1,5..80
+  damage 0..1,0..5
+
+WANTSCREEN -ms
+
+!Merge to cells
+RESET
+  damage 0..25,0..80
+DAMAGEMERGE CELL
+
+PUSH "A"
+  damage 0..1,0..1
+  ?screen_chars 0,0,1,1 = 0x41
+PUSH "B"
+  damage 0..1,1..2
+  ?screen_chars 0,1,1,2 = 0x42
+PUSH "C"
+  damage 0..1,2..3
+  ?screen_chars 0,2,1,3 = 0x43
+
+!Merge entire rows
+RESET
+  damage 0..25,0..80
+DAMAGEMERGE ROW
+
+PUSH "ABCDE\r\nEFGH"
+  damage 0..1,0..5
+  ?screen_chars 0,0,1,5 = 0x41,0x42,0x43,0x44,0x45
+DAMAGEFLUSH
+  damage 1..2,0..4
+  ?screen_chars 1,0,2,5 = 0x45,0x46,0x47,0x48
+PUSH "\e[3;6r\e[6H\eD"
+  damage 2..5,0..80
+DAMAGEFLUSH
+  damage 5..6,0..80
+
+!Merge entire screen
+RESET
+  damage 0..25,0..80
+DAMAGEMERGE SCREEN
+
+PUSH "ABCDE\r\nEFGH"
+DAMAGEFLUSH
+  damage 0..2,0..5
+  ?screen_chars 0,0,1,5 = 0x41,0x42,0x43,0x44,0x45
+  ?screen_chars 1,0,2,5 = 0x45,0x46,0x47,0x48
+PUSH "\e[3;6r\e[6H\eD"
+DAMAGEFLUSH
+  damage 2..6,0..80
+
+!Merge entire screen with moverect
+WANTSCREEN ms
+
+RESET
+  damage 0..25,0..80
+DAMAGEMERGE SCREEN
+
+PUSH "ABCDE\r\nEFGH"
+PUSH "\e[3;6r\e[6H\eD"
+  prescroll 2..3,0..80
+  damage 0..2,0..5
+  moverect 3..6,0..80 -> 2..5,0..80
+  ?screen_chars 0,0,1,5 = 0x41,0x42,0x43,0x44,0x45
+  ?screen_chars 1,0,2,5 = 0x45,0x46,0x47,0x48
+DAMAGEFLUSH
+  damage 5..6,0..80
+
+!Merge scroll
+RESET
+  damage 0..25,0..80
+DAMAGEMERGE SCROLL
+
+PUSH "\e[25H\n\n\n"
+  prescroll 0..1,0..80
+  prescroll 0..1,0..80
+  prescroll 0..1,0..80
+DAMAGEFLUSH
+  moverect 3..25,0..80 -> 0..22,0..80
+  damage 22..25,0..80
+
+!Merge scroll with damage
+PUSH "ABCDE\r\nEFGH\r\n"
+  prescroll 0..1,0..80
+  prescroll 0..1,0..80
+DAMAGEFLUSH
+  moverect 2..25,0..80 -> 0..23,0..80
+  damage 22..25,0..80
+  ?screen_chars 22,0,23,5 = 0x41,0x42,0x43,0x44,0x45
+  ?screen_chars 23,0,24,5 = 0x45,0x46,0x47,0x48
+
+!Merge scroll with damage past region
+PUSH "\e[3;6r\e[6H1\r\n2\r\n3\r\n4\r\n5"
+  prescroll 2..3,0..80
+  prescroll 2..3,0..80
+  prescroll 2..3,0..80
+  prescroll 2..3,0..80
+DAMAGEFLUSH
+  damage 2..6,0..80
+  ?screen_chars 2,0,3,1 = 0x32
+  ?screen_chars 3,0,4,1 = 0x33
+  ?screen_chars 4,0,5,1 = 0x34
+  ?screen_chars 5,0,6,1 = 0x35
+
+!Damage entirely outside scroll region
+PUSH "\e[HABC\e[3;6r\e[6H\r\n6"
+  prescroll 2..3,0..80
+  damage 0..1,0..3
+DAMAGEFLUSH
+  moverect 3..6,0..80 -> 2..5,0..80
+  damage 5..6,0..80
