@@ -75,8 +75,12 @@ int main(int argc, char **argv) {
     printf("Initialisation failed");
     return 1;
   }
+
+  const SDL_VideoInfo *vid = SDL_GetVideoInfo();
+  int maxwidth  = vid->current_w;
+  int maxheight = vid->current_h;
  
-  screen=SDL_SetVideoMode(1200,800,32,SDL_ANYFORMAT);
+  screen=SDL_SetVideoMode(maxwidth,maxheight,32,SDL_ANYFORMAT);//double buf?
   if(screen==NULL) {
     printf("Failed SDL_SetVideoMode: %d",SDL_GetError());
     SDL_Quit();
@@ -112,8 +116,8 @@ int main(int argc, char **argv) {
  
   SDL_EnableUNICODE(1);
 
-  rows = 25;
-  cols = 80;
+  rows = maxheight/17;
+  cols = maxwidth /17;
 
   vt = vterm_new(rows, cols);
   vts = vterm_obtain_screen(vt);

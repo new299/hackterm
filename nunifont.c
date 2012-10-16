@@ -4,6 +4,7 @@
 #include <SDL/SDL.h>
 #include <stdbool.h>
  
+bool get_widthmap(uint16_t p);
 
 typedef struct fontchar {
   uint8_t data[32];
@@ -67,11 +68,19 @@ void draw_unitext(SDL_Surface *screen,int x,int y,const uint16_t *text,int16_t b
   if(length < 0    ) return;
   if(length > 10000) return;
 
+  int spacing=1;
+
   int c_x = x;
   int c_y = y;
   for(size_t n=0;n<length;n++) {
-    draw_character(screen,c_x,c_y,text[n],background);
-    c_x+=16;
+
+    if(text[n] == ' ') {
+      c_x += 8 + spacing; 
+    } else {
+      draw_character(screen,c_x,c_y,text[n],background);
+      if(get_widthmap(text[n]) != true) c_x+=16+spacing;
+                                   else c_x+=8 +spacing;
+    }
   }
 }
 
@@ -83,6 +92,13 @@ void set_widthmap(uint8_t *widthmap,int p,int v) {
   if(v == 1) { widthmap[byte] = widthmap[byte] & ~(1 << bit); }
         else { widthmap[byte] = widthmap[byte] |  (1 << bit); }
 
+}
+
+bool get_widthmap(uint16_t p) {
+  int byte = p/8;
+  int bit  = p%8;
+  if((widthmap[byte] & (1 << bit)) > 0) return true;
+                                   else return false;
 }
 
 int hex2dec(char h) {
@@ -136,6 +152,8 @@ int load_line(char *line,fontchar *f) {
       }
     }
   }
+
+  if(width == 16) return 1; else return 0;
 }
 
 void load_fonts(char *filename,fontchar **fontmap,uint8_t **widthmap) {
@@ -151,7 +169,7 @@ void load_fonts(char *filename,fontchar **fontmap,uint8_t **widthmap) {
     getline(&line,&size,mfile);
 
     int width = load_line(line,&(*fontmap)[n]);
-  //  set_widthmap(*widthmap,n,width);
+    set_widthmap(*widthmap,n,width);
     free(line);
   }
 }
