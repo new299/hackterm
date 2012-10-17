@@ -13,6 +13,7 @@
 #include <unistd.h>
 
 #include "vterm.h"
+#include "utf8proc.h"
 
 #include "nunifont.h"
 
@@ -32,17 +33,66 @@ void dump_row(int row) {
     .end_col   = cols,
   };
 
-  size_t len = vterm_screen_get_text(vts, NULL, 0, rect);
-  char *text = malloc(len + 1);
-  text[len] = 0;
+//  printf("vterm text: %s\n",text);
 
-  vterm_screen_get_text(vts, text, len, rect);
+//  size_t len = vterm_screen_get_chars(vts,NULL,0,rect);
+//  size_t len = vterm_screen_get_text(vts, NULL, 0, rect);
+//  if(len <= 0) return;
+  uint8_t text1[1000];// = malloc(len + 1);
+  uint32_t text[1000];// = malloc(len + 1);
+  uint16_t rtext[1000];// = malloc(len + 1);
+  text[0] = 0;
 
-  uint16_t atext[100];
-  for(int a=0;a<=len;a++) {atext[a] = text[a];}
-  draw_unitext(screen,0,row*18,atext,0);
 
-  free(text);
+  VTermPos vp;
+  for(int n=0;n<cols;n++) {
+    vp.row=row;
+    vp.col=n;
+    VTermScreenCell c;
+    int i = vterm_screen_get_cell(vts,vp,&c);
+    rtext[n] = c.chars[0];
+    if(rtext[n]==0) rtext[n]=' ';
+    rtext[n+1]=0;
+    //printf("%u,%u,%u,%u:%c ",c.chars[0],c.chars[1],c.chars[2],c.chars[3],rtext[n]);
+  }
+  //printf("\n");
+  draw_unitext(screen,0,row*18,rtext,0);
+/*
+  size_t len=1000;
+        vterm_screen_get_text (vts, text1, len, rect);
+  len = vterm_screen_get_chars(vts, text , len, rect);
+  printf("len: %d\n",len);
+
+//  printf("vterm text: %s\n",text);
+
+  uint16_t atext[1000];
+  atext[0]=0;
+  size_t pos=0;
+  for(size_t n=0;n<len;n++) { atext[n] = text[n]; atext[n+1]=0; }
+
+  for(size_t n=0;;) {
+    if(pos >= len) break;
+    int32_t uc;
+    ssize_t p = utf8proc_iterate(text+pos,-1,&uc);
+    if(p==-1) break;
+    atext[n] = uc;
+    atext[n+1]=0;
+    n++;
+    pos+=p;
+  }
+
+  printf("vterm atext: ");
+  for(int n=0;n<len+5;n++) {
+    printf("rt %u       ",rtext[n]);
+    printf("t1 %u ",text1[n]);
+    printf("tt %u ",text[n]);
+    printf("at %u       ",atext[n]);
+    printf("cc %c       ",text[n]);
+  }
+  printf("\n");
+*/
+
+//  free(text);
 }
 
 
@@ -120,23 +170,51 @@ int main(int argc, char **argv) {
   cols = maxwidth /17;
 
   vt = vterm_new(rows, cols);
+  vterm_parser_set_utf8(vt,1);
+
+  vterm_state_set_bold_highbright(vterm_obtain_state(vt),1);
   vts = vterm_obtain_screen(vt);
+
+  vterm_screen_enable_altscreen(vts,1);
+
   vterm_screen_set_callbacks(vts, &cb_screen, NULL);
+  vterm_parser_set_utf8(vts,1);
 
   vterm_screen_reset(vts, 1);
+  vterm_parser_set_utf8(vts,1);
+
+  VTermColor fg;
+  fg.red   =  257;
+  fg.green =  257;
+  fg.blue  =  257;
+
+  VTermColor bg;
+  bg.red   = 0;
+  bg.green = 0;
+  bg.blue  = 0;
+
+  vterm_state_set_default_colors(vterm_obtain_state(vt), &fg, &bg);
 
 
   int x=0;int y=0;
   for(;;) {
+
+    // redraw complete screen from vterm
     for(int row = 0; row < rows; row++) {
       dump_row(row);
     }
+
+    // sending bytes from pts to vterm
     int len;
     char buffer[1024];
-    while((len = read(fd, buffer, sizeof(buffer))) > 0) {
+    len = read(fd, buffer, sizeof(buffer));
+    if(len > 0) {
       vterm_push_bytes(vt, buffer, len);
+      //printf("read: "); for(int n=0;n<len;n++) printf("%u,",(uint8_t) buffer[n]); printf("\n");
+      //printf("nead: "); for(int n=0;n<len;n++) printf("%c",buffer[n]); printf("\n");
     }
 
+    // sending bytes from SDL to pts
     SDL_Event event;
     if(SDL_PollEvent(&event))
     if(event.type == SDL_KEYDOWN) {
@@ -145,7 +223,7 @@ int main(int argc, char **argv) {
       char buf[2];
       buf[0] = event.key.keysym.unicode;
       buf[1]=0;
-      printf("key: %u\n",buf[0]);
+    //  printf("key: %u\n",buf[0]);
       write(fd,buf,1);
     }
 
