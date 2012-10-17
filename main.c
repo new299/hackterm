@@ -45,14 +45,17 @@ void dump_row(int row) {
 
 
   VTermPos vp;
+  int ncol=0;
   for(int n=0;n<cols;n++) {
     vp.row=row;
-    vp.col=n;
+    vp.col=ncol;
     VTermScreenCell c;
     int i = vterm_screen_get_cell(vts,vp,&c);
+    if(c.width == 2) ncol++;
     rtext[n] = c.chars[0];
     if(rtext[n]==0) rtext[n]=' ';
     rtext[n+1]=0;
+    ncol++;
     //printf("%u,%u,%u,%u:%c ",c.chars[0],c.chars[1],c.chars[2],c.chars[3],rtext[n]);
   }
   //printf("\n");
@@ -128,7 +131,7 @@ int main(int argc, char **argv) {
 
   const SDL_VideoInfo *vid = SDL_GetVideoInfo();
   int maxwidth  = vid->current_w;
-  int maxheight = vid->current_h;
+  int maxheight = vid->current_h-(18*2);
  
   screen=SDL_SetVideoMode(maxwidth,maxheight,32,SDL_ANYFORMAT);//double buf?
   if(screen==NULL) {
@@ -166,8 +169,8 @@ int main(int argc, char **argv) {
  
   SDL_EnableUNICODE(1);
 
-  rows = maxheight/17;
-  cols = maxwidth /17;
+  rows = maxheight/18;
+  cols = maxwidth /18;
 
   vt = vterm_new(rows, cols);
   vterm_parser_set_utf8(vt,1);
