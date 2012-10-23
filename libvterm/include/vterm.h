@@ -165,6 +165,7 @@ void vterm_get_size(VTerm *vt, int *rowsp, int *colsp);
 void vterm_set_size(VTerm *vt, int rows, int cols);
 
 void vterm_set_parser_callbacks(VTerm *vt, const VTermParserCallbacks *callbacks, void *user);
+void vterm_set_parser_backup_callbacks(VTerm *vt, const VTermParserCallbacks *callbacks, void *user);
 
 VTermState *vterm_obtain_state(VTerm *vt);
 

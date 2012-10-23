@@ -90,13 +90,21 @@ VTermScreenCallbacks cb_screen = {
   .resize    = &screen_resize,
 };
 
+int dcs_handler(const char *command,size_t cmdlen,void *user) {
+  printf("command is: ");
+  for(int n=0;n<cmdlen;n++) {
+    printf("%c",command[n]);
+  }
+  printf("\n");
+}
+
 VTermParserCallbacks cb_parser = {
   .text    = 0,
   .control = 0,
   .escape  = 0,
   .csi     = 0,
   .osc     = 0,
-  .dcs     = 0,
+  .dcs     = dcs_handler,
   .resize  = 0  //&parser_resize,
 //  int (*text)(const char *bytes, size_t len, void *user);
 //  int (*control)(unsigned char control, void *user);
@@ -182,7 +190,7 @@ int main(int argc, char **argv) {
   vterm_screen_set_callbacks(vts, &cb_screen, NULL);
 
   vterm_screen_set_damage_merge(vts, VTERM_DAMAGE_SCROLL);
-  //vterm_set_parser_callbacks(vt , &cb_parser, NULL);
+  vterm_set_parser_backup_callbacks(vt , &cb_parser, NULL);
 
   vterm_screen_reset(vts, 1);
   vterm_parser_set_utf8(vt,1); // should be vts?

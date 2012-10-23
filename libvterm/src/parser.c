@@ -175,6 +175,10 @@ static size_t do_string(VTerm *vt, const char *str_frag, size_t len)
       if((*vt->parser_callbacks->dcs)(str_frag, len, vt->cbdata))
         return 0;
 
+    if(vt->parser_backup_callbacks && vt->parser_backup_callbacks->dcs)
+      if((*vt->parser_backup_callbacks->dcs)(str_frag, len, vt->cbdata))
+				return 0;
+
     fprintf(stderr, "libvterm: Unhandled DCS %.*s\n", (int)len, str_frag);
     return 0;
 

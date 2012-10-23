@@ -103,6 +103,12 @@ void vterm_set_parser_callbacks(VTerm *vt, const VTermParserCallbacks *callbacks
   vt->cbdata = user;
 }
 
+void vterm_set_parser_backup_callbacks(VTerm *vt, const VTermParserCallbacks *callbacks, void *user)
+{
+  vt->parser_backup_callbacks = callbacks;
+  //vt->cbdata = user;
+}
+
 void vterm_parser_set_utf8(VTerm *vt, int is_utf8)
 {
   vt->is_utf8 = is_utf8;

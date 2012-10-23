@@ -117,6 +117,7 @@ struct VTerm
     ESC_IN_DCS,
   } parser_state;
   const VTermParserCallbacks *parser_callbacks;
+  const VTermParserCallbacks *parser_backup_callbacks;
   void *cbdata;
 
   /* len == malloc()ed size; cur == number of valid bytes */
