@@ -16,6 +16,7 @@
 #include "utf8proc.h"
 
 #include "nunifont.h"
+#include <pty.h>
 
 static VTerm *vt;
 static VTermScreen *vts;
@@ -33,15 +34,10 @@ void dump_row(int row) {
     .end_col   = cols,
   };
 
-//  printf("vterm text: %s\n",text);
-
-//  size_t len = vterm_screen_get_chars(vts,NULL,0,rect);
-//  size_t len = vterm_screen_get_text(vts, NULL, 0, rect);
-//  if(len <= 0) return;
-  uint8_t text1[1000];// = malloc(len + 1);
-  uint32_t text[1000];// = malloc(len + 1);
+//  uint8_t text1[1000];// = malloc(len + 1);
+//  uint32_t text[1000];// = malloc(len + 1);
   uint16_t rtext[1000];// = malloc(len + 1);
-  text[0] = 0;
+//  text[0] = 0;
 
 
   VTermPos vp;
@@ -60,41 +56,6 @@ void dump_row(int row) {
   }
   //printf("\n");
   draw_unitext(screen,0,row*18,rtext,0);
-/*
-  size_t len=1000;
-        vterm_screen_get_text (vts, text1, len, rect);
-  len = vterm_screen_get_chars(vts, text , len, rect);
-  printf("len: %d\n",len);
-
-//  printf("vterm text: %s\n",text);
-
-  uint16_t atext[1000];
-  atext[0]=0;
-  size_t pos=0;
-  for(size_t n=0;n<len;n++) { atext[n] = text[n]; atext[n+1]=0; }
-
-  for(size_t n=0;;) {
-    if(pos >= len) break;
-    int32_t uc;
-    ssize_t p = utf8proc_iterate(text+pos,-1,&uc);
-    if(p==-1) break;
-    atext[n] = uc;
-    atext[n+1]=0;
-    n++;
-    pos+=p;
-  }
-
-  printf("vterm atext: ");
-  for(int n=0;n<len+5;n++) {
-    printf("rt %u       ",rtext[n]);
-    printf("t1 %u ",text1[n]);
-    printf("tt %u ",text[n]);
-    printf("at %u       ",atext[n]);
-    printf("cc %c       ",text[n]);
-  }
-  printf("\n");
-*/
-
 //  free(text);
 }
 
@@ -117,10 +78,47 @@ static int screen_resize(int new_rows, int new_cols, void *user)
   return 1;
 }
 
-static VTermScreenCallbacks cb_screen = {
+static int parser_resize(int new_rows, int new_cols, void *user)
+{
+//  rows = new_rows;
+//  cols = new_cols;
+  return 1;
+}
+
+VTermScreenCallbacks cb_screen = {
   .prescroll = &screen_prescroll,
   .resize    = &screen_resize,
 };
+
+VTermParserCallbacks cb_parser = {
+  .text    = 0,
+  .control = 0,
+  .escape  = 0,
+  .csi     = 0,
+  .osc     = 0,
+  .dcs     = 0,
+  .resize  = 0  //&parser_resize,
+//  int (*text)(const char *bytes, size_t len, void *user);
+//  int (*control)(unsigned char control, void *user);
+//  int (*escape)(const char *bytes, size_t len, void *user);
+//  int (*csi)(const char *leader, const long args[], int argcount, const char *intermed, char command, void *user);
+//  int (*osc)(const char *command, size_t cmdlen, void *user);
+//  int (*dcs)(const char *command, size_t cmdlen, void *user);
+//  int (*resize)(int rows, int cols, void *user);
+};
+
+void terminal_resize(SDL_Surface *screen,int fd,VTerm *vt,int *cols,int *rows) {
+
+  *rows = screen->h/18;
+  *cols = screen->w/9;
+
+  printf("resized: %d %d\n",*cols,*rows);
+
+  struct winsize size = { *rows, *cols, 0, 0 };
+  ioctl(fd, TIOCSWINSZ, &size);
+  if(vt != 0) vterm_set_size(vt,*rows,*cols);
+}
+
 
 int main(int argc, char **argv) {
 
@@ -131,9 +129,9 @@ int main(int argc, char **argv) {
 
   const SDL_VideoInfo *vid = SDL_GetVideoInfo();
   int maxwidth  = vid->current_w;
-  int maxheight = vid->current_h-(18*2);
+  int maxheight = vid->current_h-18;
  
-  screen=SDL_SetVideoMode(maxwidth,maxheight,32,SDL_ANYFORMAT);//double buf?
+  screen=SDL_SetVideoMode(maxwidth,maxheight,32,SDL_ANYFORMAT | SDL_RESIZABLE);//double buf?
   if(screen==NULL) {
     printf("Failed SDL_SetVideoMode: %d",SDL_GetError());
     SDL_Quit();
@@ -165,15 +163,16 @@ int main(int argc, char **argv) {
 
 //  grantpt(fd);
 //  unlockpt(fd);
-  printf("fd: %d",fd);
+  printf("fd: %d\n",fd);
  
   SDL_EnableUNICODE(1);
 
-  rows = maxheight/18;
-  cols = maxwidth /18;
+  printf("screen size %d %d\n",screen->w,screen->h);
+  vt=0;
+  terminal_resize(screen,fd,vt,&cols,&rows);
 
+  printf("init rows: %d cols: %d\n",rows,cols);
   vt = vterm_new(rows, cols);
-  vterm_parser_set_utf8(vt,1);
 
   vterm_state_set_bold_highbright(vterm_obtain_state(vt),1);
   vts = vterm_obtain_screen(vt);
@@ -181,10 +180,12 @@ int main(int argc, char **argv) {
   vterm_screen_enable_altscreen(vts,1);
 
   vterm_screen_set_callbacks(vts, &cb_screen, NULL);
-  vterm_parser_set_utf8(vts,1);
+
+  vterm_screen_set_damage_merge(vts, VTERM_DAMAGE_SCROLL);
+  //vterm_set_parser_callbacks(vt , &cb_parser, NULL);
 
   vterm_screen_reset(vts, 1);
-  vterm_parser_set_utf8(vts,1);
+  vterm_parser_set_utf8(vt,1); // should be vts?
 
   VTermColor fg;
   fg.red   =  257;
@@ -196,7 +197,14 @@ int main(int argc, char **argv) {
   bg.green = 0;
   bg.blue  = 0;
 
-  vterm_state_set_default_colors(vterm_obtain_state(vt), &fg, &bg);
+//  vterm_state_set_default_colors(vterm_obtain_state(vt), &fg, &bg);
+
+  int rowsc;
+  int colsc;
+ // vterm_get_size(vt,&rowsc,&colsc);
+ // printf("read rows: %d cols: %d\n",rowsc,colsc);
+ // vterm_get_size(vt,&rowsc,&colsc);
+ // printf("read rows: %d cols: %d\n",rowsc,colsc);
 
 
   int x=0;int y=0;
@@ -213,21 +221,25 @@ int main(int argc, char **argv) {
     len = read(fd, buffer, sizeof(buffer));
     if(len > 0) {
       vterm_push_bytes(vt, buffer, len);
-      //printf("read: "); for(int n=0;n<len;n++) printf("%u,",(uint8_t) buffer[n]); printf("\n");
-      //printf("nead: "); for(int n=0;n<len;n++) printf("%c",buffer[n]); printf("\n");
     }
 
     // sending bytes from SDL to pts
     SDL_Event event;
     if(SDL_PollEvent(&event))
     if(event.type == SDL_KEYDOWN) {
+      if(event.key.keysym.sym == SDLK_LSHIFT) continue;
+      if(event.key.keysym.sym == SDLK_RSHIFT) continue;
       if(event.key.keysym.sym == SDLK_LEFT) exit(0);
  
       char buf[2];
       buf[0] = event.key.keysym.unicode;
       buf[1]=0;
-    //  printf("key: %u\n",buf[0]);
       write(fd,buf,1);
+    }
+
+    if(event.type == SDL_VIDEORESIZE) {
+      screen = SDL_SetVideoMode(event.resize.w, event.resize.h, 32, SDL_ANYFORMAT | SDL_RESIZABLE);
+      terminal_resize(screen,fd,vt,&cols,&rows);
     }
 
     SDL_Flip(screen);
@@ -235,13 +247,12 @@ int main(int argc, char **argv) {
 
     SDL_UnlockSurface(screen);
     SDL_FillRect(screen,NULL, 0x000000); 
-
   }
+
   SDL_Quit();
   close(fd);
 
-  //vterm_free(vt);
+  vterm_free(vt);
  
- // return 0;
-
+  return 0;
 }
