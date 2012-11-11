@@ -62,10 +62,10 @@ void dump_row(int row) {
     if(c.attrs.reverse == 1) { printf("b!"); }
 
     if((cursorpos.row == vp.row) && (cursorpos.col == vp.col)) {
-      draw_unitext(screen,xpos,row*18,rtext,UINT_MAX,0);
+      draw_unitext(screen,xpos,row*17,rtext,UINT_MAX,0);
     } else {
-      draw_unitext(screen,xpos,row*18,rtext,0,UINT_MAX);
-      draw_unitext(screen,xpos,row*18,rtext,(c.bg.red << 16) + (c.bg.green << 8) + c.bg.blue,
+      draw_unitext(screen,xpos,row*17,rtext,0,UINT_MAX);
+      draw_unitext(screen,xpos,row*17,rtext,(c.bg.red << 16) + (c.bg.green << 8) + c.bg.blue,
                                             (c.fg.red << 16) + (c.fg.green << 8) + c.fg.blue);
     }
 
@@ -151,7 +151,7 @@ VTermParserCallbacks cb_parser = {
 
 void terminal_resize(SDL_Surface *screen,VTerm *vt,int *cols,int *rows) {
 
-  *rows = screen->h/18;
+  *rows = screen->h/17;
   *cols = screen->w/9;
 
   printf("resized: %d %d\n",*cols,*rows);
@@ -161,11 +161,10 @@ void terminal_resize(SDL_Surface *screen,VTerm *vt,int *cols,int *rows) {
   if(vt != 0) vterm_set_size(vt,*rows,*cols);
 }
 
-bool redraw=false;
+pthread_mutex_t screen_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void sdl_render_thread() {
   for(;;) {
-
 
     // sending bytes from pts to vterm
     int len;
@@ -179,7 +178,6 @@ void sdl_render_thread() {
     //if(len>0)printf("\n");
     if(len > 0) {
       vterm_push_bytes(vt, buffer, len);
-      redraw=true;
     }
     
     // redraw complete screen from vterm
@@ -187,13 +185,14 @@ void sdl_render_thread() {
       dump_row(row);
     }
 
-    if(redraw) {
-      SDL_Flip(screen);
-      SDL_LockSurface(screen);
+    pthread_mutex_lock( &screen_mutex );
 
-      SDL_UnlockSurface(screen);
-      SDL_FillRect(screen,NULL, 0x000000); 
-    }
+    SDL_Flip(screen);
+    SDL_LockSurface(screen);
+
+    SDL_UnlockSurface(screen);
+    SDL_FillRect(screen,NULL, 0x000000);
+    pthread_mutex_unlock( &screen_mutex );
   }
 }
 
@@ -202,8 +201,8 @@ void sdl_read_thread() {
     // sending bytes from SDL to pts
     SDL_Event event;
     SDL_WaitEvent(&event);
+    //if(SDL_PollEvent(&event))
     if(event.type == SDL_KEYDOWN) {
-      redraw=true;
       if(event.key.keysym.sym == SDLK_LSHIFT) continue;
       if(event.key.keysym.sym == SDLK_RSHIFT) continue;
       if(event.key.keysym.sym == SDLK_LEFT) {
@@ -248,9 +247,16 @@ void sdl_read_thread() {
     }
 
     if(event.type == SDL_VIDEORESIZE) {
+      pthread_mutex_lock( &screen_mutex );
       screen = SDL_SetVideoMode(event.resize.w, event.resize.h, 32, SDL_ANYFORMAT | SDL_RESIZABLE);
       terminal_resize(screen,vt,&cols,&rows);
-      redraw=true;
+
+//      SDL_Flip(screen);
+//      SDL_LockSurface(screen);
+
+//      SDL_UnlockSurface(screen);
+//      SDL_FillRect(screen,NULL, 0x000000); 
+      pthread_mutex_unlock( &screen_mutex );
     }
 
   }
@@ -265,7 +271,7 @@ int main(int argc, char **argv) {
 
   const SDL_VideoInfo *vid = SDL_GetVideoInfo();
   int maxwidth  = vid->current_w;
-  int maxheight = vid->current_h-18;
+  int maxheight = vid->current_h-17;
  
   screen=SDL_SetVideoMode(maxwidth,maxheight,32,SDL_ANYFORMAT | SDL_RESIZABLE);//double buf?
   if(screen==NULL) {

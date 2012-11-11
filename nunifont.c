@@ -81,12 +81,15 @@ void draw_unitext(SDL_Surface *screen,int x,int y,const uint16_t *text,uint32_t 
   for(size_t n=0;n<length;n++) {
 
     if(text[n] == ' ') {
-      draw_space(screen,c_x,c_y,8,bg,fg);
+      draw_space(screen,c_x,c_y,8+spacing,bg,fg);
       c_x += 8 + spacing; 
     } else {
       int w=8;
       if(get_widthmap(text[n]) != true) w=16; else w=8;
       draw_character(screen,c_x,c_y,w,text[n],bg,fg);
+
+      //draw spacing
+      draw_space(screen,c_x+w,c_y,spacing,bg,fg);
       c_x+=w+spacing;
     }
   }
