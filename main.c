@@ -205,6 +205,7 @@ int main(int argc, char **argv) {
   printf("fd: %d\n",fd);
  
   SDL_EnableUNICODE(1);
+  SDL_EnableKeyRepeat(500,50);
 
   printf("screen size %d %d\n",screen->w,screen->h);
   vt=0;
@@ -252,6 +253,7 @@ int main(int argc, char **argv) {
 
   int x=0;int y=0;
   for(;;) {
+    bool redraw=false;
 
     // redraw complete screen from vterm
     for(int row = 0; row < rows; row++) {
@@ -270,12 +272,14 @@ int main(int argc, char **argv) {
     //if(len>0)printf("\n");
     if(len > 0) {
       vterm_push_bytes(vt, buffer, len);
+      redraw=true;
     }
 
     // sending bytes from SDL to pts
     SDL_Event event;
     if(SDL_PollEvent(&event))
     if(event.type == SDL_KEYDOWN) {
+      redraw=true;
       if(event.key.keysym.sym == SDLK_LSHIFT) continue;
       if(event.key.keysym.sym == SDLK_RSHIFT) continue;
       if(event.key.keysym.sym == SDLK_LEFT) {
@@ -322,13 +326,16 @@ int main(int argc, char **argv) {
     if(event.type == SDL_VIDEORESIZE) {
       screen = SDL_SetVideoMode(event.resize.w, event.resize.h, 32, SDL_ANYFORMAT | SDL_RESIZABLE);
       terminal_resize(screen,fd,vt,&cols,&rows);
+      redraw=true;
     }
 
-    SDL_Flip(screen);
-    SDL_LockSurface(screen);
+    if(redraw) {
+      SDL_Flip(screen);
+      SDL_LockSurface(screen);
 
-    SDL_UnlockSurface(screen);
-    SDL_FillRect(screen,NULL, 0x000000); 
+      SDL_UnlockSurface(screen);
+      SDL_FillRect(screen,NULL, 0x000000); 
+    }
   }
 
   SDL_Quit();
