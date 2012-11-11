@@ -19,11 +19,14 @@
 #include <pty.h>
 #include <limits.h>
 
+#include <pthread.h>
+
 static VTerm *vt;
 static VTermScreen *vts;
 
 static int cols;
 static int rows;
+int fd;
 
 SDL_Surface *screen;
 
@@ -146,7 +149,7 @@ VTermParserCallbacks cb_parser = {
 //  int (*resize)(int rows, int cols, void *user);
 };
 
-void terminal_resize(SDL_Surface *screen,int fd,VTerm *vt,int *cols,int *rows) {
+void terminal_resize(SDL_Surface *screen,VTerm *vt,int *cols,int *rows) {
 
   *rows = screen->h/18;
   *cols = screen->w/9;
@@ -158,107 +161,11 @@ void terminal_resize(SDL_Surface *screen,int fd,VTerm *vt,int *cols,int *rows) {
   if(vt != 0) vterm_set_size(vt,*rows,*cols);
 }
 
+bool redraw=false;
 
-int main(int argc, char **argv) {
-
-  if(SDL_Init(SDL_INIT_VIDEO)<0) {
-    printf("Initialisation failed");
-    return 1;
-  }
-
-  const SDL_VideoInfo *vid = SDL_GetVideoInfo();
-  int maxwidth  = vid->current_w;
-  int maxheight = vid->current_h-18;
- 
-  screen=SDL_SetVideoMode(maxwidth,maxheight,32,SDL_ANYFORMAT | SDL_RESIZABLE);//double buf?
-  if(screen==NULL) {
-    printf("Failed SDL_SetVideoMode: %d",SDL_GetError());
-    SDL_Quit();
-    return 1;
-  }
-   
-  // grab pts
-  //int fd = open("/dev/ptmx",O_RDWR | O_NOCTTY | O_NONBLOCK);
-  int fd;
-  int pid = forkpty(&fd,NULL,NULL,NULL);
-  int flag=fcntl(fd,F_GETFL,0);
-  flag|=O_NONBLOCK;
-  fcntl(fd,F_SETFL,flag);
-
-  //fcntl(fd, F_SETFL, FNDELAY);
-
-  printf("fd: %d",fd);
-  if(pid == 0) {
-    char args[3];
-    args[0] = "/bin/bash";
-    args[1] =""; 
-    args[2] = 0;
-
-    //execv("/bin/bash",args);
-    execl("/bin/bash","bash",NULL);
-    return 0;
-  }
-
-
-//  grantpt(fd);
-//  unlockpt(fd);
-  printf("fd: %d\n",fd);
- 
-  SDL_EnableUNICODE(1);
-  SDL_EnableKeyRepeat(500,50);
-
-  printf("screen size %d %d\n",screen->w,screen->h);
-  vt=0;
-  terminal_resize(screen,fd,vt,&cols,&rows);
-
-  printf("init rows: %d cols: %d\n",rows,cols);
-  vt = vterm_new(rows, cols);
-
-  vterm_state_set_bold_highbright(vterm_obtain_state(vt),1);
-  vts = vterm_obtain_screen(vt);
-
-  vterm_screen_enable_altscreen(vts,1);
-
-  vterm_screen_set_callbacks(vts, &cb_screen, NULL);
-
-  vterm_screen_set_damage_merge(vts, VTERM_DAMAGE_SCROLL);
-  vterm_set_parser_backup_callbacks(vt , &cb_parser, NULL);
-
-  vterm_screen_reset(vts, 1);
-  vterm_parser_set_utf8(vt,1); // should be vts?
-  
-  // cope with initial resize
-  //struct winsize size = { rows, cols, 0, 0 };
-  //ioctl(fd, TIOCSWINSZ, &size);
-
-  VTermColor fg;
-  fg.red   =  257;
-  fg.green =  257;
-  fg.blue  =  257;
-
-  VTermColor bg;
-  bg.red   = 0;
-  bg.green = 0;
-  bg.blue  = 0;
-
-//  vterm_state_set_default_colors(vterm_obtain_state(vt), &fg, &bg);
-
-  int rowsc;
-  int colsc;
- // vterm_get_size(vt,&rowsc,&colsc);
- // printf("read rows: %d cols: %d\n",rowsc,colsc);
- // vterm_get_size(vt,&rowsc,&colsc);
- // printf("read rows: %d cols: %d\n",rowsc,colsc);
-
-
-  int x=0;int y=0;
+void sdl_render_thread() {
   for(;;) {
-    bool redraw=false;
 
-    // redraw complete screen from vterm
-    for(int row = 0; row < rows; row++) {
-      dump_row(row);
-    }
 
     // sending bytes from pts to vterm
     int len;
@@ -274,10 +181,27 @@ int main(int argc, char **argv) {
       vterm_push_bytes(vt, buffer, len);
       redraw=true;
     }
+    
+    // redraw complete screen from vterm
+    for(int row = 0; row < rows; row++) {
+      dump_row(row);
+    }
 
+    if(redraw) {
+      SDL_Flip(screen);
+      SDL_LockSurface(screen);
+
+      SDL_UnlockSurface(screen);
+      SDL_FillRect(screen,NULL, 0x000000); 
+    }
+  }
+}
+
+void sdl_read_thread() {
+  for(;;) {
     // sending bytes from SDL to pts
     SDL_Event event;
-    if(SDL_PollEvent(&event))
+    SDL_WaitEvent(&event);
     if(event.type == SDL_KEYDOWN) {
       redraw=true;
       if(event.key.keysym.sym == SDLK_LSHIFT) continue;
@@ -325,18 +249,111 @@ int main(int argc, char **argv) {
 
     if(event.type == SDL_VIDEORESIZE) {
       screen = SDL_SetVideoMode(event.resize.w, event.resize.h, 32, SDL_ANYFORMAT | SDL_RESIZABLE);
-      terminal_resize(screen,fd,vt,&cols,&rows);
+      terminal_resize(screen,vt,&cols,&rows);
       redraw=true;
     }
 
-    if(redraw) {
-      SDL_Flip(screen);
-      SDL_LockSurface(screen);
-
-      SDL_UnlockSurface(screen);
-      SDL_FillRect(screen,NULL, 0x000000); 
-    }
   }
+}
+
+int main(int argc, char **argv) {
+
+  if(SDL_Init(SDL_INIT_VIDEO)<0) {
+    printf("Initialisation failed");
+    return 1;
+  }
+
+  const SDL_VideoInfo *vid = SDL_GetVideoInfo();
+  int maxwidth  = vid->current_w;
+  int maxheight = vid->current_h-18;
+ 
+  screen=SDL_SetVideoMode(maxwidth,maxheight,32,SDL_ANYFORMAT | SDL_RESIZABLE);//double buf?
+  if(screen==NULL) {
+    printf("Failed SDL_SetVideoMode: %d",SDL_GetError());
+    SDL_Quit();
+    return 1;
+  }
+   
+  // grab pts
+  //int fd = open("/dev/ptmx",O_RDWR | O_NOCTTY | O_NONBLOCK);
+  int pid = forkpty(&fd,NULL,NULL,NULL);
+  int flag=fcntl(fd,F_GETFL,0);
+  //flag|=O_NONBLOCK;
+  //fcntl(fd,F_SETFL,flag);
+
+  //fcntl(fd, F_SETFL, FNDELAY);
+
+  printf("fd: %d",fd);
+  if(pid == 0) {
+    char args[3];
+    args[0] = "/bin/bash";
+    args[1] =""; 
+    args[2] = 0;
+
+    //execv("/bin/bash",args);
+    execl("/bin/bash","bash",NULL);
+    return 0;
+  }
+
+
+//  grantpt(fd);
+//  unlockpt(fd);
+  printf("fd: %d\n",fd);
+ 
+  SDL_EnableUNICODE(1);
+  SDL_EnableKeyRepeat(500,50);
+
+  printf("screen size %d %d\n",screen->w,screen->h);
+  vt=0;
+  terminal_resize(screen,vt,&cols,&rows);
+
+  printf("init rows: %d cols: %d\n",rows,cols);
+  vt = vterm_new(rows, cols);
+
+  vterm_state_set_bold_highbright(vterm_obtain_state(vt),1);
+  vts = vterm_obtain_screen(vt);
+
+  vterm_screen_enable_altscreen(vts,1);
+
+  vterm_screen_set_callbacks(vts, &cb_screen, NULL);
+
+  vterm_screen_set_damage_merge(vts, VTERM_DAMAGE_SCROLL);
+  vterm_set_parser_backup_callbacks(vt , &cb_parser, NULL);
+
+  vterm_screen_reset(vts, 1);
+  vterm_parser_set_utf8(vt,1); // should be vts?
+  
+  // cope with initial resize
+  //struct winsize size = { rows, cols, 0, 0 };
+  //ioctl(fd, TIOCSWINSZ, &size);
+
+  VTermColor fg;
+  fg.red   =  257;
+  fg.green =  257;
+  fg.blue  =  257;
+
+  VTermColor bg;
+  bg.red   = 0;
+  bg.green = 0;
+  bg.blue  = 0;
+
+//  vterm_state_set_default_colors(vterm_obtain_state(vt), &fg, &bg);
+
+  int rowsc;
+  int colsc;
+ // vterm_get_size(vt,&rowsc,&colsc);
+ // printf("read rows: %d cols: %d\n",rowsc,colsc);
+ // vterm_get_size(vt,&rowsc,&colsc);
+ // printf("read rows: %d cols: %d\n",rowsc,colsc);
+
+
+  int x=0;int y=0;
+
+  pthread_t thread1, thread2;
+  pthread_create( &thread1, NULL, sdl_read_thread  , 0);
+  pthread_create( &thread2, NULL, sdl_render_thread, 0);
+   
+  pthread_join( thread2, NULL);
 
   SDL_Quit();
   close(fd);
