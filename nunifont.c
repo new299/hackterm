@@ -3,7 +3,8 @@
 #include <string.h>
 #include <SDL/SDL.h>
 #include <stdbool.h>
- 
+#include <limits.h>
+
 bool get_widthmap(uint16_t p);
 
 typedef struct fontchar {
@@ -45,21 +46,26 @@ void draw_point(SDL_Surface *screen,int x,int y,uint32_t value) {
   *(uint32_t *) p = value;
 }
 
-void draw_character(SDL_Surface *screen,int x,int y,uint16_t c,uint32_t background) {
-
+void draw_character(SDL_Surface *screen,int x,int y,int w,uint16_t c,uint32_t bg,uint32_t fg) {
   for(size_t c_y=0;c_y<16;c_y++) {
-    for(size_t c_x=0;c_x<16;c_x++) {
-      int32_t value = get_pixel(c,c_x,c_y) - background;
-      if(value < 0) value=0;
+    for(size_t c_x=0;c_x<w;c_x++) {
+      int32_t value = get_pixel(c,c_x,c_y);
 
-      if(background == -1) value = background ^ get_pixel(c,c_x,c_y); 
-
-      draw_point(screen,x+c_x,y+c_y,value);
+      if(value > 0) { draw_point(screen,x+c_x,y+c_y,fg); }
+               else { draw_point(screen,x+c_x,y+c_y,bg); }
     }
   }
 }
 
-void draw_unitext(SDL_Surface *screen,int x,int y,const uint16_t *text,int16_t background) {
+void draw_space(SDL_Surface *screen,int x,int y,int w,uint32_t bg,uint32_t fg) {
+  for(size_t c_y=0;c_y<16;c_y++) {
+    for(size_t c_x=0;c_x<w;c_x++) {
+      draw_point(screen,x+c_x,y+c_y,bg);
+    }
+  }
+}
+
+void draw_unitext(SDL_Surface *screen,int x,int y,const uint16_t *text,uint32_t bg,uint32_t fg) {
 
   if(!initialised) nfont_init();
 
@@ -75,11 +81,13 @@ void draw_unitext(SDL_Surface *screen,int x,int y,const uint16_t *text,int16_t b
   for(size_t n=0;n<length;n++) {
 
     if(text[n] == ' ') {
+      draw_space(screen,c_x,c_y,8,bg,fg);
       c_x += 8 + spacing; 
     } else {
-      draw_character(screen,c_x,c_y,text[n],background);
-      if(get_widthmap(text[n]) != true) c_x+=16+spacing;
-                                   else c_x+=8 +spacing;
+      int w=8;
+      if(get_widthmap(text[n]) != true) w=16; else w=8;
+      draw_character(screen,c_x,c_y,w,text[n],bg,fg);
+      c_x+=w+spacing;
     }
   }
 }

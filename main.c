@@ -17,6 +17,7 @@
 
 #include "nunifont.h"
 #include <pty.h>
+#include <limits.h>
 
 static VTerm *vt;
 static VTermScreen *vts;
@@ -34,28 +35,57 @@ void dump_row(int row) {
     .end_col   = cols,
   };
 
-//  uint8_t text1[1000];// = malloc(len + 1);
-//  uint32_t text[1000];// = malloc(len + 1);
-  uint16_t rtext[1000];// = malloc(len + 1);
-//  text[0] = 0;
-
-
   VTermPos vp;
   int ncol=0;
+  int xpos=0;
+
+  VTermPos cursorpos;
+  VTermState *vs = vterm_obtain_state(vt);
+  vterm_state_get_cursorpos(vs,&cursorpos);
+  printf("cursor pos: %d %d\n",cursorpos.row,cursorpos.col);
   for(int n=0;n<cols;n++) {
+    uint16_t rtext[1000];
+
     vp.row=row;
     vp.col=ncol;
     VTermScreenCell c;
     int i = vterm_screen_get_cell(vts,vp,&c);
-    if(c.width == 2) ncol++;
-    rtext[n] = c.chars[0];
-    if(rtext[n]==0) rtext[n]=' ';
-    rtext[n+1]=0;
+    if(c.width == 2) ncol++; // required?
+    rtext[0]= c.chars[0];
+    if(rtext[0]==0) rtext[0]=' ';
+    rtext[1]=0;
     ncol++;
+
     //printf("%u,%u,%u,%u:%c ",c.chars[0],c.chars[1],c.chars[2],c.chars[3],rtext[n]);
+    if(c.attrs.reverse == 1) { printf("b!"); }
+
+    if((cursorpos.row == vp.row) && (cursorpos.col == vp.col)) {
+      draw_unitext(screen,xpos,row*18,rtext,UINT_MAX,0);
+    } else {
+      draw_unitext(screen,xpos,row*18,rtext,0,UINT_MAX);
+    }
+
+    xpos+=9;
+    if(c.width == 2) xpos +=9;
   }
+/*
+typedef struct {
+#define VTERM_MAX_CHARS_PER_CELL 6
+  uint32_t chars[VTERM_MAX_CHARS_PER_CELL];
+  char     width;
+  struct {
+    unsigned int bold      : 1;
+    unsigned int underline : 2;
+    unsigned int italic    : 1;
+    unsigned int blink     : 1;
+    unsigned int reverse   : 1;
+    unsigned int strike    : 1;
+    unsigned int font      : 4; // 0 to 9 
+  } attrs;
+  VTermColor fg, bg;
+} VTermScreenCell;
+*/
   //printf("\n");
-  draw_unitext(screen,0,row*18,rtext,0);
 //  free(text);
 }
 
@@ -227,6 +257,12 @@ int main(int argc, char **argv) {
     int len;
     char buffer[1024];
     len = read(fd, buffer, sizeof(buffer));
+    if(len == -1) {
+      if(errno == EIO) break;
+    }
+    //if(len>0)printf("buffer: ");
+    //for(int n=0;n<len;n++) printf("%c",buffer[n]); 
+    //if(len>0)printf("\n");
     if(len > 0) {
       vterm_push_bytes(vt, buffer, len);
     }
@@ -237,7 +273,7 @@ int main(int argc, char **argv) {
     if(event.type == SDL_KEYDOWN) {
       if(event.key.keysym.sym == SDLK_LSHIFT) continue;
       if(event.key.keysym.sym == SDLK_RSHIFT) continue;
-      if(event.key.keysym.sym == SDLK_LEFT) exit(0);
+      //if(event.key.keysym.sym == SDLK_LEFT) exit(0);
  
       char buf[2];
       buf[0] = event.key.keysym.unicode;
