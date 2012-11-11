@@ -42,7 +42,6 @@ void dump_row(int row) {
   VTermPos cursorpos;
   VTermState *vs = vterm_obtain_state(vt);
   vterm_state_get_cursorpos(vs,&cursorpos);
-  printf("cursor pos: %d %d\n",cursorpos.row,cursorpos.col);
   for(int n=0;n<cols;n++) {
     uint16_t rtext[1000];
 
@@ -63,6 +62,8 @@ void dump_row(int row) {
       draw_unitext(screen,xpos,row*18,rtext,UINT_MAX,0);
     } else {
       draw_unitext(screen,xpos,row*18,rtext,0,UINT_MAX);
+      draw_unitext(screen,xpos,row*18,rtext,(c.bg.red << 16) + (c.bg.green << 8) + c.bg.blue,
+                                            (c.fg.red << 16) + (c.fg.green << 8) + c.fg.blue);
     }
 
     xpos+=9;
@@ -224,6 +225,10 @@ int main(int argc, char **argv) {
 
   vterm_screen_reset(vts, 1);
   vterm_parser_set_utf8(vt,1); // should be vts?
+  
+  // cope with initial resize
+  //struct winsize size = { rows, cols, 0, 0 };
+  //ioctl(fd, TIOCSWINSZ, &size);
 
   VTermColor fg;
   fg.red   =  257;
