@@ -278,12 +278,45 @@ int main(int argc, char **argv) {
     if(event.type == SDL_KEYDOWN) {
       if(event.key.keysym.sym == SDLK_LSHIFT) continue;
       if(event.key.keysym.sym == SDLK_RSHIFT) continue;
-      //if(event.key.keysym.sym == SDLK_LEFT) exit(0);
+      if(event.key.keysym.sym == SDLK_LEFT) {
+        char buf[4];
+        buf[0] = 0x1b;
+        buf[1] = 'O';
+        buf[2] = 'D';
+        buf[3] = 0;
+        write(fd,buf,3);
+      } else 
+      if(event.key.keysym.sym == SDLK_RIGHT) {
+        char buf[4];
+        buf[0] = 0x1b;
+        buf[1] = 'O';
+        buf[2] = 'C';
+        buf[3] = 0;
+        write(fd,buf,3);
+      } else 
+      if(event.key.keysym.sym == SDLK_UP) {
+        char buf[4];
+        buf[0] = 0x1b;
+        buf[1] = 'O';
+        buf[2] = 'A';
+        buf[3] = 0;
+        write(fd,buf,3);
+      } else 
+      if(event.key.keysym.sym == SDLK_DOWN) {
+        char buf[4];
+        buf[0] = 0x1b;
+        buf[1] = 'O';
+        buf[2] = 'B';
+        buf[3] = 0;
+        write(fd,buf,3);
+      } else {
  
-      char buf[2];
-      buf[0] = event.key.keysym.unicode;
-      buf[1]=0;
-      write(fd,buf,1);
+        // normal character
+        char buf[2];
+        buf[0] = event.key.keysym.unicode;
+        buf[1]=0;
+        write(fd,buf,1);
+      }
     }
 
     if(event.type == SDL_VIDEORESIZE) {
