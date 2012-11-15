@@ -1,5 +1,5 @@
 hterm: main.c nunifont.c nunifont.h
-	gcc -g main.c nunifont.c -o hterm -I./libvterm/include -L./libvterm/.libs -lvterm -lSDL -std=c99 -lutil -L./utf8proc -I./utf8proc -lutf8proc -lpthread
+	gcc -std=gnu99 -g main.c nunifont.c nsdl.c -o hterm -I./libvterm/include -L./libvterm/.libs -lvterm -lSDL -lutil -L./utf8proc -I./utf8proc -lutf8proc 
 
 clean:
 	rm hterm
