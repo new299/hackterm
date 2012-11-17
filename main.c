@@ -62,17 +62,14 @@ VTermScreenCell *grab_row(int row) {
 
 void draw_row(VTermScreenCell *row,int ypos) {
 
-  int ncol=0;
   int xpos=0;
 
   for(int n=0;n<cols;n++) {
     uint16_t rtext[1000];
 
-    if(row[n].width == 2) ncol++; // required?
     rtext[0] = row[n].chars[0];
     if(rtext[0]==0) rtext[0]=' ';
     rtext[1]=0;
-    ncol++;
 
     //printf("%u,%u,%u,%u:%c ",c.chars[0],c.chars[1],c.chars[2],c.chars[3],rtext[n]);
     if(row[n].attrs.reverse == 1) { printf("b!"); }
@@ -81,7 +78,7 @@ void draw_row(VTermScreenCell *row,int ypos) {
                                         (row[n].fg.red << 16) + (row[n].fg.green << 8) + row[n].fg.blue);
 
     xpos+=9;
-    if(row[n].width == 2) xpos +=9;
+    if(row[n].width == 2) {xpos +=8;n++;}
   }
 /*
 typedef struct {
@@ -100,8 +97,6 @@ typedef struct {
   VTermColor fg, bg;
 } VTermScreenCell;
 */
-  //printf("\n");
-//  free(text);
 }
 
 
