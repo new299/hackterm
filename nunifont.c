@@ -18,7 +18,7 @@ bool     initialised=false;
 void load_fonts(char *filename,fontchar **fontmap,uint8_t **widthmap);
 
 void nfont_init() {
-  load_fonts("unifont.hex",&fontmap,&widthmap);
+  load_fonts("/etc/alternatives/unifont.hex",&fontmap,&widthmap);
   initialised = true;
 }
 

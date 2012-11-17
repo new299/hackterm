@@ -28,6 +28,10 @@
 static VTerm *vt;
 static VTermScreen *vts;
 
+bool new_screen_size    = false;
+int  new_screen_size_x;
+int  new_screen_size_y;
+
 static int cols;
 static int rows;
 int fd;
@@ -39,48 +43,45 @@ int select_start_x=0;
 int select_start_y=0;
 int select_end_x  =0;
 int select_end_y  =0;
+int scroll_offset=0;
 
-void dump_row(int row) {
-  VTermRect rect = {
-    .start_row = row,
-    .start_col = 0,
-    .end_row   = row+1,
-    .end_col   = cols,
-  };
+VTermScreenCell *grab_row(int row) {
+
+  VTermScreenCell *rowdata = malloc(cols*sizeof(VTermScreenCell));
 
   VTermPos vp;
+  for(int n=0;n<cols;n++) {
+    vp.row = row;
+    vp.col = n;
+    vterm_screen_get_cell(vts,vp,&(rowdata[n]));
+  }
+
+  return rowdata;
+}
+
+
+void draw_row(VTermScreenCell *row,int ypos) {
+
   int ncol=0;
   int xpos=0;
 
-  VTermPos cursorpos;
-  VTermState *vs = vterm_obtain_state(vt);
-  vterm_state_get_cursorpos(vs,&cursorpos);
   for(int n=0;n<cols;n++) {
     uint16_t rtext[1000];
 
-    vp.row=row;
-    vp.col=ncol;
-    VTermScreenCell c;
-    int i = vterm_screen_get_cell(vts,vp,&c);
-    if(c.width == 2) ncol++; // required?
-    rtext[0]= c.chars[0];
+    if(row[n].width == 2) ncol++; // required?
+    rtext[0] = row[n].chars[0];
     if(rtext[0]==0) rtext[0]=' ';
     rtext[1]=0;
     ncol++;
 
     //printf("%u,%u,%u,%u:%c ",c.chars[0],c.chars[1],c.chars[2],c.chars[3],rtext[n]);
-    if(c.attrs.reverse == 1) { printf("b!"); }
+    if(row[n].attrs.reverse == 1) { printf("b!"); }
 
-    if((cursorpos.row == vp.row) && (cursorpos.col == vp.col)) {
-      draw_unitext(screen,xpos,row*17,rtext,UINT_MAX,0);
-    } else {
-      draw_unitext(screen,xpos,row*17,rtext,0,UINT_MAX);
-      draw_unitext(screen,xpos,row*17,rtext,(c.bg.red << 16) + (c.bg.green << 8) + c.bg.blue,
-                                            (c.fg.red << 16) + (c.fg.green << 8) + c.fg.blue);
-    }
+    draw_unitext(screen,xpos,ypos,rtext,(row[n].bg.red << 16) + (row[n].bg.green << 8) + row[n].bg.blue,
+                                        (row[n].fg.red << 16) + (row[n].fg.green << 8) + row[n].fg.blue);
 
     xpos+=9;
-    if(c.width == 2) xpos +=9;
+    if(row[n].width == 2) xpos +=9;
   }
 /*
 typedef struct {
@@ -104,14 +105,66 @@ typedef struct {
 }
 
 
+size_t    scroll_buffer_size = 0;
+VTermScreenCell **scroll_buffer = 0;
+
+void scroll_buffer_push(VTermScreenCell *scroll_line,size_t len) {
+
+  //printf("push line: %d\n",scroll_buffer_size);
+  if(scroll_buffer == 0) { 
+    scroll_buffer = malloc(sizeof(VTermScreenCell *)*1);  
+  } else {
+    scroll_buffer = realloc(scroll_buffer,sizeof(VTermScreenCell *)*(scroll_buffer_size+1));
+  }
+  scroll_buffer[scroll_buffer_size] = malloc(sizeof(VTermScreenCell)*len);
+
+  for(size_t n=0;n<len;n++) {
+    scroll_buffer[scroll_buffer_size][n] = scroll_line[n];
+  }
+
+  scroll_buffer_size++;
+}
+
+void scroll_buffer_get(size_t line_number,VTermScreenCell **line,size_t **len) {
+  *line = scroll_buffer[scroll_buffer_size-line_number-1];
+  *len  = 10;
+}
+
+void scroll_buffer_dump() {
+}
+
 static int screen_prescroll(VTermRect rect, void *user)
 {
   if(rect.start_row != 0 || rect.start_col != 0 || rect.end_col != cols)
     return 0;
 
-  for(int row = 0; row < rect.end_row; row++)
-    dump_row(row);
+  
+  for(int row=rect.start_row;row<rect.end_row;row++) {
+    //uint16_t scrolloff[1000];
+    VTermScreenCell scrolloff[1000];
+    //printf("cols: %d\n",cols);
 
+    size_t len=0;
+    for(int n=0;n<cols;n++) {
+      VTermPos vp;
+      vp.row=row;
+      vp.col=n;
+      VTermScreenCell c;
+      int i = vterm_screen_get_cell(vts,vp,&c);
+      scrolloff[n] = c;
+      //if(scrolloff[n] == 0) scrolloff[n] = ' ';
+      //scrolloff[n+1] =0;
+      len++;
+    }
+    //printf("strlen: %d",strlen(scrolloff));
+    //printf("scroll off: %s\n",scrolloff);
+    scroll_buffer_push(scrolloff,len);
+
+    //scroll_buffer_dump();
+  }
+  // for(int row = 0; row < rect.end_row; row++)
+  //   dump_row(row);
+  redraw_required();
   return 1;
 }
 
@@ -129,9 +182,16 @@ static int parser_resize(int new_rows, int new_cols, void *user)
   return 1;
 }
 
+static int screen_bell(void* d) {
+
+  
+
+}
+
 VTermScreenCallbacks cb_screen = {
   .prescroll = &screen_prescroll,
   .resize    = &screen_resize,
+  .bell      = &screen_bell
 };
 
 int dcs_handler(const char *command,size_t cmdlen,void *user) {
@@ -159,6 +219,10 @@ VTermParserCallbacks cb_parser = {
 //  int (*resize)(int rows, int cols, void *user);
 };
 
+SDL_mutex *screen_mutex;
+SDL_mutex *vterm_mutex;
+SDL_sem   *redraw_sem;
+
 void terminal_resize(SDL_Surface *screen,VTerm *vt,int *cols,int *rows) {
 
   *rows = screen->h/17;
@@ -168,22 +232,66 @@ void terminal_resize(SDL_Surface *screen,VTerm *vt,int *cols,int *rows) {
 
   struct winsize size = { *rows, *cols, 0, 0 };
   ioctl(fd, TIOCSWINSZ, &size);
+
+  SDL_mutexP(vterm_mutex);
   if(vt != 0) vterm_set_size(vt,*rows,*cols);
+  SDL_mutexV(vterm_mutex);
 }
 
-//pthread_mutex_t screen_mutex = PTHREAD_MUTEX_INITIALIZER;
-SDL_mutex *screen_mutex; //= SDL_CreateMutex();
-SDL_sem   *redraw_sem;
+void cursor_position(int *cursorx,int *cursory) {
+  VTermPos cursorpos;
+  VTermState *vs = vterm_obtain_state(vt);
+  vterm_state_get_cursorpos(vs,&cursorpos);
+
+  *cursorx = cursorpos.col;
+  *cursory = cursorpos.row;
+}
 
 void redraw_screen() {
-  //pthread_mutex_lock( &screen_mutex );
   SDL_mutexP(screen_mutex);
+
+  if(new_screen_size) {
+    screen = SDL_SetVideoMode(new_screen_size_x, new_screen_size_y, 32, SDL_ANYFORMAT | SDL_RESIZABLE | SDL_DOUBLEBUF);
+    terminal_resize(screen,vt,&cols,&rows);
+    new_screen_size = false;
+  }
+
   SDL_LockSurface(screen);
   SDL_FillRect(screen,NULL, 0x000000); 
 
   for(int row = 0; row < rows; row++) {
-    dump_row(row);
+
+    //int trow = row;
+    int trow = row-scroll_offset;
+
+//    dump_row(trow);
+
+    VTermScreenCell *rowdata=0;
+    if(trow >= 0) {
+      rowdata = grab_row(trow);
+      if(rowdata != 0) draw_row(rowdata,row*17);
+      if(rowdata != 0) free(rowdata);
+    } else {
+      //printf("trow: %d\n",trow);
+      int len;
+      if((0-trow) > scroll_buffer_size) { rowdata = 0; }
+      else {
+        scroll_buffer_get(0-trow,&rowdata,&len);
+      }
+      if(rowdata != 0) draw_row(rowdata,row*17);
+    }
+
+    int cursorx,cursory;
+    cursor_position(&cursorx,&cursory);
+    if(cursory == trow) {
+      int width=9;
+      if(rowdata[cursorx].width == 2) width+=9;
+      nsdl_rectangle_softalph(screen,cursorx*9,row*17,(cursorx*9)+width,(row*17)+17,0xFF);
+      nsdl_rectangle_wire    (screen,cursorx*9,row*17,(cursorx*9)+width,(row*17)+17,UINT_MAX);
+    }
+
   }
+
   if(draw_selection) {
     //printf("selection %d %d %d %d\n",select_start_x,select_end_x,select_start_y,select_end_y);
     int pselect_start_x = select_start_x;
@@ -198,7 +306,7 @@ void redraw_screen() {
 
   SDL_UnlockSurface(screen);
   SDL_Flip(screen);
-//  pthread_mutex_unlock( &screen_mutex );
+
   SDL_mutexV(screen_mutex);
 }
 
@@ -226,7 +334,9 @@ void console_read_thread() {
     //for(int n=0;n<len;n++) printf("%c",buffer[n]); 
     //if(len>0)printf("\n");
     if(len > 0) {
+      SDL_mutexP(vterm_mutex);
       vterm_push_bytes(vt, buffer, len);
+      SDL_mutexV(vterm_mutex);
     }
     redraw_required();
   }
@@ -250,11 +360,26 @@ void copy_text(char *text) {
   //echo "test" | xclip -i 
 }
 
+
 void process_mouse_event(SDL_Event *event) {
 
   int mouse_x = event->motion.x;
   int mouse_y = event->motion.y;
   
+  
+  if(event->button.button == SDL_BUTTON_WHEELUP) {
+    printf("wheel up\n");
+    scroll_offset++;
+    redraw_required();
+    printf("scroll offset %d\n",scroll_offset);
+  } else
+  if(event->button.button == SDL_BUTTON_WHEELDOWN) {
+    printf("wheel down\n");
+    scroll_offset--;
+    if(scroll_offset < 0) scroll_offset = 0;
+    redraw_required();
+    printf("scroll offset %d\n",scroll_offset);
+  } else
   if(event->type == SDL_MOUSEMOTION    ) {
     if(draw_selection == true) {
       select_end_x = event->button.x;
@@ -310,6 +435,7 @@ void sdl_read_thread() {
     process_mouse_event(&event);
 
     if(event.type == SDL_KEYDOWN) {
+      scroll_offset = 0;
       if(event.key.keysym.sym == SDLK_LSHIFT) continue;
       if(event.key.keysym.sym == SDLK_RSHIFT) continue;
       if(event.key.keysym.sym == SDLK_LEFT) {
@@ -349,17 +475,23 @@ void sdl_read_thread() {
         char buf[2];
         buf[0] = event.key.keysym.unicode;
         buf[1]=0;
-        write(fd,buf,1);
+        if(buf[0] != 0) {
+          write(fd,buf,1);
+        }
       }
     }
 
     if(event.type == SDL_VIDEORESIZE) {
 //      pthread_mutex_lock( &screen_mutex );
-      SDL_mutexP(screen_mutex);
-      screen = SDL_SetVideoMode(event.resize.w, event.resize.h, 32, SDL_ANYFORMAT | SDL_RESIZABLE | SDL_DOUBLEBUF);
-      terminal_resize(screen,vt,&cols,&rows);
+//      SDL_mutexP(screen_mutex);
 
-      SDL_mutexV(screen_mutex);
+      new_screen_size_x = event.resize.w;
+      new_screen_size_y = event.resize.h;
+      new_screen_size   = true;
+      //screen = SDL_SetVideoMode(event.resize.w, event.resize.h, 32, SDL_ANYFORMAT | SDL_RESIZABLE | SDL_DOUBLEBUF);
+      //terminal_resize(screen,vt,&cols,&rows);
+
+//      SDL_mutexV(screen_mutex);
       //pthread_mutex_unlock( &screen_mutex );
       redraw_required();
     }
@@ -369,7 +501,8 @@ void sdl_read_thread() {
 int main(int argc, char **argv) {
 
   screen_mutex = SDL_CreateMutex();
-  redraw_sem = SDL_CreateSemaphore(1);
+  vterm_mutex  = SDL_CreateMutex();
+  redraw_sem   = SDL_CreateSemaphore(1);
 
   if(SDL_Init(SDL_INIT_VIDEO)<0) {
     printf("Initialisation failed");
@@ -462,18 +595,11 @@ int main(int argc, char **argv) {
 
   int x=0;int y=0;
 
-//  pthread_t thread1, thread2, thread3;
   SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0);
   SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0);
   SDL_Thread *thread3 = SDL_CreateThread(console_read_thread,0);
 
-//  pthread_create( &thread1, NULL, sdl_read_thread    , 0);
-//  pthread_create( &thread2, NULL, sdl_render_thread  , 0);
-//  pthread_create( &thread3, NULL, console_read_thread, 0);
-  
-
   SDL_WaitThread(thread3,NULL); 
-//  pthread_join( thread3, NULL);
 
   SDL_Quit();
   close(fd);
