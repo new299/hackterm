@@ -25,6 +25,12 @@
 #include <pthread.h>
 #include "nsdl.h"
 
+void redraw_required();
+    
+int font_width  = 8;
+int font_height = 16;
+int font_space  = 1;
+
 static VTerm *vt;
 static VTermScreen *vts;
 
@@ -77,8 +83,8 @@ void draw_row(VTermScreenCell *row,int ypos) {
     draw_unitext(screen,xpos,ypos,rtext,(row[n].bg.red << 16) + (row[n].bg.green << 8) + row[n].bg.blue,
                                         (row[n].fg.red << 16) + (row[n].fg.green << 8) + row[n].fg.blue);
 
-    xpos+=9;
-    if(row[n].width == 2) {xpos +=8;n++;}
+    xpos+=(font_width+font_space);
+    if(row[n].width == 2) {xpos +=(font_width+font_space);n++;}
   }
 /*
 typedef struct {
@@ -120,7 +126,7 @@ void scroll_buffer_push(VTermScreenCell *scroll_line,size_t len) {
   scroll_buffer_size++;
 }
 
-void scroll_buffer_get(size_t line_number,VTermScreenCell **line,size_t **len) {
+void scroll_buffer_get(size_t line_number,VTermScreenCell **line,int *len) {
   *line = scroll_buffer[scroll_buffer_size-line_number-1];
   *len  = 10;
 }
@@ -179,8 +185,6 @@ static int parser_resize(int new_rows, int new_cols, void *user)
 
 static int screen_bell(void* d) {
 
-  
-
 }
 
 VTermScreenCallbacks cb_screen = {
@@ -220,8 +224,8 @@ SDL_sem   *redraw_sem;
 
 void terminal_resize(SDL_Surface *screen,VTerm *vt,int *cols,int *rows) {
 
-  *rows = screen->h/17;
-  *cols = screen->w/9;
+  *rows = screen->h/(font_height+font_space);
+  *cols = screen->w/(font_width+font_space);
 
   printf("resized: %d %d\n",*cols,*rows);
 
@@ -256,15 +260,12 @@ void redraw_screen() {
 
   for(int row = 0; row < rows; row++) {
 
-    //int trow = row;
     int trow = row-scroll_offset;
-
-//    dump_row(trow);
 
     VTermScreenCell *rowdata=0;
     if(trow >= 0) {
       rowdata = grab_row(trow);
-      if(rowdata != 0) draw_row(rowdata,row*17);
+      if(rowdata != 0) draw_row(rowdata,row*(font_height+font_space));
       if(rowdata != 0) free(rowdata);
     } else {
       //printf("trow: %d\n",trow);
@@ -273,30 +274,42 @@ void redraw_screen() {
       else {
         scroll_buffer_get(0-trow,&rowdata,&len);
       }
-      if(rowdata != 0) draw_row(rowdata,row*17);
+      if(rowdata != 0) draw_row(rowdata,row*(font_height+font_space));
     }
 
     int cursorx,cursory;
     cursor_position(&cursorx,&cursory);
     if(cursory == trow) {
-      int width=9;
-      if(rowdata[cursorx].width == 2) width+=9;
-      nsdl_rectangle_softalph(screen,cursorx*9,row*17,(cursorx*9)+width,(row*17)+17,0xFF);
-      nsdl_rectangle_wire    (screen,cursorx*9,row*17,(cursorx*9)+width,(row*17)+17,UINT_MAX);
+      int width=font_width+font_space;
+      if(rowdata[cursorx].width == 2) width+=(font_width+font_space);
+      nsdl_rectangle_softalph(screen,cursorx*(font_width+font_space),row*(font_height+font_space),(cursorx*(font_width+font_space))+width,(row*(font_height+font_space))+(font_height+font_space),0xFF);
+      nsdl_rectangle_wire    (screen,cursorx*(font_width+font_space),row*(font_height+font_space),(cursorx*(font_width+font_space))+width,(row*(font_height+font_space))+(font_height+font_space),UINT_MAX);
     }
 
   }
 
   if(draw_selection) {
     //printf("selection %d %d %d %d\n",select_start_x,select_end_x,select_start_y,select_end_y);
-    int pselect_start_x = select_start_x;
-    int pselect_end_x   = select_end_x;
-    int pselect_start_y = select_start_y;
-    int pselect_end_y   = select_end_y;
+    //int pselect_start_x = select_start_x;
+    //int pselect_end_x   = select_end_x;
+    //int pselect_start_y = select_start_y;
+    //int pselect_end_y   = select_end_y;
 
-    if(pselect_start_x > pselect_end_x) {int c = pselect_start_x; pselect_start_x = pselect_end_x; pselect_end_x = c; }
-    if(pselect_start_y > pselect_end_y) {int c = pselect_start_y; pselect_start_y = pselect_end_y; pselect_end_y = c; }
-    nsdl_rectangle_hashed(screen,pselect_start_x,pselect_start_y,pselect_end_x,pselect_end_y,0xFFFFFF);
+    //if(pselect_start_x > pselect_end_x) {int c = pselect_start_x; pselect_start_x = pselect_end_x; pselect_end_x = c; }
+    //if(pselect_start_y > pselect_end_y) {int c = pselect_start_y; pselect_start_y = pselect_end_y; pselect_end_y = c; }
+
+    int text_start_x;
+    int text_start_y;
+    int text_end_x;
+    int text_end_y;
+    mouse_to_select_box(select_start_x,select_start_y,select_end_x,select_end_y,
+                         &text_start_x, &text_start_y, &text_end_x, &text_end_y);
+
+
+    //nsdl_rectangle_hashed(screen,pselect_start_x,pselect_start_y,pselect_end_x,pselect_end_y,0xFFFFFF);
+    //nsdl_rectangle_wire(screen,pselect_start_x,pselect_start_y,pselect_end_x,pselect_end_y,0xFFFFFF);
+    nsdl_rectangle_wire(screen,text_start_x*(font_width+font_space),text_start_y*(font_height+font_space),
+                                 text_end_x*(font_width+font_space),text_end_y*(font_height+font_space),0xFFFFFF);
   }
 
   SDL_UnlockSurface(screen);
@@ -320,8 +333,8 @@ void console_read_thread() {
   for(;;) {
     // sending bytes from pts to vterm
     int len;
-    char buffer[1024];
-    len = read(fd, buffer, sizeof(buffer));
+    char buffer[10241];
+    len = read(fd, buffer, sizeof(buffer)-1);
     if(len == -1) {
       if(errno == EIO) break;
     }
@@ -337,8 +350,14 @@ void console_read_thread() {
   }
 }
 
-void copy_text(char *text) {
+void copy_text(uint16_t *itext,int len) {
   
+  printf("copy len: %d\n",len);
+  char text[20000];
+  for(int i=0;i<len;i++) {
+    text[i] = itext[i];
+  }
+
   FILE *w1 = popen("xclip -selection c","w");
   if(w1!=NULL) {
     fprintf(w1,"%s",text);
@@ -355,6 +374,43 @@ void copy_text(char *text) {
   //echo "test" | xclip -i 
 }
 
+void mouse_to_select_box(int   sx,int   sy,int   ex,int   ey,
+                         int *stx,int *sty,int *etx,int *ety) {
+
+  *stx=ceil(((float)select_start_x/(font_width+font_space)));
+  *etx=ceil(((float)select_end_x/(font_width+font_space)));
+  *sty=ceil(((float)select_start_y/(font_height+font_space)));
+  *ety=ceil(((float)select_end_y/(font_height+font_space)));
+  if(*etx<*stx) {int c=*etx; *etx=*stx;*stx=c;}
+  if(*ety<*sty) {int c=*ety; *ety=*sty;*sty=c;}
+
+  if(*etx >= cols) *etx = cols-1;
+  if(*ety >= rows) *ety = rows-1;
+}
+
+void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_end_y,uint16_t **itext,int *ilen) {
+
+  int len=0;
+  uint16_t *text = malloc(10240);
+  for(int y=text_start_y;y<text_end_y;y++) {
+    for(int x=text_start_x;x<text_end_x;x++) {
+      VTermScreenCell c;
+      VTermPos vp;
+      vp.row=y;
+      vp.col=x;
+      int i = vterm_screen_get_cell(vts,vp,&c);
+      text[len] = c.chars[0];
+      if(text[len]==0) text[len]=' ';
+      len++;
+    }
+    text[len] = '\n';
+    len++;
+  }
+  text[len]=0;
+
+  *itext = text;
+  *ilen  = len;
+}
 
 void process_mouse_event(SDL_Event *event) {
 
@@ -376,6 +432,8 @@ void process_mouse_event(SDL_Event *event) {
     printf("scroll offset %d\n",scroll_offset);
   } else
   if(event->type == SDL_MOUSEMOTION    ) {
+
+
     if(draw_selection == true) {
       select_end_x = event->button.x;
       select_end_y = event->button.y;
@@ -385,32 +443,20 @@ void process_mouse_event(SDL_Event *event) {
   if(event->type == SDL_MOUSEBUTTONUP  ) {
     draw_selection = false;
 
-    int sx=select_start_x/9;
-    int ex=select_end_x/9;
-    int sy=select_start_y/17;
-    int ey=select_end_y/17;
-    if(ex<sx) {int c=ex; ex=sx;sx=c;}
-    if(ey<sy) {int c=ey; ey=sy;sy=c;}
-    printf("copy: %d %d %d %d\n",sx,ex,sy,ey);
-    char text[10000];
-    int n=0;
-    for(int y=sy;y<ey;y++) {
-      for(int x=sx;x<ex;x++) {
-        VTermScreenCell c;
-        VTermPos vp;
-        vp.row=y;
-        vp.col=x;
-        int i = vterm_screen_get_cell(vts,vp,&c);
-        text[n] = c.chars[0];
-        if(text[n]==0)text[n]=' ';
-        n++;
-      }
-      text[n] = '\n';
-      n++;
-    }
-    text[n]=0;
+    int text_start_x;
+    int text_start_y;
+    int text_end_x;
+    int text_end_y;
+    mouse_to_select_box(select_start_x,select_start_y,select_end_x,select_end_y,
+                         &text_start_x, &text_start_y, &text_end_x, &text_end_y);
 
-    copy_text(text);
+    uint16_t *text;
+    int      len=0;
+    get_text_region(text_start_x,text_start_y,text_end_x,text_end_y,&text,&len);
+    printf("copy: %d %d %d %d\n",text_start_x,text_start_y,text_end_x,text_end_y);
+
+    copy_text(text,len);
+    free(text);
     redraw_required();
   } else
   if(event->type == SDL_MOUSEBUTTONDOWN) {
@@ -477,17 +523,10 @@ void sdl_read_thread() {
     }
 
     if(event.type == SDL_VIDEORESIZE) {
-//      pthread_mutex_lock( &screen_mutex );
-//      SDL_mutexP(screen_mutex);
-
       new_screen_size_x = event.resize.w;
       new_screen_size_y = event.resize.h;
       new_screen_size   = true;
-      //screen = SDL_SetVideoMode(event.resize.w, event.resize.h, 32, SDL_ANYFORMAT | SDL_RESIZABLE | SDL_DOUBLEBUF);
-      //terminal_resize(screen,vt,&cols,&rows);
 
-//      SDL_mutexV(screen_mutex);
-      //pthread_mutex_unlock( &screen_mutex );
       redraw_required();
     }
   }
@@ -506,7 +545,7 @@ int main(int argc, char **argv) {
 
   const SDL_VideoInfo *vid = SDL_GetVideoInfo();
   int maxwidth  = vid->current_w;
-  int maxheight = vid->current_h-17;
+  int maxheight = vid->current_h-(font_height+font_space);
  
   screen=SDL_SetVideoMode(maxwidth,maxheight,32,SDL_ANYFORMAT | SDL_RESIZABLE | SDL_DOUBLEBUF);//double buf?
   if(screen==NULL) {

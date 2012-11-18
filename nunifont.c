@@ -90,7 +90,9 @@ void draw_unitext(SDL_Surface *screen,int x,int y,const uint16_t *text,uint32_t 
 
       //draw spacing
       draw_space(screen,c_x+w,c_y,spacing,bg,fg);
-      c_x+=w+spacing;
+      if(w==16) draw_space(screen,c_x+w+1,c_y,spacing,bg,fg);
+      if(w==8 ) c_x+=w+spacing;
+      if(w==16) c_x+=w+spacing+spacing;
     }
   }
 }
