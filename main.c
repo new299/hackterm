@@ -354,11 +354,14 @@ void console_read_thread() {
 
 void copy_text(uint16_t *itext,int len) {
   
+  
   printf("copy len: %d\n",len);
   char text[20000];
   for(int i=0;i<len;i++) {
     text[i] = itext[i];
+    text[i+1] = 0;
   }
+  printf("copy text: %s\n",text);
 
   FILE *w1 = popen("xclip -selection c","w");
   if(w1!=NULL) {
@@ -378,13 +381,14 @@ void copy_text(uint16_t *itext,int len) {
 
 void mouse_to_select_box(int   sx,int   sy,int   ex,int   ey,
                          int *stx,int *sty,int *etx,int *ety) {
+  
+  if(ex<sx) {int c=ex; ex=sx;sx=c;}
+  if(ey<sy) {int c=ey; ey=sy;sy=c;}
 
-  *stx=ceil(((float)select_start_x/(font_width+font_space)));
+  *stx=floor(((float)select_start_x/(font_width+font_space)));
   *etx=ceil(((float)select_end_x/(font_width+font_space)));
-  *sty=ceil(((float)select_start_y/(font_height+font_space)));
+  *sty=floor(((float)select_start_y/(font_height+font_space)));
   *ety=ceil(((float)select_end_y/(font_height+font_space)));
-  if(*etx<*stx) {int c=*etx; *etx=*stx;*stx=c;}
-  if(*ety<*sty) {int c=*ety; *ety=*sty;*sty=c;}
 
   if(*etx >= cols) *etx = cols-1;
   if(*ety >= rows) *ety = rows-1;
@@ -567,7 +571,7 @@ int main(int argc, char **argv) {
     .c_lflag = ISIG|ICANON|IEXTEN|ECHO|ECHOE|ECHOK,
     /* c_cc later */
   };
-
+/*
 #ifdef ECHOCTL
   termios.c_lflag |= ECHOCTL;
 #endif
@@ -596,7 +600,12 @@ int main(int argc, char **argv) {
   //struct winsize size = { CONF_lines, CONF_cols, 0, 0 };
   //pid_t kid = forkpty(&master, NULL, &termios, &size);
   int pid = forkpty(&fd,NULL,&termios,NULL);
+*/
+  int pid = forkpty(&fd,NULL,NULL,NULL);
   int flag=fcntl(fd,F_GETFL,0);
+
+  char *termset = "TERM=xterm";
+  putenv(termset);
   //flag|=O_NONBLOCK;
   //fcntl(fd,F_SETFL,flag);
 
