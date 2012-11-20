@@ -385,10 +385,10 @@ void mouse_to_select_box(int   sx,int   sy,int   ex,int   ey,
   if(ex<sx) {int c=ex; ex=sx;sx=c;}
   if(ey<sy) {int c=ey; ey=sy;sy=c;}
 
-  *stx=floor(((float)select_start_x/(font_width+font_space)));
-  *etx=ceil(((float)select_end_x/(font_width+font_space)));
-  *sty=floor(((float)select_start_y/(font_height+font_space)));
-  *ety=ceil(((float)select_end_y/(font_height+font_space)));
+  *stx=floor(((float)sx/(font_width +font_space)));
+  *etx=ceil( ((float)ex/(font_width +font_space)));
+  *sty=floor(((float)sy/(font_height+font_space)));
+  *ety=ceil( ((float)ey/(font_height+font_space)));
 
   if(*etx >= cols) *etx = cols-1;
   if(*ety >= rows) *ety = rows-1;
