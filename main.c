@@ -1,4 +1,5 @@
 #define _POSIX_C_SOURCE 2
+#define _BSD_SOURCE
 
 #include <string.h>
 #include <SDL/SDL.h>
@@ -14,9 +15,10 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
-
+#include <termios.h>
 #include "vterm.h"
 #include "utf8proc.h"
+#include <locale.h>
 
 #include "nunifont.h"
 #include <pty.h>
@@ -556,7 +558,44 @@ int main(int argc, char **argv) {
    
   // grab pts
   //int fd = open("/dev/ptmx",O_RDWR | O_NOCTTY | O_NONBLOCK);
-  int pid = forkpty(&fd,NULL,NULL,NULL);
+  /* None of the docs about termios explain how to construct a new one of
+   * these, so this is largely a guess */
+  struct termios termios = {
+    .c_iflag = ICRNL|IXON|IUTF8,
+    .c_oflag = OPOST|ONLCR|NL0|CR0|TAB0|BS0|VT0|FF0,
+    .c_cflag = CS8|CREAD,
+    .c_lflag = ISIG|ICANON|IEXTEN|ECHO|ECHOE|ECHOK,
+    /* c_cc later */
+  };
+
+#ifdef ECHOCTL
+  termios.c_lflag |= ECHOCTL;
+#endif
+#ifdef ECHOKE
+  termios.c_lflag |= ECHOKE;
+#endif
+
+  cfsetspeed(&termios, 38400);
+
+  termios.c_cc[VINTR]    = 0x1f & 'C';
+  termios.c_cc[VQUIT]    = 0x1f & '\\';
+  termios.c_cc[VERASE]   = 0x7f;
+  termios.c_cc[VKILL]    = 0x1f & 'U';
+  termios.c_cc[VEOF]     = 0x1f & 'D';
+  termios.c_cc[VEOL]     = _POSIX_VDISABLE;
+  termios.c_cc[VEOL2]    = _POSIX_VDISABLE;
+  termios.c_cc[VSTART]   = 0x1f & 'Q';
+  termios.c_cc[VSTOP]    = 0x1f & 'S';
+  termios.c_cc[VSUSP]    = 0x1f & 'Z';
+  termios.c_cc[VREPRINT] = 0x1f & 'R';
+  termios.c_cc[VWERASE]  = 0x1f & 'W';
+  termios.c_cc[VLNEXT]   = 0x1f & 'V';
+  termios.c_cc[VMIN]     = 1;
+  termios.c_cc[VTIME]    = 0;
+
+  //struct winsize size = { CONF_lines, CONF_cols, 0, 0 };
+  //pid_t kid = forkpty(&master, NULL, &termios, &size);
+  int pid = forkpty(&fd,NULL,&termios,NULL);
   int flag=fcntl(fd,F_GETFL,0);
   //flag|=O_NONBLOCK;
   //fcntl(fd,F_SETFL,flag);
