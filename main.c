@@ -390,8 +390,8 @@ void mouse_to_select_box(int   sx,int   sy,int   ex,int   ey,
   *sty=floor(((float)sy/(font_height+font_space)));
   *ety=ceil( ((float)ey/(font_height+font_space)));
 
-  if(*etx >= cols) *etx = cols-1;
-  if(*ety >= rows) *ety = rows-1;
+  if(*etx > cols) *etx = cols;
+  if(*ety > rows) *ety = rows;
 }
 
 void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_end_y,uint16_t **itext,int *ilen) {
