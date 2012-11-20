@@ -195,11 +195,139 @@ VTermScreenCallbacks cb_screen = {
   .bell      = &screen_bell
 };
 
+int pen_x = 0;
+int pen_y = 0;
+
+char *regis_process_cmd_screen(char *cmd) {
+  printf("processing screen\n");
+
+  char *buffer;
+  char *code = strtok_r(cmd+2,")",&buffer);
+  printf("screen code: %s\n",code);
+  
+  return code+strlen(code)+1;
+}
+
+char *regis_process_cmd_text(char *cmd) {
+  printf("processing text\n");
+  char *buffer;
+  char *code = strtok_r(cmd+2,")",&buffer);
+  printf("screen code: %s\n",code);
+  
+  return code+strlen(code)+1;
+}
+
+char *regis_process_cmd_w(char *cmd) {
+  printf("processing w\n");
+  char *buffer;
+  char *code = strtok_r(cmd+2,")",&buffer);
+  printf("screen code: %s\n",code);
+  
+  return code+strlen(code)+1;
+}
+
+char *regis_process_cmd_position(char *cmd) {
+  printf("processing position\n");
+
+
+  char *buffer;
+  char *xstr = strtok_r(cmd+2,",",&buffer);
+  char *ystr = strtok_r( NULL,"]",&buffer);
+
+  int new_x = atoi(xstr);
+  int new_y = atoi(ystr);
+  printf("processing position: %d %d\n",new_x,new_y);
+
+  pen_x = new_x;
+  pen_y = new_y;
+
+  return ystr+strlen(ystr)+1;
+}
+
+struct regis_line {
+  int start_x;
+  int start_y;
+  int end_x;
+  int end_y;
+  int color;
+};
+
+struct regis_line regis_lines[100];
+int    regis_lines_size=0;
+
+void regis_lines_push(int sx,int sy,int ex,int ey,int color) {
+  
+  struct regis_line r = { sx,sy,ex,ey,color };
+
+
+  regis_lines[regis_lines_size] = r;
+  regis_lines_size++;
+}
+
+void regis_render() {
+
+  printf("regis lines size: %d\n",regis_lines_size);
+
+  for(size_t n=0;n<regis_lines_size;n++) {
+    printf("regis line: %d %d %d %d %d\n",regis_lines[n].start_x,regis_lines[n].start_y,regis_lines[n].end_x,regis_lines[n].end_y,regis_lines[n].color);
+    nsdl_line(screen,regis_lines[n].start_x,regis_lines[n].start_y,regis_lines[n].end_x,regis_lines[n].end_y,0xFFFFFFF);
+  }
+
+}
+
+char *regis_process_cmd_vector(char *cmd) {
+
+  // vector commands look like this: v[] or v[100,200]
+  // where 100 and 200 are the x and y positions respectively.
+  // a line is drawn between the current pen position and the x,y position
+
+  printf("processing vector: %s\n",cmd);
+
+  if(strncmp(cmd,"v[]",3) == 0) {
+    printf("empry vector (dot) return\n");
+    return cmd+3;
+  }
+  char *buffer;
+  char *xstr = strtok_r(cmd+2,",",&buffer);
+  char *ystr = strtok_r( NULL,"]",&buffer);
+
+  int new_x = atoi(xstr);
+  int new_y = atoi(ystr);
+  printf("processed vector: %d %d\n",new_x,new_y);
+
+  regis_lines_push(pen_x,pen_y,new_x,new_y,0xFFFFFFFF);
+  pen_x = new_x;
+  pen_y = new_y;
+
+  return ystr+strlen(ystr)+1;
+}
+
+
+char *regis_process_command(char *cmd) {
+  if(cmd[0] == 'S') return regis_process_cmd_screen(cmd);
+  if(cmd[0] == 'T') return regis_process_cmd_text(cmd);
+  if(cmd[0] == 'W') return regis_process_cmd_w(cmd);
+  if(cmd[0] == 'P') return regis_process_cmd_position(cmd);
+  if(cmd[0] == 'v') return regis_process_cmd_vector(cmd);
+}
+
+void regis_processor(const char *cmd) {
+ 
+  char *command = cmd;
+
+  for(;;) {
+    command = regis_process_command(command);
+    if(command[0] == 0) return;
+  }
+
+}
+
 int dcs_handler(const char *command,size_t cmdlen,void *user) {
   printf("command is: ");
   for(int n=0;n<cmdlen;n++) {
     printf("%c",command[n]);
   }
+  regis_processor(command+2);
   printf("\n");
 }
 
@@ -313,6 +441,8 @@ void redraw_screen() {
     nsdl_rectangle_wire(screen,text_start_x*(font_width+font_space),text_start_y*(font_height+font_space),
                                  text_end_x*(font_width+font_space),text_end_y*(font_height+font_space),0xFFFFFF);
   }
+  
+  regis_render();
 
   SDL_UnlockSurface(screen);
   SDL_Flip(screen);
@@ -323,6 +453,7 @@ void redraw_screen() {
 void sdl_render_thread() {
   for(;;) {
     SDL_SemWait(redraw_sem);
+    regis_render();
     redraw_screen();
   }
 }
@@ -456,13 +587,13 @@ void process_mouse_event(SDL_Event *event) {
     mouse_to_select_box(select_start_x,select_start_y,select_end_x,select_end_y,
                          &text_start_x, &text_start_y, &text_end_x, &text_end_y);
 
-    uint16_t *text;
+    uint16_t *text=0;
     int      len=0;
     get_text_region(text_start_x,text_start_y,text_end_x,text_end_y,&text,&len);
     printf("copy: %d %d %d %d\n",text_start_x,text_start_y,text_end_x,text_end_y);
 
-    copy_text(text,len);
-    free(text);
+    if(len != 0) copy_text(text,len);
+    if(text != 0) free(text);
     redraw_required();
   } else
   if(event->type == SDL_MOUSEBUTTONDOWN) {
@@ -571,36 +702,7 @@ int main(int argc, char **argv) {
     .c_lflag = ISIG|ICANON|IEXTEN|ECHO|ECHOE|ECHOK,
     /* c_cc later */
   };
-/*
-#ifdef ECHOCTL
-  termios.c_lflag |= ECHOCTL;
-#endif
-#ifdef ECHOKE
-  termios.c_lflag |= ECHOKE;
-#endif
 
-  cfsetspeed(&termios, 38400);
-
-  termios.c_cc[VINTR]    = 0x1f & 'C';
-  termios.c_cc[VQUIT]    = 0x1f & '\\';
-  termios.c_cc[VERASE]   = 0x7f;
-  termios.c_cc[VKILL]    = 0x1f & 'U';
-  termios.c_cc[VEOF]     = 0x1f & 'D';
-  termios.c_cc[VEOL]     = _POSIX_VDISABLE;
-  termios.c_cc[VEOL2]    = _POSIX_VDISABLE;
-  termios.c_cc[VSTART]   = 0x1f & 'Q';
-  termios.c_cc[VSTOP]    = 0x1f & 'S';
-  termios.c_cc[VSUSP]    = 0x1f & 'Z';
-  termios.c_cc[VREPRINT] = 0x1f & 'R';
-  termios.c_cc[VWERASE]  = 0x1f & 'W';
-  termios.c_cc[VLNEXT]   = 0x1f & 'V';
-  termios.c_cc[VMIN]     = 1;
-  termios.c_cc[VTIME]    = 0;
-
-  //struct winsize size = { CONF_lines, CONF_cols, 0, 0 };
-  //pid_t kid = forkpty(&master, NULL, &termios, &size);
-  int pid = forkpty(&fd,NULL,&termios,NULL);
-*/
   int pid = forkpty(&fd,NULL,NULL,NULL);
   int flag=fcntl(fd,F_GETFL,0);
 
