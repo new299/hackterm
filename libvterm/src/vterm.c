@@ -45,7 +45,7 @@ VTerm *vterm_new_with_allocator(int rows, int cols, VTermAllocatorFunctions *fun
 
   vt->parser_state = NORMAL;
 
-  vt->strbuffer_len = 10240; // was 64
+  vt->strbuffer_len = 1024000; // was 64
   vt->strbuffer_cur = 0;
   vt->strbuffer = vterm_allocator_malloc(vt, vt->strbuffer_len);
 

@@ -203,16 +203,16 @@ char *regis_process_cmd_screen(char *cmd) {
 
   char *buffer;
   char *code = strtok_r(cmd+2,")",&buffer);
-  printf("screen code: %s\n",code);
+  //printf("screen code: %s\n",code);
   
   return code+strlen(code)+1;
 }
 
 char *regis_process_cmd_text(char *cmd) {
-  printf("processing text: %s\n",cmd);
+  //printf("processing text: %s\n",cmd);
   char *buffer=0;
   char *data=0;
-  printf("cmd+1: %c\n",*(cmd+1));
+  //printf("cmd+1: %c\n",*(cmd+1));
   if(*(cmd+1) == '\'') {
     printf("type 1 text\n");
     data = strtok_r(cmd+2,"\'",&buffer);
@@ -222,8 +222,8 @@ char *regis_process_cmd_text(char *cmd) {
     printf("type 2 text\n");
     data = strtok_r(cmd+2,")",&buffer);
   }
-  if(data != 0) printf("text data: %s\n",data);
-           else printf("no text data\n");
+ // if(data != 0) printf("text data: %s\n",data);
+//           else printf("no text data\n");
   
   return data+strlen(data)+1;
 }
@@ -232,7 +232,7 @@ char *regis_process_cmd_w(char *cmd) {
   printf("processing w\n");
   char *buffer;
   char *code = strtok_r(cmd+2,")",&buffer);
-  printf("screen code: %s\n",code);
+ // printf("screen code: %s\n",code);
   
   return code+strlen(code)+1;
 }
@@ -269,10 +269,11 @@ struct regis_text {
   char *text;
 };
 
-struct regis_line regis_lines[100];
+
+struct regis_line regis_lines[100000];
 int    regis_lines_size=0;
 
-struct regis_text regis_texts[100];
+struct regis_text regis_texts[100000];
 int    regis_texts_size=0;
 
 void regis_lines_push(int sx,int sy,int ex,int ey,int color) {
@@ -328,7 +329,7 @@ char *regis_process_cmd_vector(char *cmd) {
   // where 100 and 200 are the x and y positions respectively.
   // a line is drawn between the current pen position and the x,y position
 
-  printf("processing vector: %s\n",cmd);
+  printf("processing vector\n",cmd);
 
   if(strncmp(cmd,"v[]",3) == 0) {
     printf("empry vector (dot) return\n");
@@ -530,6 +531,27 @@ void console_read_thread() {
   }
 }
 
+uint8_t *paste_text() {
+
+  uint8_t *paste_data = malloc(sizeof(uint8_t)*10240);
+
+  FILE *r1 = popen("xclip -o","r");
+  if(r1!=NULL) {
+
+    for(size_t n=0;feof(r1) == false;n++) {
+      int c = fgetc(r1);
+      if(!feof(r1)) {
+        paste_data[n] = c;
+        paste_data[n+1] = 0;
+      }
+    }
+
+    pclose(r1);
+  }
+
+  return paste_data;
+}
+
 void copy_text(uint16_t *itext,int len) {
   
   
@@ -658,6 +680,8 @@ void sdl_read_thread() {
     SDL_Event event;
     SDL_WaitEvent(&event);
     process_mouse_event(&event);
+    
+    uint8_t *keystate = SDL_GetKeyState(NULL);
 
     if(event.type == SDL_KEYDOWN) {
       scroll_offset = 0;
@@ -670,6 +694,8 @@ void sdl_read_thread() {
         buf[2] = 'D';
         buf[3] = 0;
         write(fd,buf,3);
+
+
       } else 
       if(event.key.keysym.sym == SDLK_RIGHT) {
         char buf[4];
@@ -694,6 +720,15 @@ void sdl_read_thread() {
         buf[2] = 'B';
         buf[3] = 0;
         write(fd,buf,3);
+      } else
+      if((event.key.keysym.sym == SDLK_p) && (keystate[SDLK_LCTRL])) {
+
+        // perform text paste
+        uint8_t *text = paste_text();
+        if(text != 0) {
+          write(fd,text,strlen(text));
+          free(text);
+        }
       } else {
  
         // normal character
@@ -705,6 +740,7 @@ void sdl_read_thread() {
         }
       }
     }
+
 
     if(event.type == SDL_VIDEORESIZE) {
       new_screen_size_x = event.resize.w;
