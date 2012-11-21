@@ -209,12 +209,23 @@ char *regis_process_cmd_screen(char *cmd) {
 }
 
 char *regis_process_cmd_text(char *cmd) {
-  printf("processing text\n");
-  char *buffer;
-  char *code = strtok_r(cmd+2,")",&buffer);
-  printf("screen code: %s\n",code);
+  printf("processing text: %s\n",cmd);
+  char *buffer=0;
+  char *data=0;
+  printf("cmd+1: %c\n",*(cmd+1));
+  if(*(cmd+1) == '\'') {
+    printf("type 1 text\n");
+    data = strtok_r(cmd+2,"\'",&buffer);
+    regis_text_push(pen_x,pen_y,data);
+  } else 
+  if(*(cmd+1) == '(') {
+    printf("type 2 text\n");
+    data = strtok_r(cmd+2,")",&buffer);
+  }
+  if(data != 0) printf("text data: %s\n",data);
+           else printf("no text data\n");
   
-  return code+strlen(code)+1;
+  return data+strlen(data)+1;
 }
 
 char *regis_process_cmd_w(char *cmd) {
@@ -252,8 +263,17 @@ struct regis_line {
   int color;
 };
 
+struct regis_text {
+  int x;
+  int y;
+  char *text;
+};
+
 struct regis_line regis_lines[100];
 int    regis_lines_size=0;
+
+struct regis_text regis_texts[100];
+int    regis_texts_size=0;
 
 void regis_lines_push(int sx,int sy,int ex,int ey,int color) {
   
@@ -264,15 +284,42 @@ void regis_lines_push(int sx,int sy,int ex,int ey,int color) {
   regis_lines_size++;
 }
 
-void regis_render() {
+void regis_text_push(int x,int y,char *text) {
 
-  printf("regis lines size: %d\n",regis_lines_size);
+  struct regis_text t;
+  t.x = x;
+  t.y = y;
+  
+  t.text = malloc(strlen(text)+1);
+  strcpy(t.text,text);
 
+  regis_texts[regis_texts_size] = t;
+  regis_texts_size++;  
+}
+
+void regis_render_lines() {
+//  if(regis_lines_size != 0) printf("regis lines size: %d\n",regis_lines_size);
   for(size_t n=0;n<regis_lines_size;n++) {
-    printf("regis line: %d %d %d %d %d\n",regis_lines[n].start_x,regis_lines[n].start_y,regis_lines[n].end_x,regis_lines[n].end_y,regis_lines[n].color);
+//    printf("regis line: %d %d %d %d %d\n",regis_lines[n].start_x,regis_lines[n].start_y,regis_lines[n].end_x,regis_lines[n].end_y,regis_lines[n].color);
     nsdl_line(screen,regis_lines[n].start_x,regis_lines[n].start_y,regis_lines[n].end_x,regis_lines[n].end_y,0xFFFFFFF);
   }
+}
 
+void regis_render_text() {
+  for(size_t n=0;n<regis_texts_size;n++) {
+    uint16_t utext[1000];
+    for(int i=0;i<strlen(regis_texts[n].text);i++) {
+      utext[i] = regis_texts[n].text[i];
+      utext[i+1]=0;
+    }
+    draw_unitext(screen,regis_texts[n].x,regis_texts[n].y,utext,0x0,0xFFFFFFFF);
+  }
+}
+
+void regis_render() {
+
+  regis_render_lines();
+  regis_render_text();
 }
 
 char *regis_process_cmd_vector(char *cmd) {
