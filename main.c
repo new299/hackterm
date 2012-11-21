@@ -44,7 +44,8 @@ static int cols;
 static int rows;
 int fd;
 
-SDL_Surface *screen;
+SDL_Surface *screen=0;
+SDL_Surface *regis_layer=0;
 
 bool draw_selection = false;
 int select_start_x=0;
@@ -80,7 +81,7 @@ void draw_row(VTermScreenCell *row,int ypos) {
     rtext[1]=0;
 
     //printf("%u,%u,%u,%u:%c ",c.chars[0],c.chars[1],c.chars[2],c.chars[3],rtext[n]);
-    if(row[n].attrs.reverse == 1) { printf("b!"); }
+    //if(row[n].attrs.reverse == 1) { printf("b!"); }
 
     draw_unitext(screen,xpos,ypos,rtext,(row[n].bg.red << 16) + (row[n].bg.green << 8) + row[n].bg.blue,
                                         (row[n].fg.red << 16) + (row[n].fg.green << 8) + row[n].fg.blue);
@@ -216,7 +217,13 @@ char *regis_process_cmd_text(char *cmd) {
   if(*(cmd+1) == '\'') {
     printf("type 1 text\n");
     data = strtok_r(cmd+2,"\'",&buffer);
-    regis_text_push(pen_x,pen_y,data);
+    //regis_text_push(pen_x,pen_y,data);
+    uint16_t wdata[1000];
+    for(int n=0;(n<1000) && (data[n] != 0);n++) {
+      wdata[n] = data[n];
+      wdata[n+1] = 0;
+    }
+    draw_unitext(regis_layer,pen_x,pen_y,wdata,0x0,0xFFFFFFFF);
   } else 
   if(*(cmd+1) == '(') {
     printf("type 2 text\n");
@@ -255,72 +262,19 @@ char *regis_process_cmd_position(char *cmd) {
   return ystr+strlen(ystr)+1;
 }
 
-struct regis_line {
-  int start_x;
-  int start_y;
-  int end_x;
-  int end_y;
-  int color;
-};
-
-struct regis_text {
-  int x;
-  int y;
-  char *text;
-};
 
 
-struct regis_line regis_lines[100000];
-int    regis_lines_size=0;
-
-struct regis_text regis_texts[100000];
-int    regis_texts_size=0;
-
-void regis_lines_push(int sx,int sy,int ex,int ey,int color) {
-  
-  struct regis_line r = { sx,sy,ex,ey,color };
-
-
-  regis_lines[regis_lines_size] = r;
-  regis_lines_size++;
-}
-
-void regis_text_push(int x,int y,char *text) {
-
-  struct regis_text t;
-  t.x = x;
-  t.y = y;
-  
-  t.text = malloc(strlen(text)+1);
-  strcpy(t.text,text);
-
-  regis_texts[regis_texts_size] = t;
-  regis_texts_size++;  
-}
-
-void regis_render_lines() {
-//  if(regis_lines_size != 0) printf("regis lines size: %d\n",regis_lines_size);
-  for(size_t n=0;n<regis_lines_size;n++) {
-//    printf("regis line: %d %d %d %d %d\n",regis_lines[n].start_x,regis_lines[n].start_y,regis_lines[n].end_x,regis_lines[n].end_y,regis_lines[n].color);
-    nsdl_line(screen,regis_lines[n].start_x,regis_lines[n].start_y,regis_lines[n].end_x,regis_lines[n].end_y,0xFFFFFFF);
-  }
-}
-
-void regis_render_text() {
-  for(size_t n=0;n<regis_texts_size;n++) {
-    uint16_t utext[1000];
-    for(int i=0;i<strlen(regis_texts[n].text);i++) {
-      utext[i] = regis_texts[n].text[i];
-      utext[i+1]=0;
-    }
-    draw_unitext(screen,regis_texts[n].x,regis_texts[n].y,utext,0x0,0xFFFFFFFF);
-  }
+void regis_init(int width,int height) {
+  printf("regis init: %d %d\n",width,height);
+  //regis_layer = SDL_CreateRGBSurface(SDL_HWSURFACE,width,height,32,0x000000FF,0x0000FF00,0x00FF0000,0xFF000000);
+  regis_layer = SDL_CreateRGBSurface(SDL_SWSURFACE,width,height,32,0x000000FF,0x0000FF00,0x00FF0000,0xFF000000);
+  printf("regis layer: %u\n",regis_layer);
 }
 
 void regis_render() {
-
-  regis_render_lines();
-  regis_render_text();
+ int res = SDL_BlitSurface(regis_layer,NULL,screen,NULL);
+ printf("error %s\n",SDL_GetError());
+ printf("regis blit res: %d\n",res);
 }
 
 char *regis_process_cmd_vector(char *cmd) {
@@ -343,7 +297,8 @@ char *regis_process_cmd_vector(char *cmd) {
   int new_y = atoi(ystr);
   printf("processed vector: %d %d\n",new_x,new_y);
 
-  regis_lines_push(pen_x,pen_y,new_x,new_y,0xFFFFFFFF);
+  //regis_lines_push(pen_x,pen_y,new_x,new_y,0xFFFFFFFF);
+  nsdl_line(regis_layer,pen_x,pen_y,new_x,new_y,0xFFFFFFFF);
   pen_x = new_x;
   pen_y = new_y;
 
@@ -490,9 +445,9 @@ void redraw_screen() {
                                  text_end_x*(font_width+font_space),text_end_y*(font_height+font_space),0xFFFFFF);
   }
   
+  SDL_UnlockSurface(screen);
   regis_render();
 
-  SDL_UnlockSurface(screen);
   SDL_Flip(screen);
 
   SDL_mutexV(screen_mutex);
@@ -501,12 +456,14 @@ void redraw_screen() {
 void sdl_render_thread() {
   for(;;) {
     SDL_SemWait(redraw_sem);
-    regis_render();
     redraw_screen();
   }
 }
 
 void redraw_required() {
+  uint32_t v =  SDL_SemValue(redraw_sem);
+  if(v > 5) return;
+
   SDL_SemPost(redraw_sem);
 }
 
@@ -524,7 +481,7 @@ void console_read_thread() {
     //if(len>0)printf("\n");
     if(len > 0) {
       SDL_mutexP(vterm_mutex);
-      vterm_push_bytes(vt, buffer, len);
+      if((buffer != 0) && (len != 0)) vterm_push_bytes(vt, buffer, len);
       SDL_mutexV(vterm_mutex);
     }
     redraw_required();
@@ -817,6 +774,7 @@ int main(int argc, char **argv) {
   SDL_EnableKeyRepeat(500,50);
 
   printf("screen size %d %d\n",screen->w,screen->h);
+  regis_init(screen->w,screen->h);
   vt=0;
   terminal_resize(screen,vt,&cols,&rows);
 
