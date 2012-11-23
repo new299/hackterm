@@ -147,8 +147,13 @@ static int on_text(const char bytes[], size_t len, void *user)
 
   // We'll have at most len codepoints
   uint32_t codepoints[len];
+  for(int n=0;n<len;n++) codepoints[n]=0;//for some reason it's possible for codepoints to be used with being initialised, discovered during fuzz testing+valgrind. This at least makes it deterministic.
   int npoints = 0;
   size_t eaten = 0;
+
+  if(state->vt->is_utf8) {
+    printf("generally ok\n");
+  }
 
   VTermEncodingInstance *encoding =
     !(bytes[eaten] & 0x80) ? &state->encoding[state->gl_set] :

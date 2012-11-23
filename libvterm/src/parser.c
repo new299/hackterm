@@ -136,9 +136,11 @@ static size_t do_string(VTerm *vt, const char *str_frag, size_t len)
 
   switch(vt->parser_state) {
   case NORMAL:
-    if(vt->parser_callbacks && vt->parser_callbacks->text)
+    if(vt->parser_callbacks && vt->parser_callbacks->text) {
+      printf("regular called\n");
       if((eaten = (*vt->parser_callbacks->text)(str_frag, len, vt->cbdata)))
         return eaten;
+    }
 
     fprintf(stderr, "libvterm: Unhandled text (%zu chars)\n", len);
     return 0;

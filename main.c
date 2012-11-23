@@ -31,7 +31,7 @@ void redraw_required();
     
 int font_width  = 8;
 int font_height = 16;
-int font_space  = 1;
+int font_space  = 0;
 
 static VTerm *vt;
 static VTermScreen *vts;
@@ -109,28 +109,55 @@ typedef struct {
 }
 
 
+//TODO: need to convert scroll_buffer into a circular buffer
+
+size_t    scroll_buffer_initial_size = 10000;
+
 size_t    scroll_buffer_size = 0;
+size_t    scroll_buffer_start =0;
+size_t    scroll_buffer_end   =0;
+
 VTermScreenCell **scroll_buffer = 0;
+
+void scroll_buffer_init() {
+  scroll_buffer = malloc(sizeof(VTermScreenCell *)*scroll_buffer_initial_size);
+  for(int n=0;n<scroll_buffer_initial_size;n++) scroll_buffer[n] = 0;
+  scroll_buffer_size = scroll_buffer_initial_size;
+  scroll_buffer_start=0;
+  scroll_buffer_end  =0;
+}
 
 void scroll_buffer_push(VTermScreenCell *scroll_line,size_t len) {
 
+   if(scroll_buffer == 0) scroll_buffer_init();
+
+   if(scroll_buffer_end >= scroll_buffer_size) scroll_buffer_end = 0;
+
+   if(scroll_buffer[scroll_buffer_end] != 0) {
+     // if infini buffer, do resize
+     // scroll_buffer_resize(scroll_buffer_size+10000);
+     // else
+     free(scroll_buffer[scroll_buffer_end]);
+     scroll_buffer[scroll_buffer_end]=0;
+   }
+
   //printf("push line: %d\n",scroll_buffer_size);
-  if(scroll_buffer == 0) { 
-    scroll_buffer = malloc(sizeof(VTermScreenCell *)*1);  
-  } else {
-    scroll_buffer = realloc(scroll_buffer,sizeof(VTermScreenCell *)*(scroll_buffer_size+1));
-  }
-  scroll_buffer[scroll_buffer_size] = malloc(sizeof(VTermScreenCell)*len);
+  scroll_buffer[scroll_buffer_end] = malloc(sizeof(VTermScreenCell)*len);
 
   for(size_t n=0;n<len;n++) {
-    scroll_buffer[scroll_buffer_size][n] = scroll_line[n];
+    scroll_buffer[scroll_buffer_end][n] = scroll_line[n];
   }
 
-  scroll_buffer_size++;
+  scroll_buffer_end++;
 }
 
 void scroll_buffer_get(size_t line_number,VTermScreenCell **line,int *len) {
-  *line = scroll_buffer[scroll_buffer_size-line_number-1];
+  int idx = scroll_buffer_end-line_number-1;
+
+  if(idx < 0) idx = scroll_buffer_size+idx;
+  if(idx < 0) *line = 0;
+
+  *line = scroll_buffer[idx];
   *len  = 10;
 }
 
@@ -204,6 +231,8 @@ char *regis_process_cmd_screen(char *cmd) {
 
   char *buffer;
   char *code = strtok_r(cmd+2,")",&buffer);
+  if(code == 0) return (cmd+1);
+
   //printf("screen code: %s\n",code);
   
   return code+strlen(code)+1;
@@ -217,6 +246,8 @@ char *regis_process_cmd_text(char *cmd) {
   if(*(cmd+1) == '\'') {
     printf("type 1 text\n");
     data = strtok_r(cmd+2,"\'",&buffer);
+    if(data == 0) return (cmd+1);
+
     //regis_text_push(pen_x,pen_y,data);
     uint16_t wdata[1000];
     for(int n=0;(n<1000) && (data[n] != 0);n++) {
@@ -228,10 +259,10 @@ char *regis_process_cmd_text(char *cmd) {
   if(*(cmd+1) == '(') {
     printf("type 2 text\n");
     data = strtok_r(cmd+2,")",&buffer);
+    if(data == 0) return (cmd+1);
   }
- // if(data != 0) printf("text data: %s\n",data);
+  if(data == 0) return (cmd+1);
 //           else printf("no text data\n");
-  
   return data+strlen(data)+1;
 }
 
@@ -239,6 +270,7 @@ char *regis_process_cmd_w(char *cmd) {
   printf("processing w\n");
   char *buffer;
   char *code = strtok_r(cmd+2,")",&buffer);
+  if(code == 0) return (cmd+1);
  // printf("screen code: %s\n",code);
   
   return code+strlen(code)+1;
@@ -250,7 +282,9 @@ char *regis_process_cmd_position(char *cmd) {
 
   char *buffer;
   char *xstr = strtok_r(cmd+2,",",&buffer);
+  if(xstr == 0) return (cmd+1);
   char *ystr = strtok_r( NULL,"]",&buffer);
+  if(ystr == 0) return (cmd+1);
 
   int new_x = atoi(xstr);
   int new_y = atoi(ystr);
@@ -273,7 +307,7 @@ void regis_init(int width,int height) {
 
 void regis_render() {
  int res = SDL_BlitSurface(regis_layer,NULL,screen,NULL);
- printf("error %s\n",SDL_GetError());
+ if(res != 0) printf("error %s\n",SDL_GetError());
  printf("regis blit res: %d\n",res);
 }
 
@@ -291,7 +325,9 @@ char *regis_process_cmd_vector(char *cmd) {
   }
   char *buffer;
   char *xstr = strtok_r(cmd+2,",",&buffer);
+  if(xstr == 0) return cmd+2;
   char *ystr = strtok_r( NULL,"]",&buffer);
+  if(ystr == 0) return cmd+2;
 
   int new_x = atoi(xstr);
   int new_y = atoi(ystr);
@@ -307,19 +343,27 @@ char *regis_process_cmd_vector(char *cmd) {
 
 
 char *regis_process_command(char *cmd) {
-  if(cmd[0] == 'S') return regis_process_cmd_screen(cmd);
-  if(cmd[0] == 'T') return regis_process_cmd_text(cmd);
-  if(cmd[0] == 'W') return regis_process_cmd_w(cmd);
-  if(cmd[0] == 'P') return regis_process_cmd_position(cmd);
-  if(cmd[0] == 'v') return regis_process_cmd_vector(cmd);
+  if(cmd[0] == 'S') return regis_process_cmd_screen(cmd);    else
+  if(cmd[0] == 'T') return regis_process_cmd_text(cmd);      else
+  if(cmd[0] == 'W') return regis_process_cmd_w(cmd);         else
+  if(cmd[0] == 'P') return regis_process_cmd_position(cmd);  else
+  if(cmd[0] == 'v') return regis_process_cmd_vector(cmd);    else
+  {
+    printf("bad regis, incrementing %d\n",cmd);
+    
+    return cmd+1;
+  }
 }
 
-void regis_processor(const char *cmd) {
+void regis_processor(const char *cmd,int cmdlen) {
  
   char *command = cmd;
 
   for(;;) {
     command = regis_process_command(command);
+    int clen = cmdlen-(command-cmd);
+    if(clen<2) return;
+    if(command == 0) return;
     if(command[0] == 0) return;
   }
 
@@ -328,9 +372,11 @@ void regis_processor(const char *cmd) {
 int dcs_handler(const char *command,size_t cmdlen,void *user) {
   printf("command is: ");
   for(int n=0;n<cmdlen;n++) {
-    printf("%c",command[n]);
+    printf("%u,",command[n]);
   }
-  regis_processor(command+2);
+  if(cmdlen < 3) return;
+
+  regis_processor(command+2,cmdlen);
   printf("\n");
 }
 
@@ -354,6 +400,7 @@ VTermParserCallbacks cb_parser = {
 SDL_mutex *screen_mutex;
 SDL_mutex *vterm_mutex;
 SDL_sem   *redraw_sem;
+VTermState *vs;
 
 void terminal_resize(SDL_Surface *screen,VTerm *vt,int *cols,int *rows) {
 
@@ -372,7 +419,6 @@ void terminal_resize(SDL_Surface *screen,VTerm *vt,int *cols,int *rows) {
 
 void cursor_position(int *cursorx,int *cursory) {
   VTermPos cursorpos;
-  VTermState *vs = vterm_obtain_state(vt);
   vterm_state_get_cursorpos(vs,&cursorpos);
 
   *cursorx = cursorpos.col;
@@ -394,31 +440,36 @@ void redraw_screen() {
   for(int row = 0; row < rows; row++) {
 
     int trow = row-scroll_offset;
+    bool dont_free=false;
 
     VTermScreenCell *rowdata=0;
     if(trow >= 0) {
       rowdata = grab_row(trow);
       if(rowdata != 0) draw_row(rowdata,row*(font_height+font_space));
-      if(rowdata != 0) free(rowdata);
     } else {
       //printf("trow: %d\n",trow);
       int len;
       if((0-trow) > scroll_buffer_size) { rowdata = 0; }
       else {
         scroll_buffer_get(0-trow,&rowdata,&len);
+        dont_free=true;
       }
       if(rowdata != 0) draw_row(rowdata,row*(font_height+font_space));
     }
 
-    int cursorx,cursory;
+    int cursorx=0;
+    int cursory=0;
     cursor_position(&cursorx,&cursory);
     if(cursory == trow) {
       int width=font_width+font_space;
-      if(rowdata[cursorx].width == 2) width+=(font_width+font_space);
-      nsdl_rectangle_softalph(screen,cursorx*(font_width+font_space),row*(font_height+font_space),(cursorx*(font_width+font_space))+width,(row*(font_height+font_space))+(font_height+font_space),0xFF);
-      nsdl_rectangle_wire    (screen,cursorx*(font_width+font_space),row*(font_height+font_space),(cursorx*(font_width+font_space))+width,(row*(font_height+font_space))+(font_height+font_space),UINT_MAX);
+      if((cursorx < cols) && (cursory < rows) && (rowdata != 0)) {
+        if(rowdata[cursorx].width == 2) width+=(font_width+font_space);
+        nsdl_rectangle_softalph(screen,cursorx*(font_width+font_space),row*(font_height+font_space),(cursorx*(font_width+font_space))+width,(row*(font_height+font_space))+(font_height+font_space),0xFF);
+        nsdl_rectangle_wire    (screen,cursorx*(font_width+font_space),row*(font_height+font_space),(cursorx*(font_width+font_space))+width,(row*(font_height+font_space))+(font_height+font_space),UINT_MAX);
+      }
     }
 
+    if((rowdata != 0) && (dont_free==false)){free(rowdata); rowdata=0;}
   }
 
   if(draw_selection) {
@@ -481,7 +532,12 @@ void console_read_thread() {
     //if(len>0)printf("\n");
     if(len > 0) {
       SDL_mutexP(vterm_mutex);
-      if((buffer != 0) && (len != 0)) vterm_push_bytes(vt, buffer, len);
+      if((buffer != 0) && (len != 0)) {
+        printf("pushing: ");
+        for(int n=0;n<len;n++) {printf("%c",buffer[n]);}
+        printf("\n");
+        vterm_push_bytes(vt, buffer, len);
+      }
       SDL_mutexV(vterm_mutex);
     }
     redraw_required();
@@ -576,10 +632,11 @@ void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_e
 }
 
 void process_mouse_event(SDL_Event *event) {
+  
+  if((event->type != SDL_MOUSEMOTION) && (event->type != SDL_MOUSEBUTTONUP) && (event->type != SDL_MOUSEBUTTONDOWN)) return;
 
   int mouse_x = event->motion.x;
   int mouse_y = event->motion.y;
-  
   
   if(event->button.button == SDL_BUTTON_WHEELUP) {
     printf("wheel up\n");
@@ -781,8 +838,9 @@ int main(int argc, char **argv) {
   printf("init rows: %d cols: %d\n",rows,cols);
   vt = vterm_new(rows, cols);
 
-  vterm_state_set_bold_highbright(vterm_obtain_state(vt),1);
   vts = vterm_obtain_screen(vt);
+  vs  = vterm_obtain_state(vt);
+  vterm_state_set_bold_highbright(vs,1);
 
   vterm_screen_enable_altscreen(vts,1);
 

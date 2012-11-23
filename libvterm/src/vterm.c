@@ -127,9 +127,23 @@ void vterm_push_output_bytes(VTerm *vt, const char *bytes, size_t len)
 
 void vterm_push_output_vsprintf(VTerm *vt, const char *format, va_list args)
 {
+
+  size_t write_size = vt->outbuffer_len - vt->outbuffer_cur;
+  if(vt->outbuffer_cur >= vt->outbuffer_len) {
+    printf("ERROR: attempting to write beyond end of buffer\n");
+    return;
+  }
+  //TODO: this can overflow.
+
   int written = vsnprintf(vt->outbuffer + vt->outbuffer_cur,
-      vt->outbuffer_len - vt->outbuffer_cur,
+      write_size,
       format, args);
+
+  //written is the number of bytes that /would/ have been written if written is > write_size
+  if(written > write_size) {
+    written = write_size;
+  }
+
   vt->outbuffer_cur += written;
 }
 

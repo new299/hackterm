@@ -175,8 +175,10 @@ static int putglyph(const uint32_t chars[], int width, VTermPos pos, void *user)
   if(i < VTERM_MAX_CHARS_PER_CELL)
     cell->chars[i] = 0;
 
-  for(int col = 1; col < width; col++)
-    getcell(screen, pos.row, pos.col + col)->chars[0] = (uint32_t)-1;
+  for(int col = 1; col < width; col++) {
+    ScreenCell *c = getcell(screen, pos.row, pos.col + col);
+    if(c != 0) c->chars[0] = (uint32_t)-1;
+  }
 
   VTermRect rect = {
     .start_row = pos.row,
@@ -251,10 +253,12 @@ static int moverect_internal(VTermRect dest, VTermRect src, void *user)
     inc_row  = +1;
   }
 
-  for(int row = init_row; row != test_row; row += inc_row)
+  for(int row = init_row; row != test_row; row += inc_row) {
+    if(row < 0) continue; // can happen for some reason, found during fuzzing.
     memmove(getcell(screen, row, dest.start_col),
             getcell(screen, row + downward, src.start_col),
             cols * sizeof(ScreenCell));
+  }
 
   return 1;
 }

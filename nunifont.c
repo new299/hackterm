@@ -65,6 +65,14 @@ void draw_space(SDL_Surface *screen,int x,int y,int w,uint32_t bg,uint32_t fg) {
   }
 }
 
+void draw_space_h(SDL_Surface *screen,int x,int y,int w,uint32_t bg,uint32_t fg) {
+  for(size_t c_y=0;c_y<w;c_y++) {
+    for(size_t c_x=0;c_x<9;c_x++) {
+      draw_point(screen,x+c_x,y+c_y,bg);
+    }
+  }
+}
+
 void draw_unitext(SDL_Surface *screen,int x,int y,const uint16_t *text,uint32_t bg,uint32_t fg) {
 
   if(!initialised) nfont_init();
@@ -82,6 +90,7 @@ void draw_unitext(SDL_Surface *screen,int x,int y,const uint16_t *text,uint32_t 
 
     if(text[n] == ' ') {
       draw_space(screen,c_x,c_y,8+spacing,bg,fg);
+      draw_space_h(screen,c_x,c_y+16,spacing,bg,fg);
       c_x += 8 + spacing; 
     } else {
       int w=8;
@@ -90,6 +99,8 @@ void draw_unitext(SDL_Surface *screen,int x,int y,const uint16_t *text,uint32_t 
 
       //draw spacing
       draw_space(screen,c_x+w,c_y,spacing,bg,fg);
+      draw_space_h(screen,c_x,c_y+16,spacing,bg,fg);
+      if(w==16) draw_space_h(screen,c_x+8,c_y+16,spacing,bg,fg);
       if(w==16) draw_space(screen,c_x+w+1,c_y,spacing,bg,fg);
       if(w==8 ) c_x+=w+spacing;
       if(w==16) c_x+=w+spacing+spacing;
@@ -171,9 +182,12 @@ int load_line(char *line,fontchar *f) {
 
 void load_fonts(char *filename,fontchar **fontmap,uint8_t **widthmap) {
 
-  *fontmap  = (fontchar *) malloc(sizeof(fontchar)*65535);
-  *widthmap = (uint8_t  *) malloc(sizeof(uint8_t)*(65535/8));
+  *fontmap  = (fontchar *) malloc(sizeof(fontchar)*65536);
+  *widthmap = (uint8_t  *) malloc(sizeof(uint8_t)*(65536/8));
   
+  for(size_t n=0;n<65536;n++) for(int i=0;i<32;i++) (*fontmap)[n].data[i] = 0;
+  for(size_t n=0;n<(sizeof(uint8_t)*(65536/8));n++) (*widthmap)[n] = 0;
+
   FILE *mfile = fopen(filename,"r");
   
   for(int n=0;!feof(mfile);n++) {
