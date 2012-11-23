@@ -52,17 +52,40 @@ int select_start_x=0;
 int select_start_y=0;
 int select_end_x  =0;
 int select_end_y  =0;
-int scroll_offset=0;
 
-VTermScreenCell *grab_row(int row) {
 
-  VTermScreenCell *rowdata = malloc(cols*sizeof(VTermScreenCell));
+int       scroll_offset=0;
+size_t    scroll_buffer_initial_size = 10000;
 
-  VTermPos vp;
-  for(int n=0;n<cols;n++) {
-    vp.row = row;
-    vp.col = n;
-    vterm_screen_get_cell(vts,vp,&(rowdata[n]));
+size_t    scroll_buffer_size = 0;
+size_t    scroll_buffer_start =0;
+size_t    scroll_buffer_end   =0;
+VTermScreenCell **scroll_buffer = 0;
+
+void scroll_buffer_get(size_t line_number,VTermScreenCell **line,int *len);
+
+VTermScreenCell *grab_row(int trow,bool *dont_free) {
+
+  VTermScreenCell *rowdata = 0;
+
+  if(trow >= 0) {
+    // a screen row
+    rowdata = malloc(cols*sizeof(VTermScreenCell));
+    VTermPos vp;
+    for(int n=0;n<cols;n++) {
+      vp.row = trow;
+      vp.col = n;
+      vterm_screen_get_cell(vts,vp,&(rowdata[n]));
+    }
+    *dont_free =false;
+  } else {
+    // a scrollback row
+    int len;
+    if((0-trow) > scroll_buffer_size) { rowdata = 0; }
+    else {
+      scroll_buffer_get(0-trow,&rowdata,&len);
+      *dont_free=true;
+    }
   }
 
   return rowdata;
@@ -109,15 +132,6 @@ typedef struct {
 }
 
 
-//TODO: need to convert scroll_buffer into a circular buffer
-
-size_t    scroll_buffer_initial_size = 10000;
-
-size_t    scroll_buffer_size = 0;
-size_t    scroll_buffer_start =0;
-size_t    scroll_buffer_end   =0;
-
-VTermScreenCell **scroll_buffer = 0;
 
 void scroll_buffer_init() {
   scroll_buffer = malloc(sizeof(VTermScreenCell *)*scroll_buffer_initial_size);
@@ -442,20 +456,9 @@ void redraw_screen() {
     int trow = row-scroll_offset;
     bool dont_free=false;
 
-    VTermScreenCell *rowdata=0;
-    if(trow >= 0) {
-      rowdata = grab_row(trow);
-      if(rowdata != 0) draw_row(rowdata,row*(font_height+font_space));
-    } else {
-      //printf("trow: %d\n",trow);
-      int len;
-      if((0-trow) > scroll_buffer_size) { rowdata = 0; }
-      else {
-        scroll_buffer_get(0-trow,&rowdata,&len);
-        dont_free=true;
-      }
-      if(rowdata != 0) draw_row(rowdata,row*(font_height+font_space));
-    }
+    VTermScreenCell *rowdata=grab_row(trow,&dont_free);
+
+    if(rowdata != 0) draw_row(rowdata,row*(font_height+font_space));
 
     int cursorx=0;
     int cursory=0;
@@ -609,19 +612,22 @@ void mouse_to_select_box(int   sx,int   sy,int   ex,int   ey,
 
 void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_end_y,uint16_t **itext,int *ilen) {
 
+  text_start_y -= scroll_offset;
+  text_end_y   -= scroll_offset;
+
   int len=0;
   uint16_t *text = malloc(10240);
   for(int y=text_start_y;y<text_end_y;y++) {
+    bool dont_free=false;
+    VTermScreenCell *row_data = grab_row(y,&dont_free);
     for(int x=text_start_x;x<text_end_x;x++) {
-      VTermScreenCell c;
-      VTermPos vp;
-      vp.row=y;
-      vp.col=x;
-      int i = vterm_screen_get_cell(vts,vp,&c);
-      text[len] = c.chars[0];
+
+      text[len] = row_data[x].chars[0];
       if(text[len]==0) text[len]=' ';
       len++;
     }
+    if(!dont_free) free(row_data);
+
     text[len] = '\n';
     len++;
   }
