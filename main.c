@@ -1,4 +1,4 @@
-#define _POSIX_C_SOURCE 2
+#define _POSIX_C_SOURCE 199309L
 #define _BSD_SOURCE
 
 #include <string.h>
@@ -26,6 +26,7 @@
 
 #include <pthread.h>
 #include "nsdl.h"
+#include <time.h>
 
 void redraw_required();
     
@@ -61,6 +62,14 @@ size_t    scroll_buffer_size = 0;
 size_t    scroll_buffer_start =0;
 size_t    scroll_buffer_end   =0;
 VTermScreenCell **scroll_buffer = 0;
+
+SDL_mutex *regis_mutex;
+SDL_mutex *screen_mutex;
+SDL_mutex *vterm_mutex;
+SDL_sem   *redraw_sem;
+VTermState *vs;
+
+void regis_clear();
 
 void scroll_buffer_get(size_t line_number,VTermScreenCell **line,int *len);
 
@@ -231,14 +240,41 @@ static int screen_bell(void* d) {
 
 }
 
+static int state_erase(VTermRect r,void *user) {
+  printf("***************** ERASE CALLBACK\n");
+  printf("%d %d %d %d\n",r.start_row,r.end_row,r.end_row,r.end_col);
+
+  //regis_clear();
+}
+
 VTermScreenCallbacks cb_screen = {
   .prescroll = &screen_prescroll,
   .resize    = &screen_resize,
   .bell      = &screen_bell
 };
 
+VTermStateCallbacks cb_state = {
+  .putglyph     = 0,
+  .movecursor   = 0,
+  .scrollrect   = 0,
+  .moverect     = 0,
+  .erase        = &state_erase,
+  .initpen      = 0,
+  .setpenattr   = 0,
+  .settermprop  = 0,
+  .setmousefunc = 0,
+  .bell         = 0,
+  .resize       = 0
+};
+
 int pen_x = 0;
 int pen_y = 0;
+
+void regis_clear() {
+  SDL_mutexP(regis_mutex);
+  SDL_FillRect(regis_layer,NULL, 0x000000); 
+  SDL_mutexV(regis_mutex);
+}
 
 char *regis_process_cmd_screen(char *cmd) {
   printf("processing screen\n");
@@ -268,7 +304,9 @@ char *regis_process_cmd_text(char *cmd) {
       wdata[n] = data[n];
       wdata[n+1] = 0;
     }
+    SDL_mutexP(regis_mutex);
     draw_unitext(regis_layer,pen_x,pen_y,wdata,0x0,0xFFFFFFFF);
+    SDL_mutexV(regis_mutex);
   } else 
   if(*(cmd+1) == '(') {
     printf("type 2 text\n");
@@ -320,9 +358,11 @@ void regis_init(int width,int height) {
 }
 
 void regis_render() {
- int res = SDL_BlitSurface(regis_layer,NULL,screen,NULL);
- if(res != 0) printf("error %s\n",SDL_GetError());
- printf("regis blit res: %d\n",res);
+  SDL_mutexP(regis_mutex);
+  int res = SDL_BlitSurface(regis_layer,NULL,screen,NULL);
+  SDL_mutexV(regis_mutex);
+  if(res != 0) printf("error %s\n",SDL_GetError());
+  printf("regis blit res: %d\n",res);
 }
 
 char *regis_process_cmd_vector(char *cmd) {
@@ -348,7 +388,9 @@ char *regis_process_cmd_vector(char *cmd) {
   printf("processed vector: %d %d\n",new_x,new_y);
 
   //regis_lines_push(pen_x,pen_y,new_x,new_y,0xFFFFFFFF);
+  SDL_mutexP(regis_mutex);
   nsdl_line(regis_layer,pen_x,pen_y,new_x,new_y,0xFFFFFFFF);
+  SDL_mutexV(regis_mutex);
   pen_x = new_x;
   pen_y = new_y;
 
@@ -369,12 +411,15 @@ char *regis_process_command(char *cmd) {
   }
 }
 
+struct timespec regis_last_render;
+
 void regis_processor(const char *cmd,int cmdlen) {
  
   char *command = cmd;
 
   for(;;) {
     command = regis_process_command(command);
+    clock_gettime(CLOCK_MONOTONIC,&regis_last_render);
     int clen = cmdlen-(command-cmd);
     if(clen<2) return;
     if(command == 0) return;
@@ -382,13 +427,48 @@ void regis_processor(const char *cmd,int cmdlen) {
   }
 
 }
+ 
+
+bool regis_recent() {
+ 
+  struct timespec current_time;
+  clock_gettime(CLOCK_MONOTONIC,&current_time);
+
+  struct timespec delta_time;
+  delta_time.tv_sec  = current_time.tv_sec  - regis_last_render.tv_sec;
+  delta_time.tv_nsec = current_time.tv_nsec - regis_last_render.tv_nsec;
+
+  if(delta_time.tv_nsec < 0) {
+     delta_time.tv_sec--;
+     delta_time.tv_nsec += 1000000000;
+  }
+
+  printf("curr  %d %d\n",current_time.tv_sec,current_time.tv_nsec);
+  printf("lastr %d %d\n",regis_last_render.tv_sec,regis_last_render.tv_nsec);
+  printf("delta %d %d\n",delta_time.tv_sec,delta_time.tv_nsec);
+
+  if(delta_time.tv_sec  > 0        ) return false;
+  if(delta_time.tv_nsec > 200000000) return false;
+
+  return true;
+}
+
+int csi_handler(const char *leader, const long args[], int argcount, const char *intermed, char command, void *user) {
+  //printf("received CSI: %s\n",leader);
+  //printf("received CSI arg count: %d\n",argcount);
+  //printf("command: %c",command);
+  if(command = 'J') {
+    if(!regis_recent()) regis_clear();
+  }
+  return 0;
+}
 
 int dcs_handler(const char *command,size_t cmdlen,void *user) {
   printf("command is: ");
   for(int n=0;n<cmdlen;n++) {
     printf("%u,",command[n]);
   }
-  if(cmdlen < 3) return;
+  if(cmdlen < 3) return 0;
 
   regis_processor(command+2,cmdlen);
   printf("\n");
@@ -398,7 +478,7 @@ VTermParserCallbacks cb_parser = {
   .text    = 0,
   .control = 0,
   .escape  = 0,
-  .csi     = 0,
+  .csi     = csi_handler,
   .osc     = 0,
   .dcs     = dcs_handler,
   .resize  = 0  //&parser_resize,
@@ -411,10 +491,6 @@ VTermParserCallbacks cb_parser = {
 //  int (*resize)(int rows, int cols, void *user);
 };
 
-SDL_mutex *screen_mutex;
-SDL_mutex *vterm_mutex;
-SDL_sem   *redraw_sem;
-VTermState *vs;
 
 void terminal_resize(SDL_Surface *screen,VTerm *vt,int *cols,int *rows) {
 
@@ -774,6 +850,7 @@ void sdl_read_thread() {
 
 int main(int argc, char **argv) {
 
+  regis_mutex  = SDL_CreateMutex();
   screen_mutex = SDL_CreateMutex();
   vterm_mutex  = SDL_CreateMutex();
   redraw_sem   = SDL_CreateSemaphore(1);
@@ -851,6 +928,8 @@ int main(int argc, char **argv) {
   vterm_screen_enable_altscreen(vts,1);
 
   vterm_screen_set_callbacks(vts, &cb_screen, NULL);
+
+  vterm_state_set_backup_callbacks(vs,&cb_state,0);
 
   vterm_screen_set_damage_merge(vts, VTERM_DAMAGE_SCROLL);
   vterm_set_parser_backup_callbacks(vt , &cb_parser, NULL);

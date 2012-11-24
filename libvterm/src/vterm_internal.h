@@ -32,7 +32,9 @@ struct VTermState
   VTerm *vt;
 
   const VTermStateCallbacks *callbacks;
+  const VTermStateCallbacks *backup_callbacks;
   void *cbdata;
+  void *backup_cbdata;
 
   int rows;
   int cols;

@@ -40,9 +40,14 @@ static void updatecursor(VTermState *state, VTermPos *oldpos, int cancel_phantom
 
 static void erase(VTermState *state, VTermRect rect)
 {
+  printf("errase called\n");
   if(state->callbacks && state->callbacks->erase)
-    if((*state->callbacks->erase)(rect, state->cbdata))
-      return;
+    (*state->callbacks->erase)(rect, state->cbdata);
+  
+  if(state->backup_callbacks && state->backup_callbacks->erase)
+    (*state->backup_callbacks->erase)(rect, state->backup_cbdata);
+
+//      return;
 }
 
 static VTermState *vterm_state_new(VTerm *vt)
@@ -1410,3 +1415,19 @@ void vterm_state_set_callbacks(VTermState *state, const VTermStateCallbacks *cal
     state->cbdata = NULL;
   }
 }
+
+void vterm_state_set_backup_callbacks(VTermState *state, const VTermStateCallbacks *callbacks, void *user)
+{
+  if(callbacks) {
+    state->backup_callbacks = callbacks;
+    state->backup_cbdata = user;
+
+    if(state->backup_callbacks && state->backup_callbacks->initpen)
+      (*state->backup_callbacks->initpen)(state->backup_cbdata);
+  }
+  else {
+    state->backup_callbacks = NULL;
+    state->backup_cbdata = NULL;
+  }
+}
+
