@@ -54,6 +54,7 @@ int select_start_y=0;
 int select_end_x  =0;
 int select_end_y  =0;
 
+bool hterm_quit = false;
 
 int       scroll_offset=0;
 size_t    scroll_buffer_initial_size = 10000;
@@ -63,10 +64,12 @@ size_t    scroll_buffer_start =0;
 size_t    scroll_buffer_end   =0;
 VTermScreenCell **scroll_buffer = 0;
 
+SDL_cond *cond_quit;
 SDL_mutex *regis_mutex;
 SDL_mutex *screen_mutex;
 SDL_mutex *vterm_mutex;
 SDL_sem   *redraw_sem;
+SDL_mutex *quit_mutex;
 VTermState *vs;
 
 void regis_clear();
@@ -604,7 +607,12 @@ void console_read_thread() {
     char buffer[10241];
     len = read(fd, buffer, sizeof(buffer)-1);
     if(len == -1) {
-      if(errno == EIO) break;
+      if(errno == EIO) {
+        hterm_quit = true;
+        SDL_CondSignal(cond_quit);
+
+        break;
+      }
     }
     //if(len>0)printf("buffer: ");
     //for(int n=0;n<len;n++) printf("%c",buffer[n]); 
@@ -770,6 +778,7 @@ void process_mouse_event(SDL_Event *event) {
   }
 }
 
+
 void sdl_read_thread() {
   for(;;) {
     // sending bytes from SDL to pts
@@ -778,6 +787,12 @@ void sdl_read_thread() {
     process_mouse_event(&event);
     
     uint8_t *keystate = SDL_GetKeyState(NULL);
+
+    if(event.type == SDL_QUIT) {
+      hterm_quit = true;
+      SDL_CondSignal(cond_quit);
+      return;
+    }
 
     if(event.type == SDL_KEYDOWN) {
       scroll_offset = 0;
@@ -853,6 +868,7 @@ int main(int argc, char **argv) {
   regis_mutex  = SDL_CreateMutex();
   screen_mutex = SDL_CreateMutex();
   vterm_mutex  = SDL_CreateMutex();
+  quit_mutex   = SDL_CreateMutex();
   redraw_sem   = SDL_CreateSemaphore(1);
 
   if(SDL_Init(SDL_INIT_VIDEO)<0) {
@@ -963,11 +979,17 @@ int main(int argc, char **argv) {
 
   int x=0;int y=0;
 
+  cond_quit = SDL_CreateCond();
   SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0);
   SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0);
   SDL_Thread *thread3 = SDL_CreateThread(console_read_thread,0);
 
-  SDL_WaitThread(thread3,NULL); 
+  SDL_mutexP(quit_mutex);
+  SDL_CondWait(cond_quit,quit_mutex);
+ // for(;hterm_quit==false;) {
+    
+ // } 
+  //SDL_WaitThread(thread3,NULL); 
 
   SDL_Quit();
   close(fd);
