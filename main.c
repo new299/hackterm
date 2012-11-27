@@ -707,8 +707,8 @@ void mouse_to_select_box(int   sx,int   sy,int so,
 
 void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_end_y,uint16_t **itext,int *ilen) {
 
-  text_start_y -= scroll_offset;
-  text_end_y   -= scroll_offset;
+  //text_start_y -= scroll_offset;
+  //text_end_y   -= scroll_offset;
 
   int len=0;
   uint16_t *text = malloc(10240);
@@ -779,8 +779,12 @@ void process_mouse_event(SDL_Event *event) {
 
     uint16_t *text=0;
     int      len=0;
-    get_text_region(text_start_x,text_start_y,text_end_x,text_end_y,&text,&len);
+
+    if(text_end_x<text_start_x) {int c=text_end_x; text_end_x=text_start_x;text_start_x=c;}
+    if(text_end_y<text_start_y) {int c=text_end_y; text_end_y=text_start_y;text_start_y=c;}
+
     printf("copy: %d %d %d %d\n",text_start_x,text_start_y,text_end_x,text_end_y);
+    get_text_region(text_start_x,text_start_y,text_end_x,text_end_y,&text,&len);
 
     if(len != 0) copy_text(text,len);
     if(text != 0) free(text);
