@@ -570,14 +570,17 @@ void redraw_screen() {
     int text_start_y;
     int text_end_x;
     int text_end_y;
+    select_end_scroll_offset = scroll_offset;
     mouse_to_select_box(select_start_x,select_start_y,select_start_scroll_offset,
                           select_end_x,  select_end_y,  select_end_scroll_offset,
                          &text_start_x, &text_start_y, &text_end_x, &text_end_y);
 
-
+    printf("text selection location: y: %d %d\n",text_start_y,text_end_y);
     //nsdl_rectangle_hashed(screen,pselect_start_x,pselect_start_y,pselect_end_x,pselect_end_y,0xFFFFFF);
     //nsdl_rectangle_wire(screen,pselect_start_x,pselect_start_y,pselect_end_x,pselect_end_y,0xFFFFFF);
 
+  text_end_y   += scroll_offset;
+  text_start_y += scroll_offset;
 
   if(text_end_x<text_start_x) {int c=text_end_x; text_end_x=text_start_x;text_start_x=c;}
   if(text_end_y<text_start_y) {int c=text_end_y; text_end_y=text_start_y;text_start_y=c;}
@@ -695,8 +698,8 @@ void mouse_to_select_box(int   sx,int   sy,int so,
 
   *stx=floor(((float)sx/(font_width +font_space)));
   *etx=ceil( ((float)ex/(font_width +font_space)));
-  *sty=floor(((float)sy/(font_height+font_space)))+so;
-  *ety=ceil( ((float)ey/(font_height+font_space)))+eo;
+  *sty=floor(((float)sy/(font_height+font_space)))-so;
+  *ety=ceil( ((float)ey/(font_height+font_space)))-eo;
 
   //if(*etx > cols) *etx = cols;
   //if(*ety > rows) *ety = rows;
