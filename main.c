@@ -53,6 +53,8 @@ int select_start_x=0;
 int select_start_y=0;
 int select_end_x  =0;
 int select_end_y  =0;
+int select_start_scroll_offset;
+int select_end_scroll_offset;
 
 bool hterm_quit = false;
 
@@ -568,12 +570,19 @@ void redraw_screen() {
     int text_start_y;
     int text_end_x;
     int text_end_y;
-    mouse_to_select_box(select_start_x,select_start_y,select_end_x,select_end_y,
+    mouse_to_select_box(select_start_x,select_start_y,select_start_scroll_offset,
+                          select_end_x,  select_end_y,  select_end_scroll_offset,
                          &text_start_x, &text_start_y, &text_end_x, &text_end_y);
 
 
     //nsdl_rectangle_hashed(screen,pselect_start_x,pselect_start_y,pselect_end_x,pselect_end_y,0xFFFFFF);
     //nsdl_rectangle_wire(screen,pselect_start_x,pselect_start_y,pselect_end_x,pselect_end_y,0xFFFFFF);
+
+
+  if(text_end_x<text_start_x) {int c=text_end_x; text_end_x=text_start_x;text_start_x=c;}
+  if(text_end_y<text_start_y) {int c=text_end_y; text_end_y=text_start_y;text_start_y=c;}
+
+
     nsdl_rectangle_wire(screen,text_start_x*(font_width+font_space),text_start_y*(font_height+font_space),
                                  text_end_x*(font_width+font_space),text_end_y*(font_height+font_space),0xFFFFFF);
   }
@@ -679,19 +688,18 @@ void copy_text(uint16_t *itext,int len) {
   //echo "test" | xclip -i 
 }
 
-void mouse_to_select_box(int   sx,int   sy,int   ex,int   ey,
+void mouse_to_select_box(int   sx,int   sy,int so,
+                         int   ex,int   ey,int eo,
                          int *stx,int *sty,int *etx,int *ety) {
   
-  if(ex<sx) {int c=ex; ex=sx;sx=c;}
-  if(ey<sy) {int c=ey; ey=sy;sy=c;}
 
   *stx=floor(((float)sx/(font_width +font_space)));
   *etx=ceil( ((float)ex/(font_width +font_space)));
-  *sty=floor(((float)sy/(font_height+font_space)));
-  *ety=ceil( ((float)ey/(font_height+font_space)));
+  *sty=floor(((float)sy/(font_height+font_space)))+so;
+  *ety=ceil( ((float)ey/(font_height+font_space)))+eo;
 
-  if(*etx > cols) *etx = cols;
-  if(*ety > rows) *ety = rows;
+  //if(*etx > cols) *etx = cols;
+  //if(*ety > rows) *ety = rows;
 }
 
 void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_end_y,uint16_t **itext,int *ilen) {
@@ -743,8 +751,12 @@ void process_mouse_event(SDL_Event *event) {
   } else
   if(event->type == SDL_MOUSEMOTION    ) {
 
-
     if(draw_selection == true) {
+
+      printf("motion: %d %d\n",event->button.x,event->button.y);
+      //if(event->button.y <= 0            ) scroll_offset++;
+      //if(event->button.y >= (screen->h-1)) {if(scroll_offset != 0) scroll_offset--;}
+
       select_end_x = event->button.x;
       select_end_y = event->button.y;
       redraw_required();
@@ -757,7 +769,9 @@ void process_mouse_event(SDL_Event *event) {
     int text_start_y;
     int text_end_x;
     int text_end_y;
-    mouse_to_select_box(select_start_x,select_start_y,select_end_x,select_end_y,
+    select_end_scroll_offset = scroll_offset;
+    mouse_to_select_box(select_start_x,select_start_y,select_start_scroll_offset,
+                          select_end_x  ,select_end_y,select_end_scroll_offset,
                          &text_start_x, &text_start_y, &text_end_x, &text_end_y);
 
     uint16_t *text=0;
@@ -770,6 +784,7 @@ void process_mouse_event(SDL_Event *event) {
     redraw_required();
   } else
   if(event->type == SDL_MOUSEBUTTONDOWN) {
+    select_start_scroll_offset = scroll_offset;
     select_start_x = event->button.x;
     select_start_y = event->button.y;
     select_end_x = event->button.x;
@@ -861,6 +876,21 @@ void sdl_read_thread() {
       redraw_required();
     }
   }
+}
+
+void timed_repeat() {
+
+  for(;;) {
+    SDL_Delay(100);
+    if(draw_selection == true) {
+
+      if(select_end_y <= 0            ) scroll_offset++;
+      if(select_end_y >= (screen->h-1)) {if(scroll_offset != 0) scroll_offset--;}
+
+      redraw_required();
+    }
+  }
+
 }
 
 int main(int argc, char **argv) {
@@ -983,6 +1013,7 @@ int main(int argc, char **argv) {
   SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0);
   SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0);
   SDL_Thread *thread3 = SDL_CreateThread(console_read_thread,0);
+  SDL_Thread *thread5 = SDL_CreateThread(timed_repeat       ,0);
 
   SDL_mutexP(quit_mutex);
   SDL_CondWait(cond_quit,quit_mutex);
