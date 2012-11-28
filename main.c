@@ -117,11 +117,19 @@ void draw_row(VTermScreenCell *row,int ypos) {
     if(rtext[0]==0) rtext[0]=' ';
     rtext[1]=0;
 
-    //printf("%u,%u,%u,%u:%c ",c.chars[0],c.chars[1],c.chars[2],c.chars[3],rtext[n]);
-    //if(row[n].attrs.reverse == 1) { printf("b!"); }
+     //printf("%u,%u,%u,%u:%c ",c.chars[0],c.chars[1],c.chars[2],c.chars[3],rtext[n]);
 
-    draw_unitext(screen,xpos,ypos,rtext,(row[n].bg.red << 16) + (row[n].bg.green << 8) + row[n].bg.blue,
-                                        (row[n].fg.red << 16) + (row[n].fg.green << 8) + row[n].fg.blue);
+    VTermColor fg = row[n].fg;
+    VTermColor bg = row[n].bg;
+
+    if(row[n].attrs.reverse == 1) {
+      VTermColor c = fg;
+      fg = bg;
+      bg = c;
+    }
+
+    draw_unitext(screen,xpos,ypos,rtext,(bg.red << 16) + (bg.green << 8) + bg.blue,
+                                        (fg.red << 16) + (fg.green << 8) + fg.blue);
 
     xpos+=(font_width+font_space);
     if(row[n].width == 2) {xpos +=(font_width+font_space);n++;}
@@ -136,7 +144,7 @@ typedef struct {
     unsigned int underline : 2;
     unsigned int italic    : 1;
     unsigned int blink     : 1;
-    unsigned int reverse   : 1;
+    unsigned int reverse   : 1; // done?
     unsigned int strike    : 1;
     unsigned int font      : 4; // 0 to 9 
   } attrs;
