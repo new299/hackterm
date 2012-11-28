@@ -84,7 +84,7 @@ void draw_unitext_fancy(SDL_Surface *screen,int x,int y,const uint16_t *text,
                                              unsigned int font) {
 
   if(reverse == 1) {
-    uint32_t c = fg;
+    uint32_t c = bg;
     bg = fg;
     fg = c;
   }
