@@ -117,40 +117,23 @@ void draw_row(VTermScreenCell *row,int ypos) {
     if(rtext[0]==0) rtext[0]=' ';
     rtext[1]=0;
 
-     //printf("%u,%u,%u,%u:%c ",c.chars[0],c.chars[1],c.chars[2],c.chars[3],rtext[n]);
-
     VTermColor fg = row[n].fg;
     VTermColor bg = row[n].bg;
 
-    if(row[n].attrs.reverse == 1) {
-      VTermColor c = fg;
-      fg = bg;
-      bg = c;
-    }
-
-    draw_unitext(screen,xpos,ypos,rtext,(bg.red << 16) + (bg.green << 8) + bg.blue,
-                                        (fg.red << 16) + (fg.green << 8) + fg.blue);
+    draw_unitext_fancy(screen,xpos,ypos,rtext,(bg.red << 16) + (bg.green << 8) + bg.blue,
+                                              (fg.red << 16) + (fg.green << 8) + fg.blue,
+                                              row[n].attrs.bold,
+                                              row[n].attrs.underline,
+                                              row[n].attrs.italic,
+                                              row[n].attrs.blink,
+                                              row[n].attrs.reverse,
+                                              row[n].attrs.strike,
+                                              row[n].attrs.font);
 
     xpos+=(font_width+font_space);
     if(row[n].width == 2) {xpos +=(font_width+font_space);n++;}
   }
-/*
-typedef struct {
-#define VTERM_MAX_CHARS_PER_CELL 6
-  uint32_t chars[VTERM_MAX_CHARS_PER_CELL];
-  char     width;
-  struct {
-    unsigned int bold      : 1;
-    unsigned int underline : 2;
-    unsigned int italic    : 1;
-    unsigned int blink     : 1;
-    unsigned int reverse   : 1; // done?
-    unsigned int strike    : 1;
-    unsigned int font      : 4; // 0 to 9 
-  } attrs;
-  VTermColor fg, bg;
-} VTermScreenCell;
-*/
+
 }
 
 

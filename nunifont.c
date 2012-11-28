@@ -73,6 +73,26 @@ void draw_space_h(SDL_Surface *screen,int x,int y,int w,uint32_t bg,uint32_t fg)
   }
 }
 
+void draw_unitext_fancy(SDL_Surface *screen,int x,int y,const uint16_t *text,
+                                             uint32_t bg,uint32_t fg,
+                                             unsigned int bold,
+                                             unsigned int underline,
+                                             unsigned int italic,
+                                             unsigned int blink,
+                                             unsigned int reverse,
+                                             unsigned int strike,
+                                             unsigned int font) {
+
+  if(reverse == 1) {
+    uint32_t c = fg;
+    bg = fg;
+    fg = c;
+  }
+
+  draw_unitext(screen,x,y,text,bg,fg);
+}
+
+
 void draw_unitext(SDL_Surface *screen,int x,int y,const uint16_t *text,uint32_t bg,uint32_t fg) {
 
   if(!initialised) nfont_init();
