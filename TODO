@@ -1,0 +1,26 @@
+* double click to select one word, tripple click select sentence, four paragraph 
+* vim visual select doesn't show, probably a bunch of other rendering issues.
+  * vim reverse done.
+* vim F and B, complete screen doesn't redraw/fragmentation.
+* Why ^H in ttyter, rtorrent
+* Bell.
+* More Regis stuff.
+* Tabbed terminals?
+* IME support
+* PNG/Sixel/Something support
+* resize broken in alsamixer?
+* resize issues.
+
+* copying text to support unicode.
+* Embed gnu unifont.
+* support for emoji unicode fonts
+
+* menuing system
+
+done
+* When copying text, allow the user selection to span multiple screens with scrolling.
+* terminate correctly (ctrl-alt-C in dwm)
+* Clearing the screen clears Regis graphics.
+* Copy should take scroll offset into account.
+* Scrollback should be a fixed size circular buffer
+* Spacing between vertical chars needs to be colored correctly. (done, but having spacing causes issues for graphics fonts anyway for spacing now=0)
