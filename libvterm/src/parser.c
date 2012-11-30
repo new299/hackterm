@@ -99,8 +99,6 @@ done_leader: ;
   //printf(" intermed: %s\n", intermed);
   //}
 
-  printf("**************************** PROCESSING CSI HERE\n");
-
   int r1=1;
   int r2=1;
   if(vt->parser_callbacks && vt->parser_callbacks->csi)
@@ -146,7 +144,6 @@ static size_t do_string(VTerm *vt, const char *str_frag, size_t len)
   switch(vt->parser_state) {
   case NORMAL:
     if(vt->parser_callbacks && vt->parser_callbacks->text) {
-      printf("regular called\n");
       if((eaten = (*vt->parser_callbacks->text)(str_frag, len, vt->cbdata)))
         return eaten;
     }
@@ -170,7 +167,6 @@ static size_t do_string(VTerm *vt, const char *str_frag, size_t len)
     return 0;
 
   case CSI:
-    printf("CSI on 164\n");
     do_string_csi(vt, str_frag, len - 1, str_frag[len - 1]);
     return 0;
 
@@ -183,7 +179,6 @@ static size_t do_string(VTerm *vt, const char *str_frag, size_t len)
     return 0;
 
   case DCS:
-    printf("called DCS\n");
     if(vt->parser_callbacks && vt->parser_callbacks->dcs)
       if((*vt->parser_callbacks->dcs)(str_frag, len, vt->cbdata))
         return 0;
@@ -310,8 +305,6 @@ void vterm_push_bytes(VTerm *vt, const char *bytes, size_t len)
       if(c >= 0x40 && c <= 0x7f) {
         /* +1 to pos because we want to include this command byte as well */
 
-        printf("CSI: 302\n");
-
         do_string(vt, string_start, bytes + pos - string_start + 1);
         ENTER_NORMAL_STATE();
       }
@@ -319,7 +312,6 @@ void vterm_push_bytes(VTerm *vt, const char *bytes, size_t len)
 
     case OSC:
     case DCS:
-      printf("DCS: 311\n");
       if(c == 0x07 || (c == 0x9c && !vt->is_utf8)) {
         do_string(vt, string_start, bytes + pos - string_start);
         ENTER_NORMAL_STATE();
@@ -327,23 +319,18 @@ void vterm_push_bytes(VTerm *vt, const char *bytes, size_t len)
       break;
 
     case NORMAL:
-      printf("NORMAL 319\n");
       if(c >= 0x80 && c < 0xa0 && !vt->is_utf8) {
         switch(c) {
         case 0x90: // DCS
-          printf("DCS 323\n");
           ENTER_STRING_STATE(DCS);
           break;
         case 0x9b: // CSI
-          printf("CSI: 326\n");
           ENTER_STRING_STATE(CSI);
           break;
         case 0x9d: // OSC
-          printf("OCS 331\n");
           ENTER_STRING_STATE(OSC);
           break;
         default:
-          printf("do_control 335\n");
           do_control(vt, c);
           break;
         }

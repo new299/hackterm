@@ -12,12 +12,15 @@
 * resize issues.
 
 * copying text to support unicode.
+* copying test, line based selection mode
 * Embed gnu unifont.
-* support for emoji unicode fonts
+* support for emoji unicode fonts (requires support beyond basic multilingual plane in libvterm and additions to unifont)
 * a lot of borked vttest functionality
 * mouse terminal support
 
+* capture mode
 * menuing system
+* scrollbar
 
 done
 * When copying text, allow the user selection to span multiple screens with scrolling.

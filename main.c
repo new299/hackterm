@@ -24,12 +24,12 @@
 #include <pty.h>
 #include <limits.h>
 
-#include <pthread.h>
 #include "nsdl.h"
 #include <time.h>
+#include "regis.h"
 
 void redraw_required();
-    
+ 
 int font_width  = 8;
 int font_height = 16;
 int font_space  = 0;
@@ -46,7 +46,6 @@ static int rows;
 int fd;
 
 SDL_Surface *screen=0;
-SDL_Surface *regis_layer=0;
 
 bool draw_selection = false;
 int select_start_x=0;
@@ -67,16 +66,19 @@ size_t    scroll_buffer_end   =0;
 VTermScreenCell **scroll_buffer = 0;
 
 SDL_cond *cond_quit;
-SDL_mutex *regis_mutex;
 SDL_mutex *screen_mutex;
 SDL_mutex *vterm_mutex;
 SDL_sem   *redraw_sem;
 SDL_mutex *quit_mutex;
 VTermState *vs;
 
-void regis_clear();
+void scroll_buffer_get(size_t line_number,VTermScreenCell **line);
 
-void scroll_buffer_get(size_t line_number,VTermScreenCell **line,int *len);
+void regis_render() {                                        
+  SDL_mutexP(regis_mutex);                                   
+  int res = SDL_BlitSurface(regis_layer,NULL,screen,NULL);   
+  SDL_mutexV(regis_mutex);                                   
+}                                                            
 
 VTermScreenCell *grab_row(int trow,bool *dont_free) {
 
@@ -94,10 +96,9 @@ VTermScreenCell *grab_row(int trow,bool *dont_free) {
     *dont_free =false;
   } else {
     // a scrollback row
-    int len;
     if((0-trow) > scroll_buffer_size) { rowdata = 0; }
     else {
-      scroll_buffer_get(0-trow,&rowdata,&len);
+      scroll_buffer_get(0-trow,&rowdata);
       *dont_free=true;
     }
   }
@@ -169,14 +170,13 @@ void scroll_buffer_push(VTermScreenCell *scroll_line,size_t len) {
   scroll_buffer_end++;
 }
 
-void scroll_buffer_get(size_t line_number,VTermScreenCell **line,int *len) {
+void scroll_buffer_get(size_t line_number,VTermScreenCell **line) {
   int idx = scroll_buffer_end-line_number-1;
 
   if(idx < 0) idx = scroll_buffer_size+idx;
   if(idx < 0) *line = 0;
 
   *line = scroll_buffer[idx];
-  *len  = 10;
 }
 
 void scroll_buffer_dump() {
@@ -259,176 +259,6 @@ VTermStateCallbacks cb_state = {
   .resize       = 0
 };
 
-int pen_x = 0;
-int pen_y = 0;
-
-void regis_clear() {
-  SDL_mutexP(regis_mutex);
-  SDL_FillRect(regis_layer,NULL, 0x000000); 
-  SDL_mutexV(regis_mutex);
-}
-
-char *regis_process_cmd_screen(char *cmd) {
-  printf("processing screen\n");
-
-  char *buffer;
-  char *code = strtok_r(cmd+2,")",&buffer);
-  if(code == 0) return (cmd+1);
-
-  return code+strlen(code)+1;
-}
-
-char *regis_process_cmd_text(char *cmd) {
-  char *buffer=0;
-  char *data=0;
-  if(*(cmd+1) == '\'') {
-    data = strtok_r(cmd+2,"\'",&buffer);
-    if(data == 0) return (cmd+1);
-
-    //regis_text_push(pen_x,pen_y,data);
-    uint16_t wdata[1000];
-    for(int n=0;(n<1000) && (data[n] != 0);n++) {
-      wdata[n] = data[n];
-      wdata[n+1] = 0;
-    }
-    SDL_mutexP(regis_mutex);
-    draw_unitext(regis_layer,pen_x,pen_y,wdata,0x0,0xFFFFFFFF);
-    SDL_mutexV(regis_mutex);
-  } else 
-  if(*(cmd+1) == '(') {
-    data = strtok_r(cmd+2,")",&buffer);
-    if(data == 0) return (cmd+1);
-  }
-  if(data == 0) return (cmd+1);
-  return data+strlen(data)+1;
-}
-
-char *regis_process_cmd_w(char *cmd) {
-  printf("processing w\n");
-  char *buffer;
-  char *code = strtok_r(cmd+2,")",&buffer);
-  if(code == 0) return (cmd+1);
-  
-  return code+strlen(code)+1;
-}
-
-char *regis_process_cmd_position(char *cmd) {
-  printf("processing position\n");
-
-
-  char *buffer;
-  char *xstr = strtok_r(cmd+2,",",&buffer);
-  if(xstr == 0) return (cmd+1);
-  char *ystr = strtok_r( NULL,"]",&buffer);
-  if(ystr == 0) return (cmd+1);
-
-  int new_x = atoi(xstr);
-  int new_y = atoi(ystr);
-  printf("processing position: %d %d\n",new_x,new_y);
-
-  pen_x = new_x;
-  pen_y = new_y;
-
-  return ystr+strlen(ystr)+1;
-}
-
-
-
-void regis_init(int width,int height) {
-  printf("regis init: %d %d\n",width,height);
-  regis_layer = SDL_CreateRGBSurface(SDL_SWSURFACE,width,height,32,0x000000FF,0x0000FF00,0x00FF0000,0xFF000000);
-  printf("regis layer: %u\n",regis_layer);
-}
-
-void regis_render() {
-  SDL_mutexP(regis_mutex);
-  int res = SDL_BlitSurface(regis_layer,NULL,screen,NULL);
-  SDL_mutexV(regis_mutex);
-}
-
-char *regis_process_cmd_vector(char *cmd) {
-
-  // vector commands look like this: v[] or v[100,200]
-  // where 100 and 200 are the x and y positions respectively.
-  // a line is drawn between the current pen position and the x,y position
-
-  printf("processing vector\n",cmd);
-
-  if(strncmp(cmd,"v[]",3) == 0) {
-    printf("empry vector (dot) return\n");
-    return cmd+3;
-  }
-  char *buffer;
-  char *xstr = strtok_r(cmd+2,",",&buffer);
-  if(xstr == 0) return cmd+2;
-  char *ystr = strtok_r( NULL,"]",&buffer);
-  if(ystr == 0) return cmd+2;
-
-  int new_x = atoi(xstr);
-  int new_y = atoi(ystr);
-  printf("processed vector: %d %d\n",new_x,new_y);
-
-  //regis_lines_push(pen_x,pen_y,new_x,new_y,0xFFFFFFFF);
-  SDL_mutexP(regis_mutex);
-  nsdl_line(regis_layer,pen_x,pen_y,new_x,new_y,0xFFFFFFFF);
-  SDL_mutexV(regis_mutex);
-  pen_x = new_x;
-  pen_y = new_y;
-
-  return ystr+strlen(ystr)+1;
-}
-
-
-char *regis_process_command(char *cmd) {
-  if(cmd[0] == 'S') return regis_process_cmd_screen(cmd);    else
-  if(cmd[0] == 'T') return regis_process_cmd_text(cmd);      else
-  if(cmd[0] == 'W') return regis_process_cmd_w(cmd);         else
-  if(cmd[0] == 'P') return regis_process_cmd_position(cmd);  else
-  if(cmd[0] == 'v') return regis_process_cmd_vector(cmd);    else
-  {
-    printf("bad regis, incrementing %d\n",cmd);
-    
-    return cmd+1;
-  }
-}
-
-struct timespec regis_last_render;
-
-void regis_processor(const char *cmd,int cmdlen) {
- 
-  char *command = cmd;
-
-  for(;;) {
-    command = regis_process_command(command);
-    clock_gettime(CLOCK_MONOTONIC,&regis_last_render);
-    int clen = cmdlen-(command-cmd);
-    if(clen<2) return;
-    if(command == 0) return;
-    if(command[0] == 0) return;
-  }
-
-}
- 
-
-bool regis_recent() {
- 
-  struct timespec current_time;
-  clock_gettime(CLOCK_MONOTONIC,&current_time);
-
-  struct timespec delta_time;
-  delta_time.tv_sec  = current_time.tv_sec  - regis_last_render.tv_sec;
-  delta_time.tv_nsec = current_time.tv_nsec - regis_last_render.tv_nsec;
-
-  if(delta_time.tv_nsec < 0) {
-     delta_time.tv_sec--;
-     delta_time.tv_nsec += 1000000000;
-  }
-
-  if(delta_time.tv_sec  > 0        ) return false;
-  if(delta_time.tv_nsec > 200000000) return false;
-
-  return true;
-}
 
 int csi_handler(const char *leader, const long args[], int argcount, const char *intermed, char command, void *user) {
   if(command = 'J') {
@@ -493,6 +323,7 @@ void redraw_screen() {
   SDL_mutexP(screen_mutex);
 
   if(new_screen_size) {
+    printf("SCREEN RESIZE DETECTED\n");
     screen = SDL_SetVideoMode(new_screen_size_x, new_screen_size_y, 32, SDL_ANYFORMAT | SDL_RESIZABLE | SDL_DOUBLEBUF);
     terminal_resize(screen,vt,&cols,&rows);
     new_screen_size = false;
@@ -565,11 +396,11 @@ void sdl_render_thread() {
   }
 
   // initialise SDL rendering
-  const SDL_VideoInfo *vid = SDL_GetVideoInfo();
-  int maxwidth  = vid->current_w;
-  int maxheight = vid->current_h-(font_height+font_space);
+  //const SDL_VideoInfo *vid = SDL_GetVideoInfo();
+  //int maxwidth  = vid->current_w;
+  //int maxheight = vid->current_h-(font_height+font_space);
  
-  screen=SDL_SetVideoMode(maxwidth,maxheight,32,SDL_ANYFORMAT | SDL_RESIZABLE | SDL_DOUBLEBUF);//double buf?
+  screen=SDL_SetVideoMode(0,0,32,SDL_ANYFORMAT | SDL_RESIZABLE | SDL_DOUBLEBUF);
   if(screen==NULL) {
     printf("Failed SDL_SetVideoMode: %d",SDL_GetError());
     SDL_Quit();
@@ -581,7 +412,6 @@ void sdl_render_thread() {
   
   terminal_resize(screen,vt,&cols,&rows);
   regis_init(screen->w,screen->h);
-
 
   sdl_init_complete=true;
   for(;;) {
@@ -673,15 +503,12 @@ void copy_text(uint16_t *itext,int len) {
 void mouse_to_select_box(int   sx,int   sy,int so,
                          int   ex,int   ey,int eo,
                          int *stx,int *sty,int *etx,int *ety) {
-  
 
   *stx=floor(((float)sx/(font_width +font_space)));
   *etx=ceil( ((float)ex/(font_width +font_space)));
   *sty=floor(((float)sy/(font_height+font_space)))-so;
   *ety=ceil( ((float)ey/(font_height+font_space)))-eo;
 
-  //if(*etx > cols) *etx = cols;
-  //if(*ety > rows) *ety = rows;
 }
 
 void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_end_y,uint16_t **itext,int *ilen) {
@@ -694,11 +521,14 @@ void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_e
   for(int y=text_start_y;y<text_end_y;y++) {
     bool dont_free=false;
     VTermScreenCell *row_data = grab_row(y,&dont_free);
-    for(int x=text_start_x;x<text_end_x;x++) {
+    if(row_data == 0) { text[0]=0; }
+    else {
+      for(int x=text_start_x;x<text_end_x;x++) {
 
-      text[len] = row_data[x].chars[0];
-      if(text[len]==0) text[len]=' ';
-      len++;
+        text[len] = row_data[x].chars[0];
+        if(text[len]==0) text[len]=' ';
+        len++;
+      }
     }
     if(!dont_free) free(row_data);
 
@@ -858,6 +688,7 @@ void sdl_read_thread() {
 
 
     if(event.type == SDL_VIDEORESIZE) {
+      printf("resize detected A\n");
       new_screen_size_x = event.resize.w;
       new_screen_size_y = event.resize.h;
       new_screen_size   = true;
@@ -891,6 +722,11 @@ int main(int argc, char **argv) {
   redraw_sem   = SDL_CreateSemaphore(1);
 
    
+  printf("argc: %d\n",argc);
+  for(int n=0;n<argc;n++) {
+    printf("arg %s\n",argv[n]);
+  }
+
   // grab pts
   //int fd = open("/dev/ptmx",O_RDWR | O_NOCTTY | O_NONBLOCK);
   /* None of the docs about termios explain how to construct a new one of

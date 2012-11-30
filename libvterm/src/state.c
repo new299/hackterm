@@ -297,6 +297,8 @@ static int on_control(unsigned char control, void *user)
 
   VTermPos oldpos = state->pos;
 
+  printf("processing control character: %u\n",control);
+
   switch(control) {
   case 0x07: // BEL - ECMA-48 8.3.3
     if(state->callbacks && state->callbacks->bell)
