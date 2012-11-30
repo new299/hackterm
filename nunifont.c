@@ -25,6 +25,12 @@ void nfont_init() {
 
 uint32_t get_pixel(uint16_t c,int c_x,int c_y) {
   
+  if(c_x < 0 ) return 0;
+  if(c_y < 0 ) return 0;
+  if(c_x > 15) return 0;
+  if(c_y > 15) return 0;
+
+
   int pos  = (c_y*16) + c_x;
   int byte = pos/8;
   int bit  = pos%8;
@@ -47,13 +53,34 @@ void draw_point(SDL_Surface *screen,int x,int y,uint32_t value) {
   *(uint32_t *) p = value;
 }
 
-void draw_character(SDL_Surface *screen,int x,int y,int w,uint16_t c,uint32_t bg,uint32_t fg) {
+void draw_character(SDL_Surface *screen,int x,int y,int w,uint16_t c,uint32_t bg,uint32_t fg,int bold,int underline,int italic,int strike) {
   for(size_t c_y=0;c_y<16;c_y++) {
     for(size_t c_x=0;c_x<w;c_x++) {
-      int32_t value = get_pixel(c,c_x,c_y);
 
-      if(value > 0) { draw_point(screen,x+c_x,y+c_y,fg); }
-               else { draw_point(screen,x+c_x,y+c_y,bg); }
+      if((c_y==15) && (underline == 1)) {
+        draw_point(screen,x+c_x,y+c_y,fg);
+      } else 
+      if((c_y==8 ) && (strike == 1)) {
+        draw_point(screen,x+c_x,y+c_y,fg);
+      } else {
+
+        int32_t value  = get_pixel(c,c_x,c_y);
+        int32_t value1 = get_pixel(c,c_x+1,c_y);
+        int32_t value2 = get_pixel(c,c_x-1,c_y);
+        int32_t value3 = get_pixel(c,c_x,c_y+1);
+        int32_t value4 = get_pixel(c,c_x,c_y-1);
+
+        if(value > 0) {
+          draw_point(screen,x+c_x,y+c_y,fg);
+        } else {
+          draw_point(screen,x+c_x,y+c_y,bg);
+          if(bold == 1) {
+            if(value1 || value2 || value3 || value4) {
+              draw_point(screen,x+c_x,y+c_y,fg);
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -94,12 +121,11 @@ void draw_unitext_fancy(SDL_Surface *screen,int x,int y,const uint16_t *text,
     fg = c;
   }
 
-
-  draw_unitext(screen,x,y,text,bg,fg);
+  draw_unitext(screen,x,y,text,bg,fg,bold,underline,italic,strike);
 }
 
 
-void draw_unitext(SDL_Surface *screen,int x,int y,const uint16_t *text,uint32_t bg,uint32_t fg) {
+void draw_unitext(SDL_Surface *screen,int x,int y,const uint16_t *text,uint32_t bg,uint32_t fg,int bold,int underline,int italic,int strike) {
 
   if(!initialised) nfont_init();
 
@@ -121,7 +147,7 @@ void draw_unitext(SDL_Surface *screen,int x,int y,const uint16_t *text,uint32_t 
     } else {
       int w=8;
       if(get_widthmap(text[n]) != true) w=16; else w=8;
-      draw_character(screen,c_x,c_y,w,text[n],bg,fg);
+      draw_character(screen,c_x,c_y,w,text[n],bg,fg,bold,underline,italic,strike);
 
       //draw spacing
       draw_space(screen,c_x+w,c_y,spacing,bg,fg);
