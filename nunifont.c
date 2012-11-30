@@ -14,6 +14,7 @@ typedef struct fontchar {
 fontchar *fontmap;
 uint8_t  *widthmap;
 bool     initialised=false;
+bool     blink_value=false;
 
 void load_fonts(char *filename,fontchar **fontmap,uint8_t **widthmap);
 
@@ -84,7 +85,7 @@ void draw_unitext_fancy(SDL_Surface *screen,int x,int y,const uint16_t *text,
                                              unsigned int font) {
 
   if(blink == 1) {
-    if(rand()%2 == 1) {reverse=1;}
+    if(blink_value) {reverse=1;}
   }
 
   if(reverse == 1) {
@@ -224,4 +225,11 @@ void load_fonts(char *filename,fontchar **fontmap,uint8_t **widthmap) {
     set_widthmap(*widthmap,n,width);
     free(line);
   }
+}
+
+
+void nunifont_blinktimer() {
+
+  blink_value = !blink_value;
+
 }

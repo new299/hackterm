@@ -37,6 +37,7 @@ int font_space  = 0;
 static VTerm *vt;
 static VTermScreen *vts;
 
+bool any_blinking       = false;
 bool new_screen_size    = false;
 int  new_screen_size_x;
 int  new_screen_size_y;
@@ -121,6 +122,7 @@ void draw_row(VTermScreenCell *row,int ypos) {
     VTermColor fg = row[n].fg;
     VTermColor bg = row[n].bg;
 
+    if(row[n].attrs.blink == 1) any_blinking = true;
     draw_unitext_fancy(screen,xpos,ypos,rtext,(bg.red << 16) + (bg.green << 8) + bg.blue,
                                               (fg.red << 16) + (fg.green << 8) + fg.blue,
                                               row[n].attrs.bold,
@@ -189,7 +191,6 @@ static int screen_prescroll(VTermRect rect, void *user)
 
   
   for(int row=rect.start_row;row<rect.end_row;row++) {
-    //uint16_t scrolloff[1000];
     VTermScreenCell scrolloff[1000];
 
     size_t len=0;
@@ -200,16 +201,11 @@ static int screen_prescroll(VTermRect rect, void *user)
       VTermScreenCell c;
       int i = vterm_screen_get_cell(vts,vp,&c);
       scrolloff[n] = c;
-      //if(scrolloff[n] == 0) scrolloff[n] = ' ';
-      //scrolloff[n+1] =0;
       len++;
     }
     scroll_buffer_push(scrolloff,len);
 
-    //scroll_buffer_dump();
   }
-  // for(int row = 0; row < rect.end_row; row++)
-  //   dump_row(row);
   redraw_required();
   return 1;
 }
@@ -223,8 +219,6 @@ static int screen_resize(int new_rows, int new_cols, void *user)
 
 static int parser_resize(int new_rows, int new_cols, void *user)
 {
-//  rows = new_rows;
-//  cols = new_cols;
   return 1;
 }
 
@@ -233,10 +227,7 @@ static int screen_bell(void* d) {
 }
 
 static int state_erase(VTermRect r,void *user) {
-  printf("***************** ERASE CALLBACK\n");
-  printf("%d %d %d %d\n",r.start_row,r.end_row,r.end_row,r.end_col);
 
-  //regis_clear();
 }
 
 VTermScreenCallbacks cb_screen = {
@@ -332,6 +323,7 @@ void redraw_screen() {
   SDL_LockSurface(screen);
   SDL_FillRect(screen,NULL, 0x000000); 
 
+  any_blinking = false;
   for(int row = 0; row < rows; row++) {
 
     int trow = row-scroll_offset;
@@ -476,7 +468,6 @@ uint8_t *paste_text() {
 
 void copy_text(uint16_t *itext,int len) {
   
-  
   char text[20000];
   for(int i=0;i<len;i++) {
     text[i] = itext[i];
@@ -512,9 +503,6 @@ void mouse_to_select_box(int   sx,int   sy,int so,
 }
 
 void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_end_y,uint16_t **itext,int *ilen) {
-
-  //text_start_y -= scroll_offset;
-  //text_end_y   -= scroll_offset;
 
   int len=0;
   uint16_t *text = malloc(10240);
@@ -709,6 +697,9 @@ void timed_repeat() {
 
       redraw_required();
     }
+
+    nunifont_blinktimer();
+    if(any_blinking) redraw_required();
   }
 
 }
