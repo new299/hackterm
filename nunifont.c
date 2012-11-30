@@ -70,13 +70,16 @@ void draw_character(SDL_Surface *screen,int x,int y,int w,uint16_t c,uint32_t bg
         int32_t value3 = get_pixel(c,c_x,c_y+1);
         int32_t value4 = get_pixel(c,c_x,c_y-1);
 
+        int i=0;
+        if(italic==1) i=1;
+
         if(value > 0) {
-          draw_point(screen,x+c_x,y+c_y,fg);
+          draw_point(screen,x+c_x+i,y+c_y,fg);
         } else {
-          draw_point(screen,x+c_x,y+c_y,bg);
+          draw_point(screen,x+c_x+i,y+c_y,bg);
           if(bold == 1) {
             if(value1 || value2 || value3 || value4) {
-              draw_point(screen,x+c_x,y+c_y,fg);
+              draw_point(screen,x+c_x+i,y+c_y,fg);
             }
           }
         }
