@@ -160,7 +160,6 @@ void scroll_buffer_push(VTermScreenCell *scroll_line,size_t len) {
      scroll_buffer[scroll_buffer_end]=0;
    }
 
-  //printf("push line: %d\n",scroll_buffer_size);
   scroll_buffer[scroll_buffer_end] = malloc(sizeof(VTermScreenCell)*len);
 
   for(size_t n=0;n<len;n++) {
@@ -192,7 +191,6 @@ static int screen_prescroll(VTermRect rect, void *user)
   for(int row=rect.start_row;row<rect.end_row;row++) {
     //uint16_t scrolloff[1000];
     VTermScreenCell scrolloff[1000];
-    //printf("cols: %d\n",cols);
 
     size_t len=0;
     for(int n=0;n<cols;n++) {
@@ -206,8 +204,6 @@ static int screen_prescroll(VTermRect rect, void *user)
       //scrolloff[n+1] =0;
       len++;
     }
-    //printf("strlen: %d",strlen(scrolloff));
-    //printf("scroll off: %s\n",scrolloff);
     scroll_buffer_push(scrolloff,len);
 
     //scroll_buffer_dump();
@@ -279,18 +275,13 @@ char *regis_process_cmd_screen(char *cmd) {
   char *code = strtok_r(cmd+2,")",&buffer);
   if(code == 0) return (cmd+1);
 
-  //printf("screen code: %s\n",code);
-  
   return code+strlen(code)+1;
 }
 
 char *regis_process_cmd_text(char *cmd) {
-  //printf("processing text: %s\n",cmd);
   char *buffer=0;
   char *data=0;
-  //printf("cmd+1: %c\n",*(cmd+1));
   if(*(cmd+1) == '\'') {
-    printf("type 1 text\n");
     data = strtok_r(cmd+2,"\'",&buffer);
     if(data == 0) return (cmd+1);
 
@@ -305,12 +296,10 @@ char *regis_process_cmd_text(char *cmd) {
     SDL_mutexV(regis_mutex);
   } else 
   if(*(cmd+1) == '(') {
-    printf("type 2 text\n");
     data = strtok_r(cmd+2,")",&buffer);
     if(data == 0) return (cmd+1);
   }
   if(data == 0) return (cmd+1);
-//           else printf("no text data\n");
   return data+strlen(data)+1;
 }
 
@@ -319,7 +308,6 @@ char *regis_process_cmd_w(char *cmd) {
   char *buffer;
   char *code = strtok_r(cmd+2,")",&buffer);
   if(code == 0) return (cmd+1);
- // printf("screen code: %s\n",code);
   
   return code+strlen(code)+1;
 }
@@ -348,7 +336,6 @@ char *regis_process_cmd_position(char *cmd) {
 
 void regis_init(int width,int height) {
   printf("regis init: %d %d\n",width,height);
-  //regis_layer = SDL_CreateRGBSurface(SDL_HWSURFACE,width,height,32,0x000000FF,0x0000FF00,0x00FF0000,0xFF000000);
   regis_layer = SDL_CreateRGBSurface(SDL_SWSURFACE,width,height,32,0x000000FF,0x0000FF00,0x00FF0000,0xFF000000);
   printf("regis layer: %u\n",regis_layer);
 }
@@ -357,8 +344,6 @@ void regis_render() {
   SDL_mutexP(regis_mutex);
   int res = SDL_BlitSurface(regis_layer,NULL,screen,NULL);
   SDL_mutexV(regis_mutex);
-  if(res != 0) printf("error %s\n",SDL_GetError());
-  printf("regis blit res: %d\n",res);
 }
 
 char *regis_process_cmd_vector(char *cmd) {
@@ -439,10 +424,6 @@ bool regis_recent() {
      delta_time.tv_nsec += 1000000000;
   }
 
-  printf("curr  %d %d\n",current_time.tv_sec,current_time.tv_nsec);
-  printf("lastr %d %d\n",regis_last_render.tv_sec,regis_last_render.tv_nsec);
-  printf("delta %d %d\n",delta_time.tv_sec,delta_time.tv_nsec);
-
   if(delta_time.tv_sec  > 0        ) return false;
   if(delta_time.tv_nsec > 200000000) return false;
 
@@ -450,9 +431,6 @@ bool regis_recent() {
 }
 
 int csi_handler(const char *leader, const long args[], int argcount, const char *intermed, char command, void *user) {
-  //printf("received CSI: %s\n",leader);
-  //printf("received CSI arg count: %d\n",argcount);
-  //printf("command: %c",command);
   if(command = 'J') {
     if(!regis_recent()) regis_clear();
   }
@@ -548,14 +526,6 @@ void redraw_screen() {
   }
 
   if(draw_selection) {
-    //printf("selection %d %d %d %d\n",select_start_x,select_end_x,select_start_y,select_end_y);
-    //int pselect_start_x = select_start_x;
-    //int pselect_end_x   = select_end_x;
-    //int pselect_start_y = select_start_y;
-    //int pselect_end_y   = select_end_y;
-
-    //if(pselect_start_x > pselect_end_x) {int c = pselect_start_x; pselect_start_x = pselect_end_x; pselect_end_x = c; }
-    //if(pselect_start_y > pselect_end_y) {int c = pselect_start_y; pselect_start_y = pselect_end_y; pselect_end_y = c; }
 
     int text_start_x;
     int text_start_y;
@@ -566,15 +536,11 @@ void redraw_screen() {
                           select_end_x,  select_end_y,  select_end_scroll_offset,
                          &text_start_x, &text_start_y, &text_end_x, &text_end_y);
 
-    printf("text selection location: y: %d %d\n",text_start_y,text_end_y);
-    //nsdl_rectangle_hashed(screen,pselect_start_x,pselect_start_y,pselect_end_x,pselect_end_y,0xFFFFFF);
-    //nsdl_rectangle_wire(screen,pselect_start_x,pselect_start_y,pselect_end_x,pselect_end_y,0xFFFFFF);
+    text_end_y   += scroll_offset;
+    text_start_y += scroll_offset;
 
-  text_end_y   += scroll_offset;
-  text_start_y += scroll_offset;
-
-  if(text_end_x<text_start_x) {int c=text_end_x; text_end_x=text_start_x;text_start_x=c;}
-  if(text_end_y<text_start_y) {int c=text_end_y; text_end_y=text_start_y;text_start_y=c;}
+    if(text_end_x<text_start_x) {int c=text_end_x; text_end_x=text_start_x;text_start_x=c;}
+    if(text_end_y<text_start_y) {int c=text_end_y; text_end_y=text_start_y;text_start_y=c;}
 
 
     nsdl_rectangle_wire(screen,text_start_x*(font_width+font_space),text_start_y*(font_height+font_space),
@@ -589,7 +555,35 @@ void redraw_screen() {
   SDL_mutexV(screen_mutex);
 }
 
+bool sdl_init_complete=false;
+
 void sdl_render_thread() {
+  
+  if(SDL_Init(SDL_INIT_VIDEO)<0) {
+    printf("Initialisation failed");
+    return 1;
+  }
+
+  // initialise SDL rendering
+  const SDL_VideoInfo *vid = SDL_GetVideoInfo();
+  int maxwidth  = vid->current_w;
+  int maxheight = vid->current_h-(font_height+font_space);
+ 
+  screen=SDL_SetVideoMode(maxwidth,maxheight,32,SDL_ANYFORMAT | SDL_RESIZABLE | SDL_DOUBLEBUF);//double buf?
+  if(screen==NULL) {
+    printf("Failed SDL_SetVideoMode: %d",SDL_GetError());
+    SDL_Quit();
+    return 1;
+  }
+  
+  SDL_EnableUNICODE(1);
+  SDL_EnableKeyRepeat(500,50);
+  
+  terminal_resize(screen,vt,&cols,&rows);
+  regis_init(screen->w,screen->h);
+
+
+  sdl_init_complete=true;
   for(;;) {
     SDL_SemWait(redraw_sem);
     redraw_screen();
@@ -617,15 +611,10 @@ void console_read_thread() {
         break;
       }
     }
-    //if(len>0)printf("buffer: ");
-    //for(int n=0;n<len;n++) printf("%c",buffer[n]); 
-    //if(len>0)printf("\n");
+
     if(len > 0) {
       SDL_mutexP(vterm_mutex);
       if((buffer != 0) && (len != 0)) {
-        printf("pushing: ");
-        for(int n=0;n<len;n++) {printf("%c",buffer[n]);}
-        printf("\n");
         vterm_push_bytes(vt, buffer, len);
       }
       SDL_mutexV(vterm_mutex);
@@ -658,7 +647,6 @@ uint8_t *paste_text() {
 void copy_text(uint16_t *itext,int len) {
   
   
-  printf("copy len: %d\n",len);
   char text[20000];
   for(int i=0;i<len;i++) {
     text[i] = itext[i];
@@ -793,6 +781,9 @@ void process_mouse_event(SDL_Event *event) {
 
 
 void sdl_read_thread() {
+
+  for(;sdl_init_complete==false;){}
+
   for(;;) {
     // sending bytes from SDL to pts
     SDL_Event event;
@@ -899,21 +890,6 @@ int main(int argc, char **argv) {
   quit_mutex   = SDL_CreateMutex();
   redraw_sem   = SDL_CreateSemaphore(1);
 
-  if(SDL_Init(SDL_INIT_VIDEO)<0) {
-    printf("Initialisation failed");
-    return 1;
-  }
-
-  const SDL_VideoInfo *vid = SDL_GetVideoInfo();
-  int maxwidth  = vid->current_w;
-  int maxheight = vid->current_h-(font_height+font_space);
- 
-  screen=SDL_SetVideoMode(maxwidth,maxheight,32,SDL_ANYFORMAT | SDL_RESIZABLE | SDL_DOUBLEBUF);//double buf?
-  if(screen==NULL) {
-    printf("Failed SDL_SetVideoMode: %d",SDL_GetError());
-    SDL_Quit();
-    return 1;
-  }
    
   // grab pts
   //int fd = open("/dev/ptmx",O_RDWR | O_NOCTTY | O_NONBLOCK);
@@ -949,18 +925,12 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-
 //  grantpt(fd);
 //  unlockpt(fd);
   printf("fd: %d\n",fd);
  
-  SDL_EnableUNICODE(1);
-  SDL_EnableKeyRepeat(500,50);
 
-  printf("screen size %d %d\n",screen->w,screen->h);
-  regis_init(screen->w,screen->h);
   vt=0;
-  terminal_resize(screen,vt,&cols,&rows);
 
   printf("init rows: %d cols: %d\n",rows,cols);
   vt = vterm_new(rows, cols);
@@ -981,10 +951,6 @@ int main(int argc, char **argv) {
   vterm_screen_reset(vts, 1);
   vterm_parser_set_utf8(vt,1); // should be vts?
   
-  // cope with initial resize
-  //struct winsize size = { rows, cols, 0, 0 };
-  //ioctl(fd, TIOCSWINSZ, &size);
-
   VTermColor fg;
   fg.red   =  257;
   fg.green =  257;
@@ -995,30 +961,19 @@ int main(int argc, char **argv) {
   bg.green = 0;
   bg.blue  = 0;
 
-//  vterm_state_set_default_colors(vterm_obtain_state(vt), &fg, &bg);
-
   int rowsc;
   int colsc;
- // vterm_get_size(vt,&rowsc,&colsc);
- // printf("read rows: %d cols: %d\n",rowsc,colsc);
- // vterm_get_size(vt,&rowsc,&colsc);
- // printf("read rows: %d cols: %d\n",rowsc,colsc);
-
 
   int x=0;int y=0;
 
   cond_quit = SDL_CreateCond();
-  SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0);
   SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0);
+  SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0);
   SDL_Thread *thread3 = SDL_CreateThread(console_read_thread,0);
   SDL_Thread *thread5 = SDL_CreateThread(timed_repeat       ,0);
 
   SDL_mutexP(quit_mutex);
   SDL_CondWait(cond_quit,quit_mutex);
- // for(;hterm_quit==false;) {
-    
- // } 
-  //SDL_WaitThread(thread3,NULL); 
 
   SDL_Quit();
   close(fd);

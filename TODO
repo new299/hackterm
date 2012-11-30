@@ -14,6 +14,8 @@
 * copying text to support unicode.
 * Embed gnu unifont.
 * support for emoji unicode fonts
+* a lot of borked vttest functionality
+* mouse terminal support
 
 * menuing system
 

@@ -83,11 +83,16 @@ void draw_unitext_fancy(SDL_Surface *screen,int x,int y,const uint16_t *text,
                                              unsigned int strike,
                                              unsigned int font) {
 
+  if(blink == 1) {
+    if(rand()%2 == 1) {reverse=1;}
+  }
+
   if(reverse == 1) {
     uint32_t c = bg;
     bg = fg;
     fg = c;
   }
+
 
   draw_unitext(screen,x,y,text,bg,fg);
 }
