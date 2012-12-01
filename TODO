@@ -22,6 +22,8 @@
 * menuing system
 * scrollbar
 
+* builtin ssh support
+
 done
 * When copying text, allow the user selection to span multiple screens with scrolling.
 * terminate correctly (ctrl-alt-C in dwm)
