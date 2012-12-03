@@ -28,6 +28,11 @@
 #include <time.h>
 #include "regis.h"
 #include <stdbool.h>
+#include "ssh.h"
+#include "local.h"
+
+#define CONNECTION_LOCAL 1
+#define CONNECTION_SSH   2
 
 void redraw_required();
  
@@ -45,7 +50,6 @@ int  new_screen_size_y;
 
 static int cols;
 static int rows;
-int fd;
 
 SDL_Surface *screen=0;
 
@@ -67,12 +71,19 @@ size_t    scroll_buffer_start =0;
 size_t    scroll_buffer_end   =0;
 VTermScreenCell **scroll_buffer = 0;
 
-SDL_cond *cond_quit;
-SDL_mutex *screen_mutex;
-SDL_mutex *vterm_mutex;
-SDL_sem   *redraw_sem;
-SDL_mutex *quit_mutex;
+SDL_cond   *cond_quit;
+SDL_mutex  *screen_mutex;
+SDL_mutex  *vterm_mutex;
+SDL_sem    *redraw_sem;
+SDL_mutex  *quit_mutex;
 VTermState *vs;
+
+// Funtions used to communicate with host
+int (*c_open)(char *hostname,char *password);  
+int (*c_close)();                              
+int (*c_write)(char *bytes,int len);       
+int (*c_read)(char *bytes,int len);    
+int (*c_resize)(int rows,int cols);
 
 void scroll_buffer_get(size_t line_number,VTermScreenCell **line);
 
@@ -295,8 +306,7 @@ void terminal_resize(SDL_Surface *screen,VTerm *vt,int *cols,int *rows) {
 
   printf("resized: %d %d\n",*cols,*rows);
 
-  struct winsize size = { *rows, *cols, 0, 0 };
-  ioctl(fd, TIOCSWINSZ, &size);
+  (*c_resize)(*rows,*cols);
 
   SDL_mutexP(vterm_mutex);
   if(vt != 0) vterm_set_size(vt,*rows,*cols);
@@ -385,7 +395,7 @@ void sdl_render_thread() {
   
   if(SDL_Init(SDL_INIT_VIDEO)<0) {
     printf("Initialisation failed");
-    return 1;
+    return;
   }
 
   // initialise SDL rendering
@@ -397,7 +407,7 @@ void sdl_render_thread() {
   if(screen==NULL) {
     printf("Failed SDL_SetVideoMode: %d",SDL_GetError());
     SDL_Quit();
-    return 1;
+    return;
   }
   
   SDL_EnableUNICODE(1);
@@ -425,7 +435,7 @@ void console_read_thread() {
     // sending bytes from pts to vterm
     int len;
     char buffer[10241];
-    len = read(fd, buffer, sizeof(buffer)-1);
+    len = c_read(buffer, sizeof(buffer)-1);
     if(len == -1) {
       if(errno == EIO) {
         hterm_quit = true;
@@ -627,7 +637,7 @@ void sdl_read_thread() {
         buf[1] = 'O';
         buf[2] = 'D';
         buf[3] = 0;
-        write(fd,buf,3);
+        c_write(buf,3);
 
 
       } else 
@@ -637,7 +647,7 @@ void sdl_read_thread() {
         buf[1] = 'O';
         buf[2] = 'C';
         buf[3] = 0;
-        write(fd,buf,3);
+        c_write(buf,3);
       } else 
       if(event.key.keysym.sym == SDLK_UP) {
         char buf[4];
@@ -645,7 +655,7 @@ void sdl_read_thread() {
         buf[1] = 'O';
         buf[2] = 'A';
         buf[3] = 0;
-        write(fd,buf,3);
+        c_write(buf,3);
       } else 
       if(event.key.keysym.sym == SDLK_DOWN) {
         char buf[4];
@@ -653,14 +663,14 @@ void sdl_read_thread() {
         buf[1] = 'O';
         buf[2] = 'B';
         buf[3] = 0;
-        write(fd,buf,3);
+        c_write(buf,3);
       } else
       if((event.key.keysym.sym == SDLK_p) && (keystate[SDLK_LCTRL])) {
 
         // perform text paste
         uint8_t *text = paste_text();
         if(text != 0) {
-          write(fd,text,strlen(text));
+          c_write(text,strlen(text));
           free(text);
         }
       } else {
@@ -670,7 +680,7 @@ void sdl_read_thread() {
         buf[0] = event.key.keysym.unicode;
         buf[1]=0;
         if(buf[0] != 0) {
-          write(fd,buf,1);
+          c_write(buf,1);
         }
       }
     }
@@ -705,59 +715,7 @@ void timed_repeat() {
 
 }
 
-int main(int argc, char **argv) {
-
-  regis_mutex  = SDL_CreateMutex();
-  screen_mutex = SDL_CreateMutex();
-  vterm_mutex  = SDL_CreateMutex();
-  quit_mutex   = SDL_CreateMutex();
-  redraw_sem   = SDL_CreateSemaphore(1);
-
-   
-  printf("argc: %d\n",argc);
-  for(int n=0;n<argc;n++) {
-    printf("arg %s\n",argv[n]);
-  }
-
-  // grab pts
-  //int fd = open("/dev/ptmx",O_RDWR | O_NOCTTY | O_NONBLOCK);
-  /* None of the docs about termios explain how to construct a new one of
-   * these, so this is largely a guess */
-  struct termios termios = {
-    .c_iflag = ICRNL|IXON|IUTF8,
-    .c_oflag = OPOST|ONLCR|NL0|CR0|TAB0|BS0|VT0|FF0,
-    .c_cflag = CS8|CREAD,
-    .c_lflag = ISIG|ICANON|IEXTEN|ECHO|ECHOE|ECHOK,
-    /* c_cc later */
-  };
-
-  int pid = forkpty(&fd,NULL,NULL,NULL);
-  int flag=fcntl(fd,F_GETFL,0);
-
-  char *termset = "TERM=xterm";
-  putenv(termset);
-  //flag|=O_NONBLOCK;
-  //fcntl(fd,F_SETFL,flag);
-
-  //fcntl(fd, F_SETFL, FNDELAY);
-
-  printf("fd: %d",fd);
-  if(pid == 0) {
-    char args[3];
-    args[0] = "/bin/bash";
-    args[1] =""; 
-    args[2] = 0;
-
-    //execv("/bin/bash",args);
-    execl("/bin/bash","bash",NULL);
-    return 0;
-  }
-
-//  grantpt(fd);
-//  unlockpt(fd);
-  printf("fd: %d\n",fd);
- 
-
+void vterm_initialisation() {
   vt=0;
 
   printf("init rows: %d cols: %d\n",rows,cols);
@@ -778,22 +736,35 @@ int main(int argc, char **argv) {
 
   vterm_screen_reset(vts, 1);
   vterm_parser_set_utf8(vt,1); // should be vts?
+}
+
+int main(int argc, char **argv) {
+
+  regis_mutex  = SDL_CreateMutex();
+  screen_mutex = SDL_CreateMutex();
+  vterm_mutex  = SDL_CreateMutex();
+  quit_mutex   = SDL_CreateMutex();
+  redraw_sem   = SDL_CreateSemaphore(1);
+
+  int connection_type = CONNECTION_LOCAL; // replace with commandline lookup
+
+  char *open_arg1 = "";
+  char *open_arg2 = "";
+
+  if(connection_type == CONNECTION_LOCAL) {
+    c_open   = &local_open;
+    c_close  = &local_close;
+    c_write  = &local_write;
+    c_read   = &local_read;
+    c_resize = &local_resize;
+  }
+
+  c_open(open_arg1,open_arg2);
+
+  rows = 10;
+  cols = 10;
+  vterm_initialisation();
   
-  VTermColor fg;
-  fg.red   =  257;
-  fg.green =  257;
-  fg.blue  =  257;
-
-  VTermColor bg;
-  bg.red   = 0;
-  bg.green = 0;
-  bg.blue  = 0;
-
-  int rowsc;
-  int colsc;
-
-  int x=0;int y=0;
-
   cond_quit = SDL_CreateCond();
   SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0);
   SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0);
@@ -804,8 +775,8 @@ int main(int argc, char **argv) {
   SDL_CondWait(cond_quit,quit_mutex);
 
   SDL_Quit();
-  close(fd);
 
+  c_close();
   vterm_free(vt);
  
   return 0;

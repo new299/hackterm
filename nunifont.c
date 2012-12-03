@@ -78,7 +78,7 @@ void draw_character(SDL_Surface *screen,int x,int y,int w,uint16_t c,uint32_t bg
         } else {
           draw_point(screen,x+c_x+i,y+c_y,bg);
           if(bold == 1) {
-            if(value1 || value2 || value3 || value4) {
+            if(value1 > 0) {
               draw_point(screen,x+c_x+i,y+c_y,fg);
             }
           }
