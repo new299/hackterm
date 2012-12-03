@@ -7,7 +7,7 @@ int pid;
 int flag;
 int fd;
 
-int local_open(char *a,char *b) {
+int local_open(char *a,char *b,char *c) {
   pid = forkpty(&fd,0,0,0);
   flag = fcntl(fd,F_GETFL,0);
 

@@ -40,13 +40,10 @@ int rc, sock, i, auth_pw = 0;
 LIBSSH2_SESSION *session;
 LIBSSH2_CHANNEL *channel;
 
-int ssh_init() {
+int ssh_open(char *hostname,char *username,char *password) {
   #ifdef WIN32
   WSAStartup(MAKEWORD(2,0), &wsadata);
   #endif
-}
-
-int ssh_open(char *hostname,char *username,char *password) {
 
   unsigned long hostaddr;
   hostaddr = inet_addr(hostname);
@@ -54,13 +51,15 @@ int ssh_open(char *hostname,char *username,char *password) {
   struct sockaddr_in sin;
 
   sock = socket(AF_INET, SOCK_STREAM, 0);
+  printf("socket: %d\n",sock);
 
   sin.sin_family = AF_INET;
   sin.sin_port = htons(22);
   sin.sin_addr.s_addr = hostaddr;
   if (connect(sock, (struct sockaddr*)(&sin),
               sizeof(struct sockaddr_in)) != 0) {
-      fprintf(stderr, "failed to connect!\n");
+      fprintf(stderr, "failed to connect to: %s error: %d\n",hostname,errno);
+
       return -1;
   }
     /* Create a session instance and start it up. This will trade welcome
@@ -97,13 +96,13 @@ int ssh_open(char *hostname,char *username,char *password) {
         auth_pw |= 4;
     }
 
-        /* We could authenticate via password */
-        if (libssh2_userauth_password(session, username, password)) {
-            fprintf(stderr, "\tAuthentication by password failed!\n");
-            return 0;
-        } else {
-            fprintf(stderr, "\tAuthentication by password succeeded.\n");
-        }
+    /* We could authenticate via password */
+    if (libssh2_userauth_password(session, username, password)) {
+      fprintf(stderr, "\tAuthentication by password failed!\n");
+      return 0;
+    } else {
+      fprintf(stderr, "\tAuthentication by password succeeded.\n");
+    }
         ///* Or by public key */
         //if (libssh2_userauth_publickey_fromfile(session, username, keyfile1,
         //                                        keyfile2, password)) {
@@ -115,13 +114,26 @@ int ssh_open(char *hostname,char *username,char *password) {
     /* Some environment variables may be set,
      * It's up to the server which ones it'll allow though
      */
-    libssh2_channel_setenv(channel, "FOO", "bar");
+
+ /* Request a shell */ 
+    if (!(channel = libssh2_channel_open_session(session))) {
+
+        fprintf(stderr, "Unable to open a session\n");
+    }
+
+    libssh2_channel_setenv(channel, "TERM", "xterm");
 
     /* Request a terminal with 'vanilla' terminal emulation
      * See /etc/termcap for more options
      */
-    if (libssh2_channel_request_pty(channel, "vanilla")) {
-        fprintf(stderr, "Failed requesting pty\n");
+    int error=0;
+    if (error = libssh2_channel_request_pty(channel, "vanilla")) {
+        fprintf(stderr, "Failed requesting pty: %d\n",error);
+        if(error == LIBSSH2_ERROR_ALLOC) printf("alloc error\n");
+        if(error == LIBSSH2_ERROR_SOCKET_SEND) printf("eror socket\n");
+        if(error == LIBSSH2_ERROR_CHANNEL_REQUEST_DENIED) printf("ddeeenied\n");
+        if(error == LIBSSH2_ERROR_EAGAIN) printf("eagain\n");
+
         return 0;
     }
 
@@ -129,11 +141,12 @@ int ssh_open(char *hostname,char *username,char *password) {
     if (libssh2_channel_shell(channel)) {
         fprintf(stderr, "Unable to request shell on allocated pty\n");
     }
-
+  printf("connection successful\n");
+  libssh2_channel_set_blocking(channel,1);
 }
 
-int ssh_sendbytes(char *bytes,int len) {
-     // libssh2_channel_write()
+int ssh_write(char *bytes,int len) {
+  libssh2_channel_write(channel,bytes,len);
      // libssh2_channel_write_stderr()
      
      // Blocking mode may be (en|dis)abled with: libssh2_channel_set_blocking()
@@ -143,8 +156,8 @@ int ssh_sendbytes(char *bytes,int len) {
      // A channel can be freed with: libssh2_channel_free()
 }
 
-int ssh_receivebytes(char *bytes,int len) {
-     // libssh2_channel_read()
+int ssh_read(char *bytes,int len) {
+  libssh2_channel_read(channel,bytes,len);
      // libssh2_channel_read_stderr()
 }
 
@@ -174,3 +187,5 @@ int ssh_close() {
 
     libssh2_exit();
 }
+
+int ssh_resize(int cols,int rows){}

@@ -79,7 +79,7 @@ SDL_mutex  *quit_mutex;
 VTermState *vs;
 
 // Funtions used to communicate with host
-int (*c_open)(char *hostname,char *password);  
+int (*c_open)(char *hostname,char *username, char *password);  
 int (*c_close)();                              
 int (*c_write)(char *bytes,int len);       
 int (*c_read)(char *bytes,int len);    
@@ -747,9 +747,13 @@ int main(int argc, char **argv) {
   redraw_sem   = SDL_CreateSemaphore(1);
 
   int connection_type = CONNECTION_LOCAL; // replace with commandline lookup
-
-  char *open_arg1 = "";
-  char *open_arg2 = "";
+  if(argc > 1) {
+    connection_type = CONNECTION_SSH; // replace with commandline lookup
+  }
+  //char *open_arg1 = "localhost";
+  char *open_arg1 = "127.0.0.1";
+  char *open_arg2 = "new";
+  char *open_arg3 = "password";
 
   if(connection_type == CONNECTION_LOCAL) {
     c_open   = &local_open;
@@ -757,9 +761,16 @@ int main(int argc, char **argv) {
     c_write  = &local_write;
     c_read   = &local_read;
     c_resize = &local_resize;
+  } else
+  if(connection_type == CONNECTION_SSH) {
+    c_open   = &ssh_open;
+    c_close  = &ssh_close;
+    c_write  = &ssh_write;
+    c_read   = &ssh_read;
+    c_resize = &ssh_resize;
   }
 
-  c_open(open_arg1,open_arg2);
+  c_open(open_arg1,open_arg2,open_arg3);
 
   rows = 10;
   cols = 10;
