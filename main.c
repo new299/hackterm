@@ -17,7 +17,7 @@
 #include <unistd.h>
 #include <termios.h>
 #include "vterm.h"
-#include "utf8proc.h"
+//#include "utf8proc.h"
 #include <locale.h>
 
 #include "nunifont.h"
@@ -27,6 +27,7 @@
 #include "nsdl.h"
 #include <time.h>
 #include "regis.h"
+#include <stdbool.h>
 
 void redraw_required();
  

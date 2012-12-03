@@ -8,6 +8,7 @@
 #include <SDL/SDL_thread.h>
 #include <stdint.h>   
 #include <stdio.h>    
+#include <stdbool.h>
 
 
 extern SDL_Surface *regis_layer;
