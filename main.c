@@ -30,6 +30,7 @@
 #include <stdbool.h>
 #include "ssh.h"
 #include "local.h"
+#include "inlinedata.h"
 
 #define CONNECTION_LOCAL 1
 #define CONNECTION_SSH   2
@@ -91,7 +92,13 @@ void regis_render() {
   SDL_mutexP(regis_mutex);                                   
   int res = SDL_BlitSurface(regis_layer,NULL,screen,NULL);   
   SDL_mutexV(regis_mutex);                                   
-}                                                            
+} 
+
+void inline_data_render() {                                        
+  SDL_mutexP(inline_data_mutex);                                   
+  int res = SDL_BlitSurface(inline_data_layer,NULL,screen,NULL);   
+  SDL_mutexV(inline_data_mutex);                                   
+} 
 
 VTermScreenCell *grab_row(int trow,bool *dont_free) {
 
@@ -383,6 +390,7 @@ void redraw_screen() {
   
   SDL_UnlockSurface(screen);
   regis_render();
+  inline_data_render();
 
   SDL_Flip(screen);
 
@@ -415,6 +423,8 @@ void sdl_render_thread() {
   
   terminal_resize(screen,vt,&cols,&rows);
   regis_init(screen->w,screen->h);
+  inline_data_init(screen->w,screen->h);
+
 
   sdl_init_complete=true;
   for(;;) {
@@ -436,6 +446,10 @@ void console_read_thread() {
     int len;
     char buffer[10241];
     len = c_read(buffer, sizeof(buffer)-1);
+    
+    inline_data_receive(buffer,len);
+
+
     if(len == -1) {
       if(errno == EIO) {
         hterm_quit = true;
@@ -745,6 +759,7 @@ int main(int argc, char **argv) {
   vterm_mutex  = SDL_CreateMutex();
   quit_mutex   = SDL_CreateMutex();
   redraw_sem   = SDL_CreateSemaphore(1);
+  inline_data_mutex = SDL_CreateMutex();
 
   int connection_type = CONNECTION_LOCAL; // replace with commandline lookup
   if(argc > 1) {

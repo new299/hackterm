@@ -12,7 +12,7 @@ int pen_y = 0;
 
 SDL_Surface *regis_layer=0;
 
-SDL_mutex *regis_mutex;
+SDL_mutex *regis_mutex=0;
 
 void regis_clear() {
   SDL_mutexP(regis_mutex);

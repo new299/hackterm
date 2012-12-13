@@ -12,7 +12,6 @@
 
 
 extern SDL_Surface *regis_layer;
-
 extern SDL_mutex *regis_mutex;
 
 void regis_clear();
