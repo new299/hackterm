@@ -36,6 +36,8 @@
 #define CONNECTION_SSH   2
 
 void redraw_required();
+
+bool sdl_init_complete=false;
  
 int font_width  = 8;
 int font_height = 16;
@@ -245,8 +247,9 @@ static int screen_bell(void* d) {
 
 }
 
-static int state_erase(VTermRect r,void *user) {
-
+int state_erase(VTermRect r,void *user) {
+  printf("********************************************** clear received\n");
+  return 0;
 }
 
 VTermScreenCallbacks cb_screen = {
@@ -271,9 +274,14 @@ VTermStateCallbacks cb_state = {
 
 
 int csi_handler(const char *leader, const long args[], int argcount, const char *intermed, char command, void *user) {
-  if(command = 'J') {
-    if(!regis_recent()) regis_clear();
+  if(command == 'J') {
+    printf("************************* this clear\n");
+    if(sdl_init_complete) {
+      if(!regis_recent()) regis_clear();
+      inline_data_clear();
+    }
   }
+
   return 0;
 }
 
@@ -397,7 +405,6 @@ void redraw_screen() {
   SDL_mutexV(screen_mutex);
 }
 
-bool sdl_init_complete=false;
 
 void sdl_render_thread() {
   

@@ -42,7 +42,7 @@ int base64_init() {
     base64lookup[base64alphabet[n]]=n;
   }
 
- // base64lookup[base64alphabet[64]]=0;
+  base64lookup[base64alphabet[64]]=0;
 
 }
 
@@ -75,6 +75,7 @@ int base64_decode(char *input_string,int input_length,char *output_buffer) {
     if(input_string[n] == '\n') continue;
     if(input_string[n] == '\r') continue;
     if(input_string[n] == ' ' ) continue;
+    if(input_string[n] == '=' ) break;
 
     int current = base64lookup[input_string[n]];
     
@@ -272,6 +273,7 @@ void buffer_dump() {
 
 }
 
+
 bool processing_png=false;
 int inline_data_receive(char *data,int length) {
 
@@ -317,4 +319,10 @@ int inline_data_receive(char *data,int length) {
   }
   inlinepng_process_data(decoded_buffer,decoded_buffer_size);
   return 2;
+}
+
+void inline_data_clear() {
+  SDL_mutexP(inline_data_mutex);
+  SDL_FillRect(inline_data_layer,NULL, 0x000000); 
+  SDL_mutexV(inline_data_mutex);
 }

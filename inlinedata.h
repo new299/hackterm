@@ -8,4 +8,4 @@ extern SDL_mutex   *inline_data_mutex;
 
 void inline_data_init   (int width ,int height);
 int  inline_data_receive(char *data,int length);
-
+void inline_data_clear();
