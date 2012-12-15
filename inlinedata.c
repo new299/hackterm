@@ -77,7 +77,11 @@ int base64_decode(char *input_string,int input_length,char *output_buffer,bool *
 
     int current = base64lookup[input_string[n]];
     
-    if(current == -1) {*failflag=true; break;}
+    if(current == -1) {
+      *failflag=true;
+      base64_bit_pos=0;
+      break;
+    }
 
     for(int i=5;i>=0;i--) {
       int bit=0;
