@@ -25,7 +25,6 @@ char *inline_magic = "HTERMFILEXFER";
                                                       // 50 89 47 4e 0a 0d 0a 1a
                                                       // 89 50 4e 47  d  d  a 1a,d,a
 
-
 // from RFC4648
 char base64alphabet[65] = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/','='};
 
@@ -33,7 +32,6 @@ int  base64lookup[256];
 
 int base64_init() {
 
-  printf("base64 init\n");
   for(int n=0;n<256;n++) {
     base64lookup[n] = -1;
   }
@@ -49,27 +47,27 @@ int base64_init() {
 int base64_bits[8];
 int base64_bit_pos = 0;
 
-
 unsigned char base64_bits2byte() {
 
-  printf("bits %u %u %u %u %u %u %u %u\n", base64_bits[0], base64_bits[1], base64_bits[2], base64_bits[3], base64_bits[4], base64_bits[5], base64_bits[6], base64_bits[7]);
+  //printf("bits %u %u %u %u %u %u %u %u\n", base64_bits[0], base64_bits[1], base64_bits[2], base64_bits[3], base64_bits[4], base64_bits[5], base64_bits[6], base64_bits[7]);
   unsigned char byte=0;
   for(int n=0;n<8;n++) {
     if(base64_bits[n] == 1) {
       byte |= (1 << (7-n));
     }
   }
-  printf("bits2byte decode: %x\n",(unsigned char) byte);
+  //printf("bits2byte decode: %x\n",(unsigned char) byte);
 
   return byte;
 }
 
-int base64_decode(char *input_string,int input_length,char *output_buffer) {
+int base64_decode(char *input_string,int input_length,char *output_buffer,bool *failflag) {
 
-  printf("performing decode: %s\n",input_string);
+  //printf("performing decode: %s\n",input_string);
 
   int output_buffer_pos = 0;
 
+  *failflag=false;
   for(int n=0;n<input_length;n++) {
     // skip whitespace and linefeeds
     if(input_string[n] == '\n') continue;
@@ -79,16 +77,16 @@ int base64_decode(char *input_string,int input_length,char *output_buffer) {
 
     int current = base64lookup[input_string[n]];
     
-    if(current == -1) {printf("decoded failure\n"); return -1;}
+    if(current == -1) {*failflag=true; break;}
 
     for(int i=5;i>=0;i--) {
       int bit=0;
       if((current & (1 << i)) > 0) bit = 1; else bit = 0;
 
-      printf("current: %d input_string: %c\n",current,input_string[n]);
+      //printf("current: %d input_string: %c\n",current,input_string[n]);
 
       base64_bits[base64_bit_pos] = bit;
-      printf("a bit: %d %d\n",i,bit);
+      //printf("a bit: %d %d\n",i,bit);
       base64_bit_pos++;
       if(base64_bit_pos==8) {
         output_buffer[output_buffer_pos] = base64_bits2byte();
@@ -119,9 +117,9 @@ void inline_data_init(int width,int height) {
 int width, height;
 int pixel_depth;
 
-png_structp png_ptr;
-png_infop   info_ptr;
-png_bytep * row_pointers;
+png_structp png_ptr=0;
+png_infop   info_ptr=0;
+png_bytep  *row_pointers=0;
 
 /* This function is called (as set by png_set_progressive_read_fn() above) when enough data has been supplied so all of the header has been read.  */
 void info_callback(png_structp png_ptr, png_infop info) {
@@ -181,7 +179,7 @@ void row_callback(png_structp png_ptr, png_bytep new_row, png_uint_32 row_num, i
 int file_end=0;
 void end_callback(png_structp png_ptr, png_infop info) {
 /* This function is called after the whole image has been read, including any chunks after the image (up to and including the IEND). You will usually have the same info chunk as you had in the header, although some data may have been added to the comments and time fields.  Most people won’t do much here, perhaps setting a flag that marks the image as finished.  */
-  printf("processing complete\n");
+  printf("************************************************************ png processing complete\n");
   file_end=1;
 }
 
@@ -273,7 +271,6 @@ void buffer_dump() {
 
 }
 
-
 bool processing_png=false;
 int inline_data_receive(char *data,int length) {
 
@@ -290,17 +287,23 @@ int inline_data_receive(char *data,int length) {
     printf("currently processing png\n");
     if(file_end==1) {processing_png=false; return 1;}
     char decoded_buffer[4096]; // should be mallco'd based on length.
-    int decoded_buffer_size = base64_decode(data,length,decoded_buffer);
-    if(decoded_buffer_size == -1) { 
-      printf("base64 decode error\n");
-      return -2; 
+    bool failflag;
+    int decoded_buffer_size = base64_decode(data,length,decoded_buffer,&failflag);
+ 
+    if(decoded_buffer_size != 0) {
+      inlinepng_process_data(decoded_buffer,decoded_buffer_size);
     }
-    inlinepng_process_data(decoded_buffer,decoded_buffer_size);
+
+    if(failflag) {
+      processing_png=false;
+      return 0;
+    }
     //inlinepng_process_data(data,length);
     if(file_end==1) processing_png=false;
     return 1;
   }
 
+  file_end=0;
   buffer_push(data,length);
   int pos = buffer_search(inline_magic);
 
@@ -312,12 +315,16 @@ int inline_data_receive(char *data,int length) {
 
   initialize_png_reader();
   char decoded_buffer[4096]; // should be mallco'd based on length.
-  int decoded_buffer_size = base64_decode(buffer+pos+strlen(inline_magic),length-pos-strlen(inline_magic),decoded_buffer);
-  if(decoded_buffer_size == -1) { 
-    printf("base64 decode error\n");
-    return -2; 
+  bool failflag;
+  int decoded_buffer_size = base64_decode(buffer+pos+strlen(inline_magic),length-pos-strlen(inline_magic),decoded_buffer,&failflag);
+  if(decoded_buffer_size != 0) {
+    inlinepng_process_data(decoded_buffer,decoded_buffer_size);
   }
-  inlinepng_process_data(decoded_buffer,decoded_buffer_size);
+
+  if(failflag) {
+    processing_png=false;
+    return 0;
+  }
   return 2;
 }
 
