@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include "nsdl.h"
+#include "base64.h"
 
 #define PNG_DEBUG 3
 #include <png.h>
@@ -18,103 +19,10 @@ SDL_mutex   *inline_data_mutex = 0;
 
 char *inline_magic = "HTERMFILEXFER";
 
-
- // 89 50 4e 47 0d 0a 1a 0a
-//char *png_magic = "\x89\x50\x4e\x47\x0d\x0a\x1a\x0a"; // 89 50 4e 47 0d 0a 1a 0a
-                                                      // 89 50 4e 47  d  d  a 1a d,a,0,0,0,
-                                                      // 50 89 47 4e 0a 0d 0a 1a
-                                                      // 89 50 4e 47  d  d  a 1a,d,a
-
-// from RFC4648
-char base64alphabet[65] = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/','='};
-
-int  base64lookup[256];
-
-int base64_init() {
-
-  for(int n=0;n<256;n++) {
-    base64lookup[n] = -1;
-  }
-
-  for(int n=0;n<65;n++) {
-    base64lookup[base64alphabet[n]]=n;
-  }
-
-  base64lookup[base64alphabet[64]]=0;
-
-}
-
-int base64_bits[8];
-int base64_bit_pos = 0;
-
-unsigned char base64_bits2byte() {
-
-  //printf("bits %u %u %u %u %u %u %u %u\n", base64_bits[0], base64_bits[1], base64_bits[2], base64_bits[3], base64_bits[4], base64_bits[5], base64_bits[6], base64_bits[7]);
-  unsigned char byte=0;
-  for(int n=0;n<8;n++) {
-    if(base64_bits[n] == 1) {
-      byte |= (1 << (7-n));
-    }
-  }
-  //printf("bits2byte decode: %x\n",(unsigned char) byte);
-
-  return byte;
-}
-
-int base64_decode(char *input_string,int input_length,char *output_buffer,bool *failflag) {
-
-  //printf("performing decode: %s\n",input_string);
-
-  int output_buffer_pos = 0;
-
-  *failflag=false;
-  for(int n=0;n<input_length;n++) {
-    // skip whitespace and linefeeds
-    if(input_string[n] == '\n') continue;
-    if(input_string[n] == '\r') continue;
-    if(input_string[n] == ' ' ) continue;
-    if(input_string[n] == '=' ) break;
-
-    int current = base64lookup[input_string[n]];
-    
-    if(current == -1) {
-      *failflag=true;
-      base64_bit_pos=0;
-      break;
-    }
-
-    for(int i=5;i>=0;i--) {
-      int bit=0;
-      if((current & (1 << i)) > 0) bit = 1; else bit = 0;
-
-      //printf("current: %d input_string: %c\n",current,input_string[n]);
-
-      base64_bits[base64_bit_pos] = bit;
-      //printf("a bit: %d %d\n",i,bit);
-      base64_bit_pos++;
-      if(base64_bit_pos==8) {
-        output_buffer[output_buffer_pos] = base64_bits2byte();
-        base64_bit_pos = 0;
-        output_buffer_pos++;
-      }
-    }
-  }
-
-  printf("decoded %d: ",output_buffer_pos);
-  for(int n=0;n<output_buffer_pos;n++) {
-    printf("%x,",(unsigned char) output_buffer[n]);
-  }
-  printf("\n");
-
-  return output_buffer_pos;
-}
-
 void inline_data_init(int width,int height) {
 
   base64_init();
   inline_data_layer = SDL_CreateRGBSurface(SDL_SWSURFACE,width,height,32,0x000000FF,0x0000FF00,0x00FF0000,0xFF000000);
-  printf("inline data layer: %d %d %u\n",width,height,inline_data_layer);
-
 }
 
 
@@ -166,7 +74,7 @@ int inlineget_pixel(char *row,int pixel_depth,int idx) {
 void row_callback(png_structp png_ptr, png_bytep new_row, png_uint_32 row_num, int pass) {
   /* If the image is interlaced, and you turned on the interlace handler, this function will be called for every row in every pass. Some of these rows will not be changed from the previous pass. When the row is not changed, the new_row variable will be NULL. The rows and passes are called in order, so you don’t really need the row_num and pass, but I’m supplying them because it may make your life easier.  For the non-NULL rows of interlaced images, you must call png_progressive_combine_row() passing in the row and the old row. You can call this function for NULL rows (it will just return) and for non-interlaced images (it just does the memcpy for you) if it will make the code easier. Thus, you can just do this for all cases: */
 
-  printf("read line: %u: ",row_num);
+  //printf("read line: %u: ",row_num);
   png_progressive_combine_row(png_ptr, row_pointers[row_num], new_row);
   for(int n=0;n<width;n++) {
     int pixel = inlineget_pixel(row_pointers[row_num],pixel_depth,n);
@@ -174,9 +82,9 @@ void row_callback(png_structp png_ptr, png_bytep new_row, png_uint_32 row_num, i
     if(pixel==1) pixel = 0xFFFFFFFF;
     nsdl_point(inline_data_layer,n,row_num,pixel);
 
-    if(pixel == 0) printf("0"); else printf("1");
+    //if(pixel == 0) printf("0"); else printf("1");
   }
-  printf("\n");
+  //printf("\n");
   /* where old_row is what was displayed for previously for the row. Note that the first pass (pass == 0, really) will completely cover the old row, so the rows do not have to be initialized. After the first pass (and only for interlaced images), you will have to pass the current row, and the function will combine the old row and the new row.  */
 }
 
@@ -212,11 +120,11 @@ int inlinepng_process_data(png_bytep buffer, png_uint_32 length) {
     return 1;
   }
 
-  printf("png receiving data: ");
-  for(int n=0;n<length;n++) {
-    printf("%x,",(unsigned char) buffer[n]);
-  }
-  printf("\n");
+  //printf("png receiving data: ");
+  //for(int n=0;n<length;n++) {
+  //  printf("%x,",(unsigned char) buffer[n]);
+  //}
+  //printf("\n");
 
   /* This one’s new also. Simply give it a chunk of data from the file stream (in order, of course). On machines with segmented memory models machines, don’t give it any more than 28 64K. The library seems to run fine with sizes of 4K. Although you can give it much less if necessary (I assume you can give it chunks of 1 byte, I haven’t tried less then 256 bytes yet). When this function returns, you may want to display any rows that were generated in the row callback if you don’t already do so there.  */
   png_process_data(png_ptr, info_ptr, buffer, length);
@@ -278,19 +186,18 @@ void buffer_dump() {
 bool processing_png=false;
 int inline_data_receive(char *data,int length) {
 
-  printf("buf received: ");
-  for(int n=0;n<length;n++) {
-    printf("%x,",(unsigned char) data[n]);
-  }
-  printf("\n");
+  //printf("buf received: ");
+  //for(int n=0;n<length;n++) {
+  //  printf("%x,",(unsigned char) data[n]);
+  //}
+  //printf("\n");
 
-  printf("inline data received data\n");
-//  buffer_dump();
+  //printf("inline data received data\n");
 
   if(processing_png) {
     printf("currently processing png\n");
     if(file_end==1) {processing_png=false; return 1;}
-    char decoded_buffer[4096]; // should be mallco'd based on length.
+    char decoded_buffer[4096]; // should be malloc'd based on length.
     bool failflag;
     int decoded_buffer_size = base64_decode(data,length,decoded_buffer,&failflag);
  
