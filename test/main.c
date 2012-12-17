@@ -44,6 +44,7 @@ int main() {
 
   base64_init();
 
+  // test 1 contiguous single input
   unsigned char *output_buffer = malloc(strlen(encoded_data));
   bool failflag;
   base64_decode(encoded_data,strlen(encoded_data),output_buffer,&failflag);
@@ -54,6 +55,26 @@ int main() {
       printf("%d %d\n",test_png[n],output_buffer[n]);
     }
   }
+  printf("TEST ONE COMPLETE\n");
+
+  // test 2 fragmented input
+  //base64_init();
+  base64_decode(encoded_data,32,output_buffer,&failflag);
+  for(int n=0;n<24;n++) {
+    test(test_png[n] == output_buffer[n]);
+    if(test_png[n] != output_buffer[n]) {
+      printf("%d %d\n",test_png[n],output_buffer[n]);
+    }
+  }
+
+  base64_decode(encoded_data+32,strlen(encoded_data)-32,output_buffer,&failflag);
+  for(int n=0;n<(test_png_len-24);n++) {
+    test(test_png[n+24] == output_buffer[n]);
+    if(test_png[n+24] != output_buffer[n]) {
+      printf("%x %x\n",test_png[n+24],output_buffer[n]);
+    }
+  }
+
 
   end_test_set();
 

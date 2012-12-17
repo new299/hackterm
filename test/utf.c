@@ -76,7 +76,7 @@ void _test(bool t1,int linenumber,const char *current_file) {
 }
 
 void test_report() {
-  printf("*** Tests complete: passed %d, failed %d\n",test_set_name,total_tests_passed,total_tests_failed);
+  printf("*** Tests complete: passed %d, failed %d\n",total_tests_passed,total_tests_failed);
   if(total_tests_failed != 0) printf("*** TEST FAILED!\n");
   if(tap_file != 0) fclose(tap_file);
 }
