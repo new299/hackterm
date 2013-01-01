@@ -157,7 +157,8 @@ int ssh_write(char *bytes,int len) {
 }
 
 int ssh_read(char *bytes,int len) {
-  libssh2_channel_read(channel,bytes,len);
+  printf("in read\n");
+  return libssh2_channel_read(channel,bytes,len);
      // libssh2_channel_read_stderr()
 }
 

@@ -32,6 +32,8 @@ int pixel_depth;
 png_structp png_ptr=0;
 png_infop   info_ptr=0;
 png_bytep  *row_pointers=0;
+bool processing_png=false;
+int file_end=0;
 
 /* This function is called (as set by png_set_progressive_read_fn() above) when enough data has been supplied so all of the header has been read.  */
 void info_callback(png_structp png_ptr, png_infop info) {
@@ -88,7 +90,6 @@ void row_callback(png_structp png_ptr, png_bytep new_row, png_uint_32 row_num, i
   /* where old_row is what was displayed for previously for the row. Note that the first pass (pass == 0, really) will completely cover the old row, so the rows do not have to be initialized. After the first pass (and only for interlaced images), you will have to pass the current row, and the function will combine the old row and the new row.  */
 }
 
-int file_end=0;
 void end_callback(png_structp png_ptr, png_infop info) {
 /* This function is called after the whole image has been read, including any chunks after the image (up to and including the IEND). You will usually have the same info chunk as you had in the header, although some data may have been added to the comments and time fields.  Most people won’t do much here, perhaps setting a flag that marks the image as finished.  */
   printf("************************************************************ png processing complete\n");
@@ -164,8 +165,9 @@ void buffer_clear() {
 
 int buffer_search(char *v) {
 
+  if((buffer_size-((int)strlen(v))) < 0) return -1;
   // shameful search
-  for(int n=0;n<buffer_size;n++) {
+  for(int n=0;n<(buffer_size-strlen(v));n++) {
     if(strncmp(v,buffer+n,strlen(v)) == 0) return n;
   }
 
@@ -183,18 +185,17 @@ void buffer_dump() {
 
 }
 
-bool processing_png=false;
 int inline_data_receive(char *data,int length) {
 
-  //printf("buf received: ");
-  //for(int n=0;n<length;n++) {
-  //  printf("%x,",(unsigned char) data[n]);
-  //}
-  //printf("\n");
+  printf("buf received: ");
+  for(int n=0;n<length;n++) {
+    printf("%c,",data[n]);
+  }
+  printf("\n");
 
   //printf("inline data received data\n");
 
-  if(processing_png) {
+  if(processing_png == true) {
     printf("currently processing png\n");
     if(file_end==1) {processing_png=false; return 1;}
     char decoded_buffer[4096]; // should be malloc'd based on length.
@@ -203,13 +204,14 @@ int inline_data_receive(char *data,int length) {
  
     if(decoded_buffer_size != 0) {
       inlinepng_process_data(decoded_buffer,decoded_buffer_size);
+      if(file_end==1) { processing_png=false; return 1; }
     }
 
-    if(failflag) {
+    if(failflag == true) {
+      file_end =1;
       processing_png=false;
-      return 0;
+      return 2;
     }
-    //inlinepng_process_data(data,length);
     if(file_end==1) processing_png=false;
     return 1;
   }
@@ -222,15 +224,15 @@ int inline_data_receive(char *data,int length) {
   if(pos < 0) return 0;
 
   processing_png=true;
-  buffer_clear();
 
   initialize_png_reader();
   char decoded_buffer[4096]; // should be mallco'd based on length.
   bool failflag;
-  int decoded_buffer_size = base64_decode(buffer+pos+strlen(inline_magic),length-pos-strlen(inline_magic),decoded_buffer,&failflag);
+  int decoded_buffer_size = base64_decode(buffer+pos+strlen(inline_magic),buffer_size-pos-strlen(inline_magic),decoded_buffer,&failflag);
   if(decoded_buffer_size != 0) {
     inlinepng_process_data(decoded_buffer,decoded_buffer_size);
   }
+  buffer_clear();
 
   if(failflag) {
     processing_png=false;

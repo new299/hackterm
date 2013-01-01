@@ -39,7 +39,11 @@ unsigned char base64_bits2byte() {
 
 int base64_decode(char *input_string,int input_length,char *output_buffer,bool *failflag) {
 
-  printf("performing decode: %s\n",input_string);
+  printf("performing decode: ");
+  for(int n=0;n<input_length;n++) {
+    printf("%c",input_string[n]);
+  }
+  printf("\n");
 
   int output_buffer_pos = 0;
 

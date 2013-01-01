@@ -31,6 +31,7 @@
 #include "ssh.h"
 #include "local.h"
 #include "inlinedata.h"
+#include "ngui.h"
 
 #define CONNECTION_LOCAL 1
 #define CONNECTION_SSH   2
@@ -316,6 +317,8 @@ VTermParserCallbacks cb_parser = {
 
 void terminal_resize(SDL_Surface *screen,VTerm *vt,int *cols,int *rows) {
 
+  printf("terminal resize, size: %d %d\n",screen->w,screen->h);
+
   *rows = screen->h/(font_height+font_space);
   *cols = screen->w/(font_width+font_space);
 
@@ -341,7 +344,7 @@ void redraw_screen() {
 
   if(new_screen_size) {
     printf("SCREEN RESIZE DETECTED\n");
-    screen = SDL_SetVideoMode(new_screen_size_x, new_screen_size_y, 32, SDL_ANYFORMAT | SDL_RESIZABLE | SDL_DOUBLEBUF);
+    screen = SDL_SetVideoMode(new_screen_size_x, new_screen_size_y, 32, SDL_RESIZABLE | SDL_DOUBLEBUF);
     terminal_resize(screen,vt,&cols,&rows);
     new_screen_size = false;
   }
@@ -418,7 +421,7 @@ void sdl_render_thread() {
   //int maxwidth  = vid->current_w;
   //int maxheight = vid->current_h-(font_height+font_space);
  
-  screen=SDL_SetVideoMode(0,0,32,SDL_ANYFORMAT | SDL_RESIZABLE | SDL_DOUBLEBUF);
+  screen=SDL_SetVideoMode(640,480,32,SDL_RESIZABLE | SDL_DOUBLEBUF);
   if(screen==NULL) {
     printf("Failed SDL_SetVideoMode: %d",SDL_GetError());
     SDL_Quit();
@@ -454,10 +457,7 @@ void console_read_thread() {
     char buffer[10241];
     len = c_read(buffer, sizeof(buffer)-1);
     
-    inline_data_receive(buffer,len);
-
-
-    if(len == -1) {
+    if(len < 0) {
       if(errno == EIO) {
         hterm_quit = true;
         SDL_CondSignal(cond_quit);
@@ -467,6 +467,7 @@ void console_read_thread() {
     }
 
     if(len > 0) {
+      inline_data_receive(buffer,len);
       SDL_mutexP(vterm_mutex);
       if((buffer != 0) && (len != 0)) {
         vterm_push_bytes(vt, buffer, len);
@@ -770,12 +771,15 @@ int main(int argc, char **argv) {
 
   int connection_type = CONNECTION_LOCAL; // replace with commandline lookup
   if(argc > 1) {
-    connection_type = CONNECTION_SSH; // replace with commandline lookup
+    if(strcmp(argv[1],"ssh") == 0) {
+      connection_type = CONNECTION_SSH; // replace with commandline lookup
+    }
   }
+
   //char *open_arg1 = "localhost";
-  char *open_arg1 = "127.0.0.1";
-  char *open_arg2 = "new";
-  char *open_arg3 = "password";
+  char open_arg1[100];// = "127.0.0.1        ";
+  char open_arg2[100];// = "new              ";
+  char open_arg3[100];// = "password         ";
 
   if(connection_type == CONNECTION_LOCAL) {
     c_open   = &local_open;
@@ -790,7 +794,17 @@ int main(int argc, char **argv) {
     c_write  = &ssh_write;
     c_read   = &ssh_read;
     c_resize = &ssh_resize;
+
+    // we now need to read connection information.
+    
+    ngui_info_prompt("hostname:","username:","password:",
+                     0,0,1,
+                     open_arg1,open_arg2,open_arg3);
+
   }
+  printf("arg1: %s\n",open_arg1);
+  printf("arg2: %s\n",open_arg2);
+  printf("arg3: %s\n",open_arg3);
 
   c_open(open_arg1,open_arg2,open_arg3);
 
