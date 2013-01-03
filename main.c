@@ -640,6 +640,7 @@ void sdl_read_thread() {
     SDL_Event event;
     SDL_WaitEvent(&event);
     process_mouse_event(&event);
+    ngui_receive_event(&event);
     
     uint8_t *keystate = SDL_GetKeyState(NULL);
 
@@ -760,6 +761,21 @@ void vterm_initialisation() {
   vterm_parser_set_utf8(vt,1); // should be vts?
 }
 
+
+bool ssh_received = false;
+char ssh_hostname[100];
+char ssh_username[100];
+char ssh_password[100];
+
+void receive_ssh_info(char *o1,char *o2,char *o3) {
+
+  strcpy(ssh_hostname,o1);
+  strcpy(ssh_username,o2);
+  strcpy(ssh_password,o3);
+
+  ssh_received=true;
+}
+
 int main(int argc, char **argv) {
 
   regis_mutex  = SDL_CreateMutex();
@@ -797,11 +813,18 @@ int main(int argc, char **argv) {
 
     // we now need to read connection information.
     
-    ngui_info_prompt("hostname:","username:","password:",
-                     0,0,1,
-                     open_arg1,open_arg2,open_arg3);
+    ngui_add_info_prompt(-1,-1,
+                         "hostname:","username:","password:",
+                          0,0,1,
+                          receive_ssh_info);
 
+    for(;ssh_received == false;);
+
+    strcpy(open_arg1,ssh_hostname);
+    strcpy(open_arg2,ssh_username);
+    strcpy(open_arg3,ssh_password);
   }
+
   printf("arg1: %s\n",open_arg1);
   printf("arg2: %s\n",open_arg2);
   printf("arg3: %s\n",open_arg3);
