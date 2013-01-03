@@ -402,6 +402,7 @@ void redraw_screen() {
   SDL_UnlockSurface(screen);
   regis_render();
   inline_data_render();
+  ngui_render(screen);
 
   SDL_Flip(screen);
 

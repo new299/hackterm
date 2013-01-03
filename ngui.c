@@ -30,7 +30,6 @@ ngui_info_prompt_data ngui_info_prompts[50];
 
 void ngui_receive_event(SDL_Event *event) {
   for(int n=0;n<ngui_info_prompts_size;n++) {
-    printf("receving %d\n",n);
     ngui_info_prompt_data *d = &ngui_info_prompts[n];
     ngui_receive_event_info_prompt(event,d);
   }
@@ -39,7 +38,8 @@ void ngui_receive_event(SDL_Event *event) {
 void ngui_render(SDL_Surface *screen) {
 
   for(int n=0;n<ngui_info_prompts_size;n++) {
-    ngui_render_info_prompt(screen,ngui_info_prompts[n]);
+    ngui_info_prompt_data *d = &ngui_info_prompts[n];
+    ngui_render_info_prompt(screen,d);
   }
 
 }
@@ -47,7 +47,7 @@ void ngui_render(SDL_Surface *screen) {
 
 
 void ngui_receive_event_info_prompt(SDL_Event *event, ngui_info_prompt_data *d) {
-  d->callback("127.0.0.1","user","password");
+//  d->callback("127.0.0.1","user","password");
 }
 
 void ngui_render_info_prompt(SDL_Surface *screen, ngui_info_prompt_data *d) {
@@ -61,25 +61,25 @@ void ngui_render_info_prompt(SDL_Surface *screen, ngui_info_prompt_data *d) {
   for(int n=0;n<100;n++) p3u[n] = d->p3[n];
 
   draw_unitext(screen,
-            (screen->w/2)-(strlen(d->p1)*8),
-            (screen->h/2)-(strlen(d->p1)*8),
-            p1u,
-            0,
-            65535,0,0,0,0);
+              (screen->w/2)-(strlen(d->p1)*8),
+              (screen->h/2)-(strlen(d->p1)*8),
+              p1u,
+              1,
+              65535,0,0,0,0);
 
   draw_unitext(screen,
-            (screen->w/2)-(strlen(d->p2)*8),
-            (screen->h/2)-(strlen(d->p2)*8)+16,
-            p2u,
-            0,
-            65535,0,0,0,0);
+              (screen->w/2)-(strlen(d->p2)*8),
+              (screen->h/2)-(strlen(d->p2)*8)+16,
+              p2u,
+              1,
+              65535,0,0,0,0);
 
   draw_unitext(screen,
-            (screen->w/2)-(strlen(d->p3)*8),
-            (screen->h/2)-(strlen(d->p3)*8)+32,
-            p3u,
-            0,
-            65535,0,0,0,0);
+              (screen->w/2)-(strlen(d->p3)*8),
+              (screen->h/2)-(strlen(d->p3)*8)+32,
+              p3u,
+              1,
+              65535,0,0,0,0);
 }
 
 void ngui_add_info_prompt(int x,int y,
