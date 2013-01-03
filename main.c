@@ -820,9 +820,9 @@ int main(int argc, char **argv) {
 
   }
 
-  printf("arg1: %s\n",open_arg1);
-  printf("arg2: %s\n",open_arg2);
-  printf("arg3: %s\n",open_arg3);
+  rows = 10;
+  cols = 10;
+  vterm_initialisation();
   SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0);
   SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0);
 
@@ -832,13 +832,14 @@ int main(int argc, char **argv) {
     strcpy(open_arg1,ssh_hostname);
     strcpy(open_arg2,ssh_username);
     strcpy(open_arg3,ssh_password);
+
+    printf("arg1: %s\n",open_arg1);
+    printf("arg2: %s\n",open_arg2);
+    printf("arg3: %s\n",open_arg3);
   }
 
   c_open(open_arg1,open_arg2,open_arg3);
 
-  rows = 10;
-  cols = 10;
-  vterm_initialisation();
   
   cond_quit = SDL_CreateCond();
   SDL_Thread *thread3 = SDL_CreateThread(console_read_thread,0);

@@ -30,7 +30,9 @@ ngui_info_prompt_data ngui_info_prompts[50];
 
 void ngui_receive_event(SDL_Event *event) {
   for(int n=0;n<ngui_info_prompts_size;n++) {
-    ngui_receive_event_info_prompt(event,ngui_info_prompts[n]);
+    printf("receving %d\n",n);
+    ngui_info_prompt_data *d = &ngui_info_prompts[n];
+    ngui_receive_event_info_prompt(event,d);
   }
 }
 
