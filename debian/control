@@ -1,0 +1,11 @@
+Source: hterm
+Maintainer: Nava Whiteford <new@sgenomics.co.uk>
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 8)
+
+Package: hterm
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: A SDL Terminal Emulator.

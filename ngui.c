@@ -80,6 +80,10 @@ void ngui_render_info_prompt(SDL_Surface *screen, ngui_info_prompt_data *d) {
               p3u,
               1,
               65535,0,0,0,0);
+
+  // draw data entry boxes
+
+  // draw "OK" button
 }
 
 void ngui_add_info_prompt(int x,int y,
