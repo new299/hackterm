@@ -818,16 +818,21 @@ int main(int argc, char **argv) {
                           0,0,1,
                           receive_ssh_info);
 
+  }
+
+  printf("arg1: %s\n",open_arg1);
+  printf("arg2: %s\n",open_arg2);
+  printf("arg3: %s\n",open_arg3);
+  SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0);
+  SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0);
+
+  if(connection_type == CONNECTION_SSH) {
     for(;ssh_received == false;);
 
     strcpy(open_arg1,ssh_hostname);
     strcpy(open_arg2,ssh_username);
     strcpy(open_arg3,ssh_password);
   }
-
-  printf("arg1: %s\n",open_arg1);
-  printf("arg2: %s\n",open_arg2);
-  printf("arg3: %s\n",open_arg3);
 
   c_open(open_arg1,open_arg2,open_arg3);
 
@@ -836,8 +841,6 @@ int main(int argc, char **argv) {
   vterm_initialisation();
   
   cond_quit = SDL_CreateCond();
-  SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0);
-  SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0);
   SDL_Thread *thread3 = SDL_CreateThread(console_read_thread,0);
   SDL_Thread *thread5 = SDL_CreateThread(timed_repeat       ,0);
 
