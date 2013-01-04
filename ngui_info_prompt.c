@@ -1,5 +1,6 @@
 #include "ngui_info_prompt.h"
 #include "ngui_textlabel.h"
+#include "ngui_button.h"
 #include <string.h>
 #include <SDL/SDL.h>
 #include "nunifont.h"
@@ -30,6 +31,10 @@ void ngui_render_info_prompt(ngui_info_prompt_data *d) {
   // draw "OK" button
 }
 
+void ngui_info_prompt_button_call(char *caller) {
+  ngui_info_prompts[0].callback("127.0.0.1","user","password");
+}
+
 void ngui_add_info_prompt(int x,int y,
                           const char *p1    ,const char *p2    ,const char *p3,
                           int         p1_opt,int         p2_opt,int         p3_opt,
@@ -54,6 +59,11 @@ void ngui_add_info_prompt(int x,int y,
   ngui_add_textlabel((ngui_screen->w/2)-(strlen(p3)*8),
                      (ngui_screen->h/2)-(strlen(p3)*8)+32,
                      p3);
+  
+  ngui_add_button((ngui_screen->w/2)-(strlen(p3)*8),
+                  (ngui_screen->h/2)-(strlen(p3)*8)+64,
+                  "OK",
+                  ngui_info_prompt_button_call);
 
   ngui_info_prompts_size++;
 }
