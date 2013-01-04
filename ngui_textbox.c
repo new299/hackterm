@@ -35,17 +35,26 @@ void ngui_receive_event_textbox(SDL_Event *event, ngui_textbox_data *d) {
   }
 
   // key press processing
-  // normal character 
   
-  if(event->type == SDL_KEYDOWN) {
-    int p;
-    for(p=0;p<100;p++) {
-      if(d->text[p] == 0) break;
-    }
+  if(d->selected) {
+    if(event->type == SDL_KEYDOWN) {
 
-    d->text[p]   = event->key.keysym.unicode;
-    d->text[p+1] = 0;
-    if(d->callback != NULL) d->callback("redraw");
+      if(event->key.keysym.sym == SDLK_BACKSPACE) {
+        int p = strlen(d->text);
+        if(p > 0) d->text[p-1]=0;
+        if(d->callback != NULL) d->callback("redraw");
+      } else {
+        // normal key processing
+        int p;
+        for(p=0;p<100;p++) {
+          if(d->text[p] == 0) break;
+        }
+
+        d->text[p]   = event->key.keysym.unicode;
+        d->text[p+1] = 0;
+        if(d->callback != NULL) d->callback("redraw");
+      }
+    }
   }
 
 
@@ -69,7 +78,7 @@ void ngui_render_textbox(ngui_textbox_data *d) {
                65535,0,0,0,0);
 }
 
-void ngui_add_textbox(int x,int y,char *text,void *callback) {
+void *ngui_add_textbox(int x,int y,char *text,void *callback) {
 
   ngui_textboxs[ngui_textboxs_size].x = x;
   ngui_textboxs[ngui_textboxs_size].y = y;
@@ -80,6 +89,7 @@ void ngui_add_textbox(int x,int y,char *text,void *callback) {
   ngui_textboxs[ngui_textboxs_size].callback = callback;
 
   ngui_textboxs_size++;
+  return &(ngui_textboxs[ngui_textboxs_size-1]);
 }
 
 void ngui_receiveall_textbox(SDL_Event *event) {
@@ -94,4 +104,11 @@ void ngui_renderall_textbox() {
     ngui_textbox_data *d = &ngui_textboxs[n];
     ngui_render_textbox(d);
   }
+}
+
+char *ngui_textbox_get_value(void *tb) {
+
+  printf("returning text %s\n", ((ngui_textbox_data *) tb)->text);
+  return ((ngui_textbox_data *) tb)->text;
+
 }
