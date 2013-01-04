@@ -806,7 +806,7 @@ int main(int argc, char **argv) {
   SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0);
 
   for(;sdl_init_complete == false;);
-  ngui_set_screen(screen);
+  ngui_set_screen(screen, redraw_required);
 
   if(connection_type == CONNECTION_LOCAL) {
     c_open   = &local_open;

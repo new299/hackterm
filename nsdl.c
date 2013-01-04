@@ -55,7 +55,6 @@ void nsdl_rectangle_shade(SDL_Surface *screen,int sx,int sy,int ex,int ey,uint32
   for(int x=sx;x<=ex;x++) {
     for(int y=sy;y<=ey;y++) {
       uint32_t v = nsdl_getpoint(screen,x,y);
-      printf("%u %u %u\n",x,y,v);
       nsdl_point(screen,x,y,v^shade);
     }
     if(x==(sx+((ex-sx)/2))) { shade_inc = 0 - shade_inc; }

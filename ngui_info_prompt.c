@@ -26,13 +26,20 @@ void ngui_receive_event_info_prompt(SDL_Event *event, ngui_info_prompt_data *d) 
 
 void ngui_render_info_prompt(ngui_info_prompt_data *d) {
 
-  // draw data entry boxes
+  // all rendering is performed by component items.
 
-  // draw "OK" button
 }
 
 void ngui_info_prompt_button_call(char *caller) {
+
+  //TODO: this sucks
   ngui_info_prompts[0].callback("127.0.0.1","user","password");
+}
+
+void ngui_info_prompt_textbox_call(char *caller) {
+
+  // trigger a redraw
+  ngui_redraw_required();
 }
 
 void ngui_add_info_prompt(int x,int y,
@@ -59,6 +66,11 @@ void ngui_add_info_prompt(int x,int y,
   ngui_add_textlabel((ngui_screen->w/2)-(strlen(p3)*8),
                      (ngui_screen->h/2)-(strlen(p3)*8)+32,
                      p3);
+
+  ngui_add_textbox((ngui_screen->w/2)+20,
+                   (ngui_screen->h/2)-(strlen(p1)*8),
+                   "localhost",ngui_info_prompt_textbox_call
+                  );
   
   ngui_add_button((ngui_screen->w/2)-(strlen(p3)*8),
                   (ngui_screen->h/2)-(strlen(p3)*8)+64,
