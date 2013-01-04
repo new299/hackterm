@@ -1,3 +1,5 @@
+#include "ngui_info_prompt.h"
+#include "ngui_textlabel.h"
 #include <string.h>
 #include <SDL/SDL.h>
 #include "nunifont.h"
@@ -21,36 +23,7 @@ void ngui_receive_event_info_prompt(SDL_Event *event, ngui_info_prompt_data *d) 
 //  d->callback("127.0.0.1","user","password");
 }
 
-void ngui_render_info_prompt(SDL_Surface *screen, ngui_info_prompt_data *d) {
-
-  uint16_t p1u[100];
-  uint16_t p2u[100];
-  uint16_t p3u[100];
-
-  for(int n=0;n<100;n++) p1u[n] = d->p1[n];
-  for(int n=0;n<100;n++) p2u[n] = d->p2[n];
-  for(int n=0;n<100;n++) p3u[n] = d->p3[n];
-
-  draw_unitext(screen,
-              (screen->w/2)-(strlen(d->p1)*8),
-              (screen->h/2)-(strlen(d->p1)*8),
-              p1u,
-              1,
-              65535,0,0,0,0);
-
-  draw_unitext(screen,
-              (screen->w/2)-(strlen(d->p2)*8),
-              (screen->h/2)-(strlen(d->p2)*8)+16,
-              p2u,
-              1,
-              65535,0,0,0,0);
-
-  draw_unitext(screen,
-              (screen->w/2)-(strlen(d->p3)*8),
-              (screen->h/2)-(strlen(d->p3)*8)+32,
-              p3u,
-              1,
-              65535,0,0,0,0);
+void ngui_render_info_prompt(ngui_info_prompt_data *d) {
 
   // draw data entry boxes
 
@@ -71,6 +44,16 @@ void ngui_add_info_prompt(int x,int y,
   ngui_info_prompts[ngui_info_prompts_size].p2_opt = p2_opt;
   ngui_info_prompts[ngui_info_prompts_size].p3_opt = p3_opt;
   ngui_info_prompts[ngui_info_prompts_size].callback = callback;
+  
+  ngui_add_textlabel((ngui_screen->w/2)-(strlen(p1)*8),
+                     (ngui_screen->h/2)-(strlen(p1)*8),
+                     p1);
+  ngui_add_textlabel((ngui_screen->w/2)-(strlen(p2)*8),
+                     (ngui_screen->h/2)-(strlen(p2)*8)+16,
+                     p2);
+  ngui_add_textlabel((ngui_screen->w/2)-(strlen(p3)*8),
+                     (ngui_screen->h/2)-(strlen(p3)*8)+32,
+                     p3);
 
   ngui_info_prompts_size++;
 }
@@ -82,9 +65,9 @@ void ngui_receiveall_info_prompt(SDL_Event *event) {
   }
 }
 
-void ngui_renderall_info_prompt(SDL_Surface *screen) {
+void ngui_renderall_info_prompt() {
   for(int n=0;n<ngui_info_prompts_size;n++) {
     ngui_info_prompt_data *d = &ngui_info_prompts[n];
-    ngui_render_info_prompt(screen,d);
+    ngui_render_info_prompt(d);
   }
 }

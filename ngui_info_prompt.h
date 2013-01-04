@@ -1,5 +1,5 @@
-#ifndef NGUI
-#define NGUI
+#ifndef NGUI_INFO_PROMPT
+#define NGUI_INFO_PROMPT
 
 #include <SDL/SDL.h>
 
@@ -10,6 +10,8 @@ void ngui_add_info_prompt(int x,int y,
 
 void ngui_receiveall_info_prompt(SDL_Event *event);
 
-void ngui_renderall_info_prompt(SDL_Surface *screen);
+void ngui_renderall_info_prompt();
+
+extern SDL_Surface *ngui_screen;
 
 #endif
