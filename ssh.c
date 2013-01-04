@@ -62,87 +62,90 @@ int ssh_open(char *hostname,char *username,char *password) {
 
       return -1;
   }
-    /* Create a session instance and start it up. This will trade welcome
-     * banners, exchange keys, and setup crypto, compression, and MAC layers
-     */
-    session = libssh2_session_init();
-    if (libssh2_session_handshake(session, sock)) {
-        fprintf(stderr, "Failure establishing SSH session\n");
-        return -1;
-    }
 
-    /* At this point we havn't authenticated. The first thing to do is check
-     * the hostkey's fingerprint against our known hosts Your app may have it
-     * hard coded, may go to a file, may present it to the user, that's your
-     * call
-     */
-    const char *fingerprint;
-    fingerprint = libssh2_hostkey_hash(session, LIBSSH2_HOSTKEY_HASH_SHA1);
-    fprintf(stderr, "Fingerprint: ");
-    for(i = 0; i < 20; i++) {
-        fprintf(stderr, "%02X ", (unsigned char)fingerprint[i]);
-    }
-    fprintf(stderr, "\n");
-    /* check what authentication methods are available */
-    char *userauthlist = libssh2_userauth_list(session, username, strlen(username));
-    fprintf(stderr, "Authentication methods: %s\n", userauthlist);
-    if (strstr(userauthlist, "password") != NULL) {
-        auth_pw |= 1;
-    }
-    if (strstr(userauthlist, "keyboard-interactive") != NULL) {
-        auth_pw |= 2;
-    }
-    if (strstr(userauthlist, "publickey") != NULL) {
-        auth_pw |= 4;
-    }
+  /* Create a session instance and start it up. This will trade welcome
+   * banners, exchange keys, and setup crypto, compression, and MAC layers
+   */
+  session = libssh2_session_init();
+  if (libssh2_session_handshake(session, sock)) {
+      fprintf(stderr, "Failure establishing SSH session\n");
+      return -1;
+  }
 
-    /* We could authenticate via password */
-    if (libssh2_userauth_password(session, username, password)) {
-      fprintf(stderr, "\tAuthentication by password failed!\n");
-      return 0;
-    } else {
-      fprintf(stderr, "\tAuthentication by password succeeded.\n");
-    }
-        ///* Or by public key */
-        //if (libssh2_userauth_publickey_fromfile(session, username, keyfile1,
-        //                                        keyfile2, password)) {
-        //    fprintf(stderr, "\tAuthentication by public key failed!\n");
-        //    goto shutdown;
-        //} else {
-        //    fprintf(stderr, "\tAuthentication by public key succeeded.\n");
-        //}
-    /* Some environment variables may be set,
-     * It's up to the server which ones it'll allow though
-     */
+  /* At this point we havn't authenticated. The first thing to do is check
+   * the hostkey's fingerprint against our known hosts Your app may have it
+   * hard coded, may go to a file, may present it to the user, that's your
+   * call
+   */
+  const char *fingerprint;
+  fingerprint = libssh2_hostkey_hash(session, LIBSSH2_HOSTKEY_HASH_SHA1);
+  fprintf(stderr, "Fingerprint: ");
+  for(i = 0; i < 20; i++) {
+      fprintf(stderr, "%02X ", (unsigned char)fingerprint[i]);
+  }
+  fprintf(stderr, "\n");
+  /* check what authentication methods are available */
+  char *userauthlist = libssh2_userauth_list(session, username, strlen(username));
+  fprintf(stderr, "Authentication methods: %s\n", userauthlist);
+  if (strstr(userauthlist, "password") != NULL) {
+      auth_pw |= 1;
+  }
+  if (strstr(userauthlist, "keyboard-interactive") != NULL) {
+      auth_pw |= 2;
+  }
+  if (strstr(userauthlist, "publickey") != NULL) {
+      auth_pw |= 4;
+  }
 
- /* Request a shell */ 
-    if (!(channel = libssh2_channel_open_session(session))) {
+  /* We could authenticate via password */
+  if (libssh2_userauth_password(session, username, password)) {
+    fprintf(stderr, "\tAuthentication by password failed!\n");
+    return -2;
+  } else {
+    fprintf(stderr, "\tAuthentication by password succeeded.\n");
+  }
+      ///* Or by public key */
+      //if (libssh2_userauth_publickey_fromfile(session, username, keyfile1,
+      //                                        keyfile2, password)) {
+      //    fprintf(stderr, "\tAuthentication by public key failed!\n");
+      //    goto shutdown;
+      //} else {
+      //    fprintf(stderr, "\tAuthentication by public key succeeded.\n");
+      //}
+  /* Some environment variables may be set,
+   * It's up to the server which ones it'll allow though
+   */
 
-        fprintf(stderr, "Unable to open a session\n");
-    }
+/* Request a shell */ 
+  if (!(channel = libssh2_channel_open_session(session))) {
+    fprintf(stderr, "Unable to open a session\n");
+    return -4;
+  }
 
-    libssh2_channel_setenv(channel, "TERM", "xterm");
+  libssh2_channel_setenv(channel, "TERM", "xterm");
 
-    /* Request a terminal with 'vanilla' terminal emulation
-     * See /etc/termcap for more options
-     */
-    int error=0;
-    if (error = libssh2_channel_request_pty(channel, "vanilla")) {
-        fprintf(stderr, "Failed requesting pty: %d\n",error);
-        if(error == LIBSSH2_ERROR_ALLOC) printf("alloc error\n");
-        if(error == LIBSSH2_ERROR_SOCKET_SEND) printf("eror socket\n");
-        if(error == LIBSSH2_ERROR_CHANNEL_REQUEST_DENIED) printf("ddeeenied\n");
-        if(error == LIBSSH2_ERROR_EAGAIN) printf("eagain\n");
+  /* Request a terminal with 'vanilla' terminal emulation
+   * See /etc/termcap for more options
+   */
+  int error=0;
+  if (error = libssh2_channel_request_pty(channel, "vanilla")) {
+    fprintf(stderr, "Failed requesting pty: %d\n",error);
+    if(error == LIBSSH2_ERROR_ALLOC) printf("alloc error\n");
+    if(error == LIBSSH2_ERROR_SOCKET_SEND) printf("eror socket\n");
+    if(error == LIBSSH2_ERROR_CHANNEL_REQUEST_DENIED) printf("ddeeenied\n");
+    if(error == LIBSSH2_ERROR_EAGAIN) printf("eagain\n");
 
-        return 0;
-    }
+    return -3;
+  }
 
-    /* Open a SHELL on that pty */
-    if (libssh2_channel_shell(channel)) {
-        fprintf(stderr, "Unable to request shell on allocated pty\n");
-    }
+  /* Open a SHELL on that pty */
+  if (libssh2_channel_shell(channel)) {
+    fprintf(stderr, "Unable to request shell on allocated pty\n");
+    return -1;
+  }
   printf("connection successful\n");
   libssh2_channel_set_blocking(channel,1);
+  return 1;
 }
 
 int ssh_write(char *bytes,int len) {

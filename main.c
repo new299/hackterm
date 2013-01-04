@@ -83,11 +83,11 @@ SDL_mutex  *quit_mutex;
 VTermState *vs;
 
 // Funtions used to communicate with host
-int (*c_open)(char *hostname,char *username, char *password);  
-int (*c_close)();                              
-int (*c_write)(char *bytes,int len);       
-int (*c_read)(char *bytes,int len);    
-int (*c_resize)(int rows,int cols);
+int (*c_open)(char *hostname,char *username, char *password) = 0;
+int (*c_close)() = 0;
+int (*c_write)(char *bytes,int len) = 0;       
+int (*c_read)(char *bytes,int len) = 0;    
+int (*c_resize)(int rows,int cols) = 0;
 
 void scroll_buffer_get(size_t line_number,VTermScreenCell **line);
 
@@ -324,7 +324,7 @@ void terminal_resize(SDL_Surface *screen,VTerm *vt,int *cols,int *rows) {
 
   printf("resized: %d %d\n",*cols,*rows);
 
-  (*c_resize)(*rows,*cols);
+  if(c_resize != NULL) (*c_resize)(*rows,*cols);
 
   SDL_mutexP(vterm_mutex);
   if(vt != 0) vterm_set_size(vt,*rows,*cols);
@@ -421,7 +421,7 @@ void sdl_render_thread() {
   //const SDL_VideoInfo *vid = SDL_GetVideoInfo();
   //int maxwidth  = vid->current_w;
   //int maxheight = vid->current_h-(font_height+font_space);
- 
+
   screen=SDL_SetVideoMode(640,480,32,SDL_RESIZABLE | SDL_DOUBLEBUF);
   if(screen==NULL) {
     printf("Failed SDL_SetVideoMode: %d",SDL_GetError());
@@ -785,6 +785,7 @@ int main(int argc, char **argv) {
   quit_mutex   = SDL_CreateMutex();
   redraw_sem   = SDL_CreateSemaphore(1);
   inline_data_mutex = SDL_CreateMutex();
+  cond_quit = SDL_CreateCond();
 
   int connection_type = CONNECTION_LOCAL; // replace with commandline lookup
   if(argc > 1) {
@@ -797,6 +798,15 @@ int main(int argc, char **argv) {
   char open_arg1[100];// = "127.0.0.1        ";
   char open_arg2[100];// = "new              ";
   char open_arg3[100];// = "password         ";
+  
+  rows = 10;
+  cols = 10;
+  vterm_initialisation();
+  SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0);
+  SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0);
+
+  for(;sdl_init_complete == false;);
+  ngui_set_screen(screen, redraw_required);
 
   if(connection_type == CONNECTION_LOCAL) {
     c_open   = &local_open;
@@ -819,15 +829,6 @@ int main(int argc, char **argv) {
                           0,0,1,
                           receive_ssh_info);
 
-  }
-
-  rows = 10;
-  cols = 10;
-  vterm_initialisation();
-  SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0);
-  SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0);
-
-  if(connection_type == CONNECTION_SSH) {
     for(;ssh_received == false;);
 
     strcpy(open_arg1,ssh_hostname);
@@ -839,15 +840,21 @@ int main(int argc, char **argv) {
     printf("arg3: %s\n",open_arg3);
   }
 
-  c_open(open_arg1,open_arg2,open_arg3);
+  int open_ret = c_open(open_arg1,open_arg2,open_arg3);
 
   
-  cond_quit = SDL_CreateCond();
-  SDL_Thread *thread3 = SDL_CreateThread(console_read_thread,0);
-  SDL_Thread *thread5 = SDL_CreateThread(timed_repeat       ,0);
+  SDL_Thread *thread3;
+  SDL_Thread *thread5;
+  if(open_ret >= 0) {
+    SDL_Thread *thread3 = SDL_CreateThread(console_read_thread,0);
+    SDL_Thread *thread5 = SDL_CreateThread(timed_repeat       ,0);
 
-  SDL_mutexP(quit_mutex);
-  SDL_CondWait(cond_quit,quit_mutex);
+    SDL_mutexP(quit_mutex);
+
+    SDL_CondWait(cond_quit,quit_mutex);
+  } else {
+    printf("Unable to connect\n");
+  }
 
   SDL_Quit();
 
