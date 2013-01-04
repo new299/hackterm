@@ -13,10 +13,6 @@ int local_open(char *a,char *b,char *c) {
 
   char *termset = "TERM=xterm";
   putenv(termset);
-  //flag|=O_NONBLOCK;
-  //fcntl(fd,F_SETFL,flag);
-
-  //fcntl(fd, F_SETFL, FNDELAY);
 
   printf("fd: %d",fd);
   if(pid == 0) {
@@ -25,14 +21,12 @@ int local_open(char *a,char *b,char *c) {
     args[1] =""; 
     args[2] = 0;
 
-    //execv("/bin/bash",args);
     execl("/bin/bash","bash",NULL);
-    return 0;
+    return 1;
   }
 
-//  grantpt(fd);
-//  unlockpt(fd);
   printf("fd: %d\n",fd);
+  return 1;
 }
 
 int local_write(char *buffer,int len) {

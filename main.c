@@ -840,14 +840,21 @@ int main(int argc, char **argv) {
     printf("arg3: %s\n",open_arg3);
   }
 
-  c_open(open_arg1,open_arg2,open_arg3);
+  int open_ret = c_open(open_arg1,open_arg2,open_arg3);
 
   
-  SDL_Thread *thread3 = SDL_CreateThread(console_read_thread,0);
-  SDL_Thread *thread5 = SDL_CreateThread(timed_repeat       ,0);
+  SDL_Thread *thread3;
+  SDL_Thread *thread5;
+  if(open_ret >= 0) {
+    SDL_Thread *thread3 = SDL_CreateThread(console_read_thread,0);
+    SDL_Thread *thread5 = SDL_CreateThread(timed_repeat       ,0);
 
-  SDL_mutexP(quit_mutex);
-  SDL_CondWait(cond_quit,quit_mutex);
+    SDL_mutexP(quit_mutex);
+
+    SDL_CondWait(cond_quit,quit_mutex);
+  } else {
+    printf("Unable to connect\n");
+  }
 
   SDL_Quit();
 
