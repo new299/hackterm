@@ -5,6 +5,7 @@
 #include <string.h>
 #include <SDL/SDL.h>
 #include "nunifont.h"
+#include <stdbool.h>
 
 typedef struct {
   int x;
@@ -77,15 +78,15 @@ void ngui_add_info_prompt(int x,int y,
 
   void *tb1 = ngui_add_textbox((ngui_screen->w/2)+20,
                                (ngui_screen->h/2)-(strlen(p1)*8),
-                               "localhost",ngui_info_prompt_textbox_call
+                               "localhost",false,ngui_info_prompt_textbox_call
                               );
   void *tb2 = ngui_add_textbox((ngui_screen->w/2)+20,
                                (ngui_screen->h/2)-(strlen(p2)*8)+32,
-                               "user",ngui_info_prompt_textbox_call
+                               "user",false,ngui_info_prompt_textbox_call
                               );
   void *tb3 = ngui_add_textbox((ngui_screen->w/2)+20,
                                (ngui_screen->h/2)-(strlen(p3)*8)+64,
-                               "password",ngui_info_prompt_textbox_call
+                               "password",true,ngui_info_prompt_textbox_call
                               );
   
   ngui_info_prompts[ngui_info_prompts_size].textbox1 = tb1;

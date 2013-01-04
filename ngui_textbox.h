@@ -1,9 +1,10 @@
 #ifndef NGUI_BUTTON
 #define NGUI_BUTTON
 
+#include <stdbool.h>
 #include <SDL/SDL.h>
 
-void *ngui_add_textbox(int x,int y,char *text,void *callback);
+void *ngui_add_textbox(int x,int y,char *text,bool passwordbox,void *callback);
 
 void ngui_receiveall_textbox(SDL_Event *event);
 

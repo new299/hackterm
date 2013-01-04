@@ -6,11 +6,12 @@
 #include <stdbool.h>
 
 typedef struct {
-  int x;
-  int y;
-  int x_padding;
-  int y_padding;
-  int width;
+  int  x;
+  int  y;
+  bool passwordbox;
+  int  x_padding;
+  int  y_padding;
+  int  width;
   bool selected;
   char text[100];
   void (*callback)(char *);
@@ -70,18 +71,32 @@ void ngui_render_textbox(ngui_textbox_data *d) {
     nsdl_rectangle_shade(ngui_screen,d->x-d->x_padding,d->y-d->y_padding,d->x+(strlen(d->text))*8+d->x_padding,d->y+16+d->y_padding,1000,10000);
   }
 
-  draw_unitext(ngui_screen,
-               d->x,
-               d->y,
-               text,
-               0,
-               65535,0,0,0,0);
+  if(d->passwordbox == false) {
+    draw_unitext(ngui_screen,
+                 d->x,
+                 d->y,
+                 text,
+                 0,
+                 65535,0,0,0,0);
+  } else {
+    for(int n=0;n<100;n++) {
+      if(text[n] != 0) text[n] = '*';
+    }
+
+    draw_unitext(ngui_screen,
+                 d->x,
+                 d->y,
+                 text,
+                 0,
+                 65535,0,0,0,0);
+  }
 }
 
-void *ngui_add_textbox(int x,int y,char *text,void *callback) {
+void *ngui_add_textbox(int x,int y,char *text,bool passwordbox,void *callback) {
 
   ngui_textboxs[ngui_textboxs_size].x = x;
   ngui_textboxs[ngui_textboxs_size].y = y;
+  ngui_textboxs[ngui_textboxs_size].passwordbox = passwordbox;
   ngui_textboxs[ngui_textboxs_size].x_padding = 10;
   ngui_textboxs[ngui_textboxs_size].y_padding = 10;
   ngui_textboxs[ngui_textboxs_size].width     = 8*20;
