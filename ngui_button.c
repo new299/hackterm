@@ -1,5 +1,6 @@
 #include <string.h>
 #include <SDL/SDL.h>
+#include "nsdl.h"
 #include "nunifont.h"
 #include "ngui.h"
 
@@ -17,7 +18,12 @@ void ngui_receive_event_button(SDL_Event *event, ngui_button_data *d) {
   if(event->type == SDL_MOUSEBUTTONDOWN) {
     // event->button.x;
     // event->button.y;
-    d->callback("press");
+    int x = event->button.x;
+    int y = event->button.y;
+    if((x > (d->x-10)) && (x < ((d->x)+(strlen(d->text)*8)+10)) &&
+       (y > (d->y-10)) && (y < ((d->y)+16+10))) {
+      d->callback("press");
+    }
   }
 }
 
@@ -25,6 +31,8 @@ void ngui_render_button(ngui_button_data *d) {
 
   uint16_t text[100];
   for(int n=0;n<100;n++) text[n] = d->text[n];
+
+  nsdl_rectangle_shade(ngui_screen,d->x-10,d->y-10,d->x+(strlen(d->text))*8+10,d->y+16+10,1000,10000);
 
   draw_unitext(ngui_screen,
               d->x,
