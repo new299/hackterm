@@ -1,6 +1,8 @@
+* screen resize doesn't seem to work correctly in ssh
+* terminal not set correctly in ssh
+
 * double click to select one word, tripple click select sentence, four paragraph 
 * scrollbar
-* builtin ssh support
 * Why ^H in ttyter, rtorrent
 * Bell.
 
@@ -23,6 +25,7 @@
 * menuing system
 
 DONE
+* builtin ssh support
 * When copying text, allow the user selection to span multiple screens with scrolling.
 * terminate correctly (ctrl-alt-C in dwm)
 * Clearing the screen clears Regis graphics.
