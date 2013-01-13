@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <netdb.h>
 
 //const char *keyfile1="~/.ssh/id_rsa.pub";
 //const char *keyfile2="~/.ssh/id_rsa";
@@ -44,18 +45,46 @@ int ssh_open(char *hostname,char *username,char *password) {
   #ifdef WIN32
   WSAStartup(MAKEWORD(2,0), &wsadata);
   #endif
+  
+  struct sockaddr_in sin;
 
   unsigned long hostaddr;
   hostaddr = inet_addr(hostname);
+
+  struct addrinfo *result;
+  struct addrinfo *res;
+  int error;
+ 
+  // resolve
+  error = getaddrinfo(hostname, NULL, NULL, &result);
+  if (error != 0) {
+    return -1;
+  }
+
+  /* loop over all returned results and do inverse lookups, that the last lookup found. */
+  for (res = result; res != NULL; res = res->ai_next) {   
+    char hostname[1000] = "";
+
+    error = getnameinfo(res->ai_addr, res->ai_addrlen, hostname, 1000, NULL, 0, 0); 
+    if (error != 0) {
+      continue;
+    }
+
+    if (*hostname != '\0') {
+      printf("hostname: %s\n", hostname);
+      sin = *((struct sockaddr_in *) (res->ai_addr));
+    }
+  }
+
+  freeaddrinfo(result);
    
-  struct sockaddr_in sin;
 
   sock = socket(AF_INET, SOCK_STREAM, 0);
   printf("socket: %d\n",sock);
 
-  sin.sin_family = AF_INET;
+  //sin.sin_family = AF_INET;
   sin.sin_port = htons(22);
-  sin.sin_addr.s_addr = hostaddr;
+  //sin.sin_addr.s_addr = hostaddr;
   if (connect(sock, (struct sockaddr*)(&sin),
               sizeof(struct sockaddr_in)) != 0) {
       fprintf(stderr, "failed to connect to: %s error: %d\n",hostname,errno);
@@ -127,7 +156,7 @@ int ssh_open(char *hostname,char *username,char *password) {
   /* Request a terminal with 'vanilla' terminal emulation
    * See /etc/termcap for more options
    */
-  int error=0;
+  error=0;
   if (error = libssh2_channel_request_pty(channel, "vanilla")) {
     fprintf(stderr, "Failed requesting pty: %d\n",error);
     if(error == LIBSSH2_ERROR_ALLOC) printf("alloc error\n");
@@ -178,8 +207,7 @@ int ssh_close() {
      * libssh2_channel_direct_tcpip()
      */
 
-    libssh2_session_disconnect(session,
-                               "Normal Shutdown, Thank you for playing");
+    libssh2_session_disconnect(session, "Sesson closed");
     libssh2_session_free(session);
 
 #ifdef WIN32
