@@ -459,12 +459,12 @@ void console_read_thread() {
     len = c_read(buffer, sizeof(buffer)-1);
     
     if(len < 0) {
-      if(errno == EIO) {
+ //     if(errno == EIO) {
         hterm_quit = true;
         SDL_CondSignal(cond_quit);
 
         break;
-      }
+ //     }
     }
 
     if(len > 0) {
@@ -768,6 +768,8 @@ char ssh_hostname[100];
 char ssh_username[100];
 char ssh_password[100];
 
+int prompt_id = 0;
+
 void receive_ssh_info(char *o1,char *o2,char *o3) {
 
   strcpy(ssh_hostname,o1);
@@ -775,6 +777,8 @@ void receive_ssh_info(char *o1,char *o2,char *o3) {
   strcpy(ssh_password,o3);
 
   ssh_received=true;
+
+  ngui_delete_info_prompt(prompt_id);
 }
 
 int main(int argc, char **argv) {
@@ -824,10 +828,10 @@ int main(int argc, char **argv) {
 
     // we now need to read connection information.
     
-    ngui_add_info_prompt(-1,-1,
-                         "hostname:","username:","password:",
-                          0,0,1,
-                          receive_ssh_info);
+    prompt_id = ngui_add_info_prompt(-1,-1,
+                                     "hostname:","username:","password:",
+                                     0,0,1,
+                                     receive_ssh_info);
 
     for(;ssh_received == false;);
 

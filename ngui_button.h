@@ -3,7 +3,9 @@
 
 #include <SDL/SDL.h>
 
-void ngui_add_button(int x,int y,char *text,void *callback);
+int ngui_add_button(int x,int y,char *text,void *callback);
+
+void ngui_delete_button(int id);
 
 void ngui_receiveall_button(SDL_Event *event);
 

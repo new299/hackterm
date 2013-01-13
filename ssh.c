@@ -145,7 +145,7 @@ int ssh_open(char *hostname,char *username,char *password) {
    * It's up to the server which ones it'll allow though
    */
 
-/* Request a shell */ 
+  /* Request a shell */ 
   if (!(channel = libssh2_channel_open_session(session))) {
     fprintf(stderr, "Unable to open a session\n");
     return -4;
@@ -190,7 +190,13 @@ int ssh_write(char *bytes,int len) {
 
 int ssh_read(char *bytes,int len) {
   printf("in read\n");
-  return libssh2_channel_read(channel,bytes,len);
+  int l = libssh2_channel_read(channel,bytes,len);
+
+  printf("read returning %d\n",l);
+
+  if(l==0) return -1; // 0 means the channel is closed as the above function should block for data.
+
+  return l;
      // libssh2_channel_read_stderr()
 }
 

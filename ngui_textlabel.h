@@ -3,7 +3,9 @@
 
 #include <SDL/SDL.h>
 
-void ngui_add_textlabel(int x,int y,char *text);
+int ngui_add_textlabel(int x,int y,char *text);
+
+void ngui_delete_textlabel(int id);
 
 void ngui_receiveall_textlabel(SDL_Event *event);
 

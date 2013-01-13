@@ -6,6 +6,7 @@
 #include <stdbool.h>
 
 typedef struct {
+  bool valid;
   int  x;
   int  y;
   bool passwordbox;
@@ -92,8 +93,13 @@ void ngui_render_textbox(ngui_textbox_data *d) {
   }
 }
 
-void *ngui_add_textbox(int x,int y,char *text,bool passwordbox,void *callback) {
+int ngui_delete_textbox(int id) {
+  ngui_textboxs[id].valid = false;
+}
 
+int ngui_add_textbox(int x,int y,char *text,bool passwordbox,void *callback) {
+
+  ngui_textboxs[ngui_textboxs_size].valid = true;
   ngui_textboxs[ngui_textboxs_size].x = x;
   ngui_textboxs[ngui_textboxs_size].y = y;
   ngui_textboxs[ngui_textboxs_size].passwordbox = passwordbox;
@@ -104,26 +110,29 @@ void *ngui_add_textbox(int x,int y,char *text,bool passwordbox,void *callback) {
   ngui_textboxs[ngui_textboxs_size].callback = callback;
 
   ngui_textboxs_size++;
-  return &(ngui_textboxs[ngui_textboxs_size-1]);
+  return ngui_textboxs_size-1;
 }
 
 void ngui_receiveall_textbox(SDL_Event *event) {
   for(int n=0;n<ngui_textboxs_size;n++) {
     ngui_textbox_data *d = &ngui_textboxs[n];
-    ngui_receive_event_textbox(event,d);
+    if(d->valid == true) {
+      ngui_receive_event_textbox(event,d);
+    }
   }
 }
 
 void ngui_renderall_textbox() {
   for(int n=0;n<ngui_textboxs_size;n++) {
     ngui_textbox_data *d = &ngui_textboxs[n];
-    ngui_render_textbox(d);
+    if(d->valid == true) {
+      ngui_render_textbox(d);
+    }
   }
 }
 
-char *ngui_textbox_get_value(void *tb) {
+char *ngui_textbox_get_value(int id) {
 
-  printf("returning text %s\n", ((ngui_textbox_data *) tb)->text);
-  return ((ngui_textbox_data *) tb)->text;
+  return ngui_textboxs[id].text;
 
 }

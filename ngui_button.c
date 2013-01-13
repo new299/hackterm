@@ -3,9 +3,10 @@
 #include "nsdl.h"
 #include "nunifont.h"
 #include "ngui.h"
-
+#include <stdbool.h>
 
 typedef struct {
+  bool valid;
   int x;
   int y;
   int x_padding;
@@ -45,8 +46,9 @@ void ngui_render_button(ngui_button_data *d) {
               65535,0,0,0,0);
 }
 
-void ngui_add_button(int x,int y,char *text,void *callback) {
+int ngui_add_button(int x,int y,char *text,void *callback) {
 
+  ngui_buttons[ngui_buttons_size].valid=true;
   ngui_buttons[ngui_buttons_size].x = x;
   ngui_buttons[ngui_buttons_size].y = y;
   ngui_buttons[ngui_buttons_size].x_padding = 10;
@@ -55,18 +57,30 @@ void ngui_add_button(int x,int y,char *text,void *callback) {
   ngui_buttons[ngui_buttons_size].callback = callback;
 
   ngui_buttons_size++;
+
+  return ngui_buttons_size-1;
+}
+
+void ngui_delete_button(int id) {
+
+  ngui_buttons[id].valid = false;
+
 }
 
 void ngui_receiveall_button(SDL_Event *event) {
   for(int n=0;n<ngui_buttons_size;n++) {
     ngui_button_data *d = &ngui_buttons[n];
-    ngui_receive_event_button(event,d);
+    if(d->valid) {
+      ngui_receive_event_button(event,d);
+    }
   }
 }
 
 void ngui_renderall_button() {
   for(int n=0;n<ngui_buttons_size;n++) {
     ngui_button_data *d = &ngui_buttons[n];
-    ngui_render_button(d);
+    if(d->valid) {
+      ngui_render_button(d);
+    }
   }
 }
