@@ -1,3 +1,6 @@
+TODO
+----
+
 * screen resize doesn't seem to work correctly in ssh
 * terminal not set correctly in ssh
 
@@ -20,11 +23,14 @@
 * support for emoji unicode fonts (requires support beyond basic multilingual plane in libvterm and additions to unifont)
 * a lot of borked vttest functionality
 * mouse terminal support
+* cursor rendering options (hide, blink etc)
 
 * capture mode
 * menuing system
 
 DONE
+----
+
 * builtin ssh support
 * When copying text, allow the user selection to span multiple screens with scrolling.
 * terminate correctly (ctrl-alt-C in dwm)
