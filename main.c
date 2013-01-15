@@ -17,11 +17,9 @@
 #include <unistd.h>
 #include <termios.h>
 #include "vterm.h"
-//#include "utf8proc.h"
 #include <locale.h>
 
 #include "nunifont.h"
-#include <pty.h>
 #include <limits.h>
 
 #include "nsdl.h"
@@ -35,6 +33,8 @@
 
 #define CONNECTION_LOCAL 1
 #define CONNECTION_SSH   2
+
+#define IPHONE_BUILD
 
 void redraw_required();
 
@@ -101,7 +101,18 @@ void inline_data_render() {
   SDL_mutexP(inline_data_mutex);                                   
   int res = SDL_BlitSurface(inline_data_layer,NULL,screen,NULL);   
   SDL_mutexV(inline_data_mutex);                                   
-} 
+}
+
+void mouse_to_select_box(int   sx,int   sy,int so,
+                         int   ex,int   ey,int eo,
+                         int *stx,int *sty,int *etx,int *ety) {
+    
+    *stx=floor(((float)sx/(font_width +font_space)));
+    *etx=ceil( ((float)ex/(font_width +font_space)));
+    *sty=floor(((float)sy/(font_height+font_space)))-so;
+    *ety=ceil( ((float)ey/(font_height+font_space)))-eo;
+    
+}
 
 VTermScreenCell *grab_row(int trow,bool *dont_free) {
 
@@ -525,17 +536,6 @@ void copy_text(uint16_t *itext,int len) {
   //echo "test" | xclip -i 
 }
 
-void mouse_to_select_box(int   sx,int   sy,int so,
-                         int   ex,int   ey,int eo,
-                         int *stx,int *sty,int *etx,int *ety) {
-
-  *stx=floor(((float)sx/(font_width +font_space)));
-  *etx=ceil( ((float)ex/(font_width +font_space)));
-  *sty=floor(((float)sy/(font_height+font_space)))-so;
-  *ety=ceil( ((float)ey/(font_height+font_space)))-eo;
-
-}
-
 void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_end_y,uint16_t **itext,int *ilen) {
 
   int len=0;
@@ -643,7 +643,7 @@ void sdl_read_thread() {
     process_mouse_event(&event);
     ngui_receive_event(&event);
     
-    uint8_t *keystate = SDL_GetKeyState(NULL);
+    uint8_t *keystate;// = SDL_GetKeyState(NULL); // FIXFIXFIXFIXFIXFIX SDL1.3
 
     if(event.type == SDL_QUIT) {
       hterm_quit = true;
@@ -797,6 +797,10 @@ int main(int argc, char **argv) {
       connection_type = CONNECTION_SSH; // replace with commandline lookup
     }
   }
+    
+  #ifdef IPHONE_BUILD
+    connection_type = CONNECTION_SSH;
+  #endif
 
   //char *open_arg1 = "localhost";
   char open_arg1[100];// = "127.0.0.1        ";
@@ -806,8 +810,8 @@ int main(int argc, char **argv) {
   rows = 10;
   cols = 10;
   vterm_initialisation();
-  SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0);
-  SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0);
+  SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0,0);
+  SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0,0);
 
   for(;sdl_init_complete == false;);
   ngui_set_screen(screen, redraw_required);
@@ -850,8 +854,8 @@ int main(int argc, char **argv) {
   SDL_Thread *thread3;
   SDL_Thread *thread5;
   if(open_ret >= 0) {
-    SDL_Thread *thread3 = SDL_CreateThread(console_read_thread,0);
-    SDL_Thread *thread5 = SDL_CreateThread(timed_repeat       ,0);
+    SDL_Thread *thread3 = SDL_CreateThread(console_read_thread,0,0);
+    SDL_Thread *thread5 = SDL_CreateThread(timed_repeat       ,0,0);
 
     SDL_mutexP(quit_mutex);
 

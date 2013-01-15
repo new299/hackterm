@@ -39,17 +39,22 @@ int file_end=0;
 void info_callback(png_structp png_ptr, png_infop info) {
 /* Do any setup here, including setting any of the transformations mentioned in the Reading PNG files section. For now, you _must_ call either png_start_read_image() or png_read_update_info() after all the transformations are set (even if you don’t set any). You may start getting rows before png_process_data() returns, so this is your last chance to prepare for that.  */
 
-  printf("image height %u\n",info->height);
-  printf("image width  %u\n",info->width );
-  printf("pixel depth  %u\n",info->pixel_depth);
+    
+  width = png_get_image_width(png_ptr,info);
+  height = png_get_image_height(png_ptr,info);
+  pixel_depth = png_get_bit_depth(png_ptr,info);
+  int row_bytes   = png_get_rowbytes(png_ptr,info);
+  //printf("image height %u\n",info->height);
+  //printf("image width  %u\n",info->width );
+  //printf("pixel depth  %u\n",info->pixel_depth);
 
-  width  = info->width;
-  height = info->height;
-  pixel_depth = info->pixel_depth;
+  //width  = info->width;
+  //height = info->height;
+  //pixel_depth = info->pixel_depth;
 
-  row_pointers = malloc(sizeof(png_bytep *) * info->height);
-  for(size_t n=0;n<info->height;n++) {
-    row_pointers[n] = malloc(info->rowbytes);
+  row_pointers = malloc(sizeof(png_bytep *) * height);
+  for(size_t n=0;n<height;n++) {
+    row_pointers[n] = malloc(row_bytes);
   }
 
   png_start_read_image(png_ptr);

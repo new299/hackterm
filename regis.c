@@ -146,7 +146,7 @@ void regis_processor(const char *cmd,int cmdlen) {
 
   for(;;) {
     command = regis_process_command(command);
-    clock_gettime(CLOCK_MONOTONIC,&regis_last_render);
+//    clock_gettime(CLOCK_MONOTONIC,&regis_last_render);
     int clen = cmdlen-(command-cmd);
     if(clen<2) return;
     if(command == 0) return;
@@ -159,7 +159,7 @@ void regis_processor(const char *cmd,int cmdlen) {
 bool regis_recent() {
  
   struct timespec current_time;
-  clock_gettime(CLOCK_MONOTONIC,&current_time);
+//  clock_gettime(CLOCK_MONOTONIC,&current_time);
 
   struct timespec delta_time;
   delta_time.tv_sec  = current_time.tv_sec  - regis_last_render.tv_sec;
