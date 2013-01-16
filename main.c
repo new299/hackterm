@@ -1,5 +1,9 @@
 #define _POSIX_C_SOURCE 199309L
 #define _BSD_SOURCE
+#define LOCAL_ENABLE
+//#define IPHONE_BUILD
+
+
 
 #include <string.h>
 #include <SDL/SDL.h>
@@ -34,7 +38,6 @@
 #define CONNECTION_LOCAL 1
 #define CONNECTION_SSH   2
 
-#define IPHONE_BUILD
 
 void redraw_required();
 
@@ -643,7 +646,12 @@ void sdl_read_thread() {
     process_mouse_event(&event);
     ngui_receive_event(&event);
     
+    // SDL_GetKeyState not present in SDL 1.3
+    #ifdef IPHONE_BUILD
+    uint8_t *keystate = SDL_GetKeyState(NULL); 
+    #else
     uint8_t *keystate;// = SDL_GetKeyState(NULL); // FIXFIXFIXFIXFIXFIX SDL1.3
+    #endif
 
     if(event.type == SDL_QUIT) {
       hterm_quit = true;
@@ -797,7 +805,8 @@ int main(int argc, char **argv) {
       connection_type = CONNECTION_SSH; // replace with commandline lookup
     }
   }
-    
+  
+  // iPhone version only supports ssh connections.
   #ifdef IPHONE_BUILD
     connection_type = CONNECTION_SSH;
   #endif
@@ -810,8 +819,15 @@ int main(int argc, char **argv) {
   rows = 10;
   cols = 10;
   vterm_initialisation();
+
+  // iPhone build uses sdl 2.
+  #ifdef IPHONE_BUILD
   SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0,0);
   SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0,0);
+  #else
+  SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0);
+  SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0);
+  #endif
 
   for(;sdl_init_complete == false;);
   ngui_set_screen(screen, redraw_required);
@@ -854,8 +870,14 @@ int main(int argc, char **argv) {
   SDL_Thread *thread3;
   SDL_Thread *thread5;
   if(open_ret >= 0) {
-    SDL_Thread *thread3 = SDL_CreateThread(console_read_thread,0,0);
-    SDL_Thread *thread5 = SDL_CreateThread(timed_repeat       ,0,0);
+    // iPhone build uses sdl 2, which requires extra arg here.
+    #ifdef IPHONE_BUILD
+    thread3 = SDL_CreateThread(console_read_thread,0,0);
+    thread5 = SDL_CreateThread(timed_repeat       ,0,0);
+    #else
+    thread3 = SDL_CreateThread(console_read_thread,0);
+    thread5 = SDL_CreateThread(timed_repeat       ,0);
+    #endif
 
     SDL_mutexP(quit_mutex);
 

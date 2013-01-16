@@ -1,6 +1,7 @@
 UNAME := $(shell sh -c 'uname 2>/dev/null || echo not')
 
 ifeq ($(UNAME), Linux)
+OPTS = -DLOCAL_ENABLE
 endif
 ifeq ($(UNAME), Darwin)
 OPTS = -L/opt/local/lib -I/opt/local/include -framework Cocoa -lSDLmain -Wl,-framework,Cocoa
@@ -13,7 +14,7 @@ LIBSSH2C = ./libssh2/src/agent.c    ./libssh2/src/transport.c ./libssh2/src/vers
 OURC = main.c base64.c inlinedata.c regis.c nunifont.c nsdl.c ngui.c ssh.c local.c ngui_info_prompt.c ngui_textlabel.c ngui_textbox.c ngui_button.c
 
 hterm: main.c nunifont.c nunifont.h *.c *.h
-	gcc -g -std=gnu99 $(LIBVTERMC) $(OURC) $(LIBSSH2C) -o hterm -I./libvterm/include -lpng -lSDL -lutil -lcrypto -I./libssh2/include  
+	gcc -g -std=gnu99 $(LIBVTERMC) $(OURC) $(LIBSSH2C) $(OPTS) -o hterm -I./libvterm/include -lpng -lSDL -lutil -lcrypto -I./libssh2/include  
 
 clean:
 	rm -rf hterm
