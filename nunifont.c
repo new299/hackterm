@@ -11,15 +11,18 @@ typedef struct fontchar {
   uint8_t data[32];
 } fontchar;
 
-fontchar *fontmap;
-uint8_t  *widthmap;
+fontchar *fontmap  =0;
+uint8_t  *widthmap =0;
+int fontmap_size   =0;
+int widthmap_size  =0;
+
 bool     initialised=false;
 bool     blink_value=false;
 
 void load_fonts(char *filename,fontchar **fontmap,uint8_t **widthmap);
 
-void nfont_init() {
-  load_fonts("/etc/alternatives/unifont.hex",&fontmap,&widthmap);
+void nunifont_init() {
+  load_fonts("unifont.hex",&fontmap,&widthmap);
   initialised = true;
 }
 
@@ -130,7 +133,7 @@ void draw_unitext_fancy(SDL_Surface *screen,int x,int y,const uint16_t *text,
 
 void draw_unitext(SDL_Surface *screen,int x,int y,const uint16_t *text,uint32_t bg,uint32_t fg,int bold,int underline,int italic,int strike) {
 
-  if(!initialised) nfont_init();
+  if(!initialised) nunifont_init();
 
   int length=0;
   for(int n=0;n<10000;n++) {if(text[n] == 0) {length=n; break;}}
@@ -239,6 +242,9 @@ void load_fonts(char *filename,fontchar **fontmap,uint8_t **widthmap) {
 
   *fontmap  = (fontchar *) malloc(sizeof(fontchar)*65536);
   *widthmap = (uint8_t  *) malloc(sizeof(uint8_t)*(65536/8));
+
+  fontmap_size  = sizeof(fontchar)*65536;
+  widthmap_size = sizeof(uint8_t)*(65536/8);
   
   for(size_t n=0;n<65536;n++) for(int i=0;i<32;i++) (*fontmap)[n].data[i] = 0;
   for(size_t n=0;n<(sizeof(uint8_t)*(65536/8));n++) (*widthmap)[n] = 0;
@@ -254,6 +260,35 @@ void load_fonts(char *filename,fontchar **fontmap,uint8_t **widthmap) {
     set_widthmap(*widthmap,n,width);
     free(line);
   }
+}
+
+void nunifont_save_staticmap(char *fontmap_filename,char *widthmap_filename) {
+
+  FILE *fontmap_file = fopen(fontmap_filename,"w");
+
+  uint8_t *f = (uint8_t *) fontmap;
+  for(int n=0;n<fontmap_size;n++) {
+    putc(f[n],fontmap_file);
+  }
+  fclose(fontmap_file);
+
+  FILE *widthmap_file = fopen(widthmap_filename,"w");
+
+  uint8_t *w = (uint8_t *) widthmap;
+  for(int n=0;n<widthmap_size;n++) {
+    putc(w[n],widthmap_file);
+  }
+  fclose(widthmap_file);
+
+}
+
+void nunifont_load_staticmap(void *fontmap_static,void *widthmap_static,int fontmap_static_size,int widthmap_static_size) {
+
+  fontmap       = (fontchar *) fontmap_static;
+  widthmap      = (uint8_t  *) widthmap_static;
+  fontmap_size  = fontmap_static_size;
+  widthmap_size = widthmap_static_size;
+  initialised = true;
 }
 
 

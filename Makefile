@@ -16,6 +16,10 @@ OURC = main.c base64.c inlinedata.c regis.c nunifont.c nsdl.c ngui.c ssh.c local
 hterm: main.c nunifont.c nunifont.h *.c *.h
 	gcc -g -std=gnu99 $(LIBVTERMC) $(OURC) $(LIBSSH2C) $(OPTS) -o hterm -I./libvterm/include -lpng -lSDL -lutil -lcrypto -I./libssh2/include  
 
+unifont_conv: unifont_conv.c nunifont.c
+	gcc -g -std=gnu99 unifont_conv.c nunifont.c -o unifont_conv
+
+
 clean:
 	rm -rf hterm
 

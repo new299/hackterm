@@ -3,6 +3,8 @@
 #define LOCAL_ENABLE
 //#define IPHONE_BUILD
 
+#include "fontmap_static.h"
+#include "widthmap_static.h"
 
 
 #include <string.h>
@@ -790,6 +792,8 @@ void receive_ssh_info(char *o1,char *o2,char *o3) {
 }
 
 int main(int argc, char **argv) {
+
+  nunifont_load_staticmap(__fontmap_static,__widthmap_static,__fontmap_static_len,__widthmap_static_len);
 
   regis_mutex  = SDL_CreateMutex();
   screen_mutex = SDL_CreateMutex();
