@@ -19,7 +19,6 @@ TODO
 
 * copying text to support unicode.
 * copying test, line based selection mode
-* Embed gnu unifont.
 * support for emoji unicode fonts (requires support beyond basic multilingual plane in libvterm and additions to unifont)
 * a lot of borked vttest functionality
 * mouse terminal support
@@ -31,6 +30,7 @@ TODO
 DONE
 ----
 
+* Embed gnu unifont.
 * builtin ssh support
 * When copying text, allow the user selection to span multiple screens with scrolling.
 * terminate correctly (ctrl-alt-C in dwm)
