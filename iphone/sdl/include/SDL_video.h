@@ -84,6 +84,7 @@ typedef struct
  *  \sa SDL_SetWindowIcon()
  *  \sa SDL_SetWindowPosition()
  *  \sa SDL_SetWindowSize()
+ *  \sa SDL_SetWindowBordered()
  *  \sa SDL_SetWindowTitle()
  *  \sa SDL_ShowWindow()
  */
@@ -107,6 +108,7 @@ typedef enum
     SDL_WINDOW_INPUT_GRABBED = 0x00000100,      /**< window has grabbed input focus */
     SDL_WINDOW_INPUT_FOCUS = 0x00000200,        /**< window has input focus */
     SDL_WINDOW_MOUSE_FOCUS = 0x00000400,        /**< window has mouse focus */
+	SDL_WINDOW_FULLSCREEN_DESKTOP = ( SDL_WINDOW_FULLSCREEN | 0x00001000 ),
     SDL_WINDOW_FOREIGN = 0x00000800             /**< window not created by SDL */
 } SDL_WindowFlags;
 
@@ -182,8 +184,27 @@ typedef enum
     SDL_GL_ACCELERATED_VISUAL,
     SDL_GL_RETAINED_BACKING,
     SDL_GL_CONTEXT_MAJOR_VERSION,
-    SDL_GL_CONTEXT_MINOR_VERSION
+    SDL_GL_CONTEXT_MINOR_VERSION,
+    SDL_GL_CONTEXT_EGL,
+    SDL_GL_CONTEXT_FLAGS,
+    SDL_GL_CONTEXT_PROFILE_MASK,
+    SDL_GL_SHARE_WITH_CURRENT_CONTEXT
 } SDL_GLattr;
+
+typedef enum
+{
+    SDL_GL_CONTEXT_PROFILE_CORE           = 0x0001,
+    SDL_GL_CONTEXT_PROFILE_COMPATIBILITY  = 0x0002,
+    SDL_GL_CONTEXT_PROFILE_ES             = 0x0004
+} SDL_GLprofile;
+
+typedef enum
+{
+    SDL_GL_CONTEXT_DEBUG_FLAG              = 0x0001,
+    SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG = 0x0002,
+    SDL_GL_CONTEXT_ROBUST_ACCESS_FLAG      = 0x0004,
+    SDL_GL_CONTEXT_RESET_ISOLATION_FLAG    = 0x0008
+} SDL_GLcontextFlag;
 
 
 /* Function prototypes */
@@ -247,6 +268,15 @@ extern DECLSPEC const char *SDLCALL SDL_GetCurrentVideoDriver(void);
  *  \sa SDL_GetDisplayBounds()
  */
 extern DECLSPEC int SDLCALL SDL_GetNumVideoDisplays(void);
+
+/**
+ *  \brief Get the name of a display in UTF-8 encoding
+ *  
+ *  \return The name of a display, or NULL for an invalid display index.
+ *  
+ *  \sa SDL_GetNumVideoDisplays()
+ */
+extern DECLSPEC const char * SDLCALL SDL_GetDisplayName(int displayIndex);
 
 /**
  *  \brief Get the desktop area represented by a display, with the primary
@@ -318,7 +348,7 @@ extern DECLSPEC SDL_DisplayMode * SDLCALL SDL_GetClosestDisplayMode(int displayI
  *  \return the display index of the display containing the center of the
  *          window, or -1 on error.
  */
-extern DECLSPEC int SDLCALL SDL_GetWindowDisplay(SDL_Window * window);
+extern DECLSPEC int SDLCALL SDL_GetWindowDisplayIndex(SDL_Window * window);
 
 /**
  *  \brief Set the display mode used when a fullscreen window is visible.
@@ -497,6 +527,65 @@ extern DECLSPEC void SDLCALL SDL_SetWindowSize(SDL_Window * window, int w,
  */
 extern DECLSPEC void SDLCALL SDL_GetWindowSize(SDL_Window * window, int *w,
                                                int *h);
+    
+/**
+ *  \brief Set the minimum size of a window's client area.
+ *
+ *  \note You can't change the minimum size of a fullscreen window, it
+ *        automatically matches the size of the display mode.
+ *
+ *  \sa SDL_GetWindowMinimumSize()
+ *  \sa SDL_SetWindowMaximumSize()
+ */
+extern DECLSPEC void SDLCALL SDL_SetWindowMinimumSize(SDL_Window * window,
+                                                      int min_w, int min_h);
+    
+/**
+ *  \brief Get the minimum size of a window's client area.
+ *
+ *  \sa SDL_GetWindowMaximumSize()
+ *  \sa SDL_SetWindowMinimumSize()
+ */
+extern DECLSPEC void SDLCALL SDL_GetWindowMinimumSize(SDL_Window * window,
+                                                      int *w, int *h);
+
+/**
+ *  \brief Set the maximum size of a window's client area.
+ *
+ *  \note You can't change the maximum size of a fullscreen window, it
+ *        automatically matches the size of the display mode.
+ *
+ *  \sa SDL_GetWindowMaximumSize()
+ *  \sa SDL_SetWindowMinimumSize()
+ */
+extern DECLSPEC void SDLCALL SDL_SetWindowMaximumSize(SDL_Window * window,
+                                                      int max_w, int max_h);
+    
+/**
+ *  \brief Get the maximum size of a window's client area.
+ *
+ *  \sa SDL_GetWindowMinimumSize()
+ *  \sa SDL_SetWindowMaximumSize()
+ */
+extern DECLSPEC void SDLCALL SDL_GetWindowMaximumSize(SDL_Window * window,
+                                                      int *w, int *h);
+
+/**
+ *  \brief Set the border state of a window.
+ *
+ *  This will add or remove the window's SDL_WINDOW_BORDERLESS flag and
+ *  add or remove the border from the actual window. This is a no-op if the
+ *  window's border already matches the requested state.
+ *
+ *  \param window The window of which to change the border state.
+ *  \param bordered SDL_FALSE to remove border, SDL_TRUE to add border.
+ *
+ *  \note You can't change the border state of a fullscreen window.
+ *  
+ *  \sa SDL_GetWindowFlags()
+ */
+extern DECLSPEC void SDLCALL SDL_SetWindowBordered(SDL_Window * window,
+                                                   SDL_bool bordered);
 
 /**
  *  \brief Show a window.
@@ -548,7 +637,7 @@ extern DECLSPEC void SDLCALL SDL_RestoreWindow(SDL_Window * window);
  *  \sa SDL_GetWindowDisplayMode()
  */
 extern DECLSPEC int SDLCALL SDL_SetWindowFullscreen(SDL_Window * window,
-                                                    SDL_bool fullscreen);
+                                                    Uint32 flags);
 
 /**
  *  \brief Get the SDL surface associated with the window.
@@ -772,7 +861,9 @@ extern DECLSPEC int SDLCALL SDL_GL_MakeCurrent(SDL_Window * window,
  *  \brief Set the swap interval for the current OpenGL context.
  *  
  *  \param interval 0 for immediate updates, 1 for updates synchronized with the
- *                  vertical retrace.
+ *                  vertical retrace. If the system supports it, you may
+ *                  specify -1 to allow late swaps to happen immediately
+ *                  instead of waiting for the next retrace.
  *  
  *  \return 0 on success, or -1 if setting the swap interval is not supported.
  *  
@@ -784,8 +875,10 @@ extern DECLSPEC int SDLCALL SDL_GL_SetSwapInterval(int interval);
  *  \brief Get the swap interval for the current OpenGL context.
  *  
  *  \return 0 if there is no vertical retrace synchronization, 1 if the buffer 
- *          swap is synchronized with the vertical retrace, and -1 if getting 
- *          the swap interval is not supported.
+ *          swap is synchronized with the vertical retrace, and -1 if late
+ *          swaps happen immediately instead of waiting for the next retrace.
+ *          If the system can't determine the swap interval, or there isn't a
+ *          valid current context, this will return 0 as a safe default.
  *  
  *  \sa SDL_GL_SetSwapInterval()
  */

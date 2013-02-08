@@ -22,6 +22,13 @@
 
 #if SDL_VIDEO_DRIVER_COCOA
 
+#if defined(__APPLE__) && defined(__POWERPC__)
+#include <altivec.h>
+#undef bool
+#undef vector
+#undef pixel
+#endif
+
 #include "SDL.h"
 #include "SDL_endian.h"
 #include "SDL_cocoavideo.h"
@@ -88,12 +95,15 @@ Cocoa_CreateDevice(int devindex)
     device->SetWindowIcon = Cocoa_SetWindowIcon;
     device->SetWindowPosition = Cocoa_SetWindowPosition;
     device->SetWindowSize = Cocoa_SetWindowSize;
+    device->SetWindowMinimumSize = Cocoa_SetWindowMinimumSize;
+    device->SetWindowMaximumSize = Cocoa_SetWindowMaximumSize;
     device->ShowWindow = Cocoa_ShowWindow;
     device->HideWindow = Cocoa_HideWindow;
     device->RaiseWindow = Cocoa_RaiseWindow;
     device->MaximizeWindow = Cocoa_MaximizeWindow;
     device->MinimizeWindow = Cocoa_MinimizeWindow;
     device->RestoreWindow = Cocoa_RestoreWindow;
+    device->SetWindowBordered = Cocoa_SetWindowBordered;
     device->SetWindowFullscreen = Cocoa_SetWindowFullscreen;
     device->SetWindowGammaRamp = Cocoa_SetWindowGammaRamp;
     device->GetWindowGammaRamp = Cocoa_GetWindowGammaRamp;
@@ -211,6 +221,18 @@ Cocoa_CreateImage(SDL_Surface * surface)
 }
 
 /*
+ * Mac OS X log support.
+ *
+ * This doesn't really have aything to do with the interfaces of the SDL video
+ *  subsystem, but we need to stuff this into an Objective-C source code file.
+ */
+
+void SDL_NSLog(const char *text)
+{
+    NSLog(@"%s", text);
+}
+
+/*
  * Mac OS X assertion support.
  *
  * This doesn't really have aything to do with the interfaces of the SDL video
@@ -228,37 +250,36 @@ SDL_PromptAssertion_cocoa(const SDL_assert_data *data)
         }
     }
 
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    @autoreleasepool {
+        NSString *msg = [NSString stringWithFormat:
+                @"Assertion failure at %s (%s:%d), triggered %u time%s:\n  '%s'",
+                    data->function, data->filename, data->linenum,
+                    data->trigger_count, (data->trigger_count == 1) ? "" : "s",
+                    data->condition];
 
-    NSString *msg = [NSString stringWithFormat:
-            @"Assertion failure at %s (%s:%d), triggered %u time%s:\n  '%s'",
-                data->function, data->filename, data->linenum,
-                data->trigger_count, (data->trigger_count == 1) ? "" : "s",
-                data->condition];
+        NSLog(@"%@", msg);
 
-    NSLog(@"%@", msg);
+        /*
+         * !!! FIXME: this code needs to deal with fullscreen modes:
+         * !!! FIXME:  reset to default desktop, runModal, reset to current?
+         */
 
-    /*
-     * !!! FIXME: this code needs to deal with fullscreen modes:
-     * !!! FIXME:  reset to default desktop, runModal, reset to current?
-     */
+        NSAlert* alert = [[NSAlert alloc] init];
+        [alert setAlertStyle:NSCriticalAlertStyle];
+        [alert setMessageText:msg];
+        [alert addButtonWithTitle:@"Retry"];
+        [alert addButtonWithTitle:@"Break"];
+        [alert addButtonWithTitle:@"Abort"];
+        [alert addButtonWithTitle:@"Ignore"];
+        [alert addButtonWithTitle:@"Always Ignore"];
+        const NSInteger clicked = [alert runModal];
 
-    NSAlert* alert = [[NSAlert alloc] init];
-    [alert setAlertStyle:NSCriticalAlertStyle];
-    [alert setMessageText:msg];
-    [alert addButtonWithTitle:@"Retry"];
-    [alert addButtonWithTitle:@"Break"];
-    [alert addButtonWithTitle:@"Abort"];
-    [alert addButtonWithTitle:@"Ignore"];
-    [alert addButtonWithTitle:@"Always Ignore"];
-    const NSInteger clicked = [alert runModal];
-    [pool release];
+        if (!initialized) {
+            SDL_QuitSubSystem(SDL_INIT_VIDEO);
+        }
 
-    if (!initialized) {
-        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+        return (SDL_assert_state) (clicked - NSAlertFirstButtonReturn);
     }
-
-    return (SDL_assert_state) (clicked - NSAlertFirstButtonReturn);
 }
 
 #endif /* SDL_VIDEO_DRIVER_COCOA */

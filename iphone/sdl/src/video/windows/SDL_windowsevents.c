@@ -29,6 +29,10 @@
 #include "../../events/SDL_events_c.h"
 #include "../../events/SDL_touch_c.h"
 
+/* Dropfile support */
+#include <shellapi.h>
+
+
 
 
 /*#define WMMSG_DEBUG*/
@@ -164,15 +168,31 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_SHOWN, 0, 0);
                 SDL_SendWindowEvent(data->window,
                                     SDL_WINDOWEVENT_RESTORED, 0, 0);
-#ifndef _WIN32_WCE              /* WinCE misses IsZoomed() */
                 if (IsZoomed(hwnd)) {
                     SDL_SendWindowEvent(data->window,
                                         SDL_WINDOWEVENT_MAXIMIZED, 0, 0);
                 }
-#endif
                 if (SDL_GetKeyboardFocus() != data->window) {
                     SDL_SetKeyboardFocus(data->window);
                 }
+
+				if(SDL_GetMouse()->relative_mode) {
+					LONG cx, cy;
+					RECT rect;
+					GetWindowRect(hwnd, &rect);
+
+					cx = (rect.left + rect.right) / 2;
+					cy = (rect.top + rect.bottom) / 2;
+
+					/* Make an absurdly small clip rect */
+					rect.left = cx-1;
+					rect.right = cx+1;
+					rect.top = cy-1;
+					rect.bottom = cy+1;
+
+					ClipCursor(&rect);
+				}
+
                 /*
                  * FIXME: Update keyboard state
                  */
@@ -191,22 +211,49 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         break;
 
 	case WM_MOUSEMOVE:
-#ifdef _WIN32_WCE
-        /* transform coords for VGA, WVGA... */
-        {
-            SDL_VideoData *videodata = data->videodata;
-            if(videodata->CoordTransform) {
-                POINT pt;
-                pt.x = LOWORD(lParam);
-                pt.y = HIWORD(lParam);
-                videodata->CoordTransform(data->window, &pt);
-                SDL_SendMouseMotion(data->window, 0, pt.x, pt.y);
-                break;
-            }
-        }
-#endif
+		if(SDL_GetMouse()->relative_mode)
+			break;
         SDL_SendMouseMotion(data->window, 0, LOWORD(lParam), HIWORD(lParam));
         break;
+
+	case WM_INPUT:
+	{
+		HRAWINPUT hRawInput = (HRAWINPUT)lParam;
+		RAWINPUT inp;
+		UINT size = sizeof(inp);
+
+		if(!SDL_GetMouse()->relative_mode)
+			break;
+
+		GetRawInputData(hRawInput, RID_INPUT, &inp, &size, sizeof(RAWINPUTHEADER));
+
+		/* Mouse data */
+		if(inp.header.dwType == RIM_TYPEMOUSE)
+		{
+			RAWMOUSE* mouse = &inp.data.mouse;
+
+			if((mouse->usFlags & 0x01) == MOUSE_MOVE_RELATIVE)
+			{
+				SDL_SendMouseMotion(data->window, 1, (int)mouse->lLastX, (int)mouse->lLastY);
+			}
+			else
+			{
+				// synthesize relative moves from the abs position
+				static SDL_Point initialMousePoint;
+				if ( initialMousePoint.x == 0 && initialMousePoint.y == 0 )
+				{
+					initialMousePoint.x = mouse->lLastX;
+					initialMousePoint.y = mouse->lLastY;
+				}
+
+				SDL_SendMouseMotion(data->window, 1, (int)(mouse->lLastX-initialMousePoint.x), (int)(mouse->lLastY-initialMousePoint.y) );
+
+				initialMousePoint.x = mouse->lLastX;
+				initialMousePoint.y = mouse->lLastY;
+			}
+		}
+		break;
+	}
 
     case WM_LBUTTONDOWN:
         SDL_SendMouseButton(data->window, SDL_PRESSED, SDL_BUTTON_LEFT);
@@ -399,16 +446,14 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             RECT size;
             int x, y;
             int w, h;
+            int min_w, min_h;
+            int max_w, max_h;
             int style;
             BOOL menu;
 
             /* If we allow resizing, let the resize happen naturally */
-            if(SDL_IsShapedWindow(data->window))
+            if (SDL_IsShapedWindow(data->window))
                 Win32_ResizeWindowShape(data->window);
-            if (SDL_GetWindowFlags(data->window) & SDL_WINDOW_RESIZABLE) {
-                returnCode = 0;
-                break;
-            }
 
             /* Get the current position of our window */
             GetWindowRect(hwnd, &size);
@@ -417,37 +462,49 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
             /* Calculate current size of our window */
             SDL_GetWindowSize(data->window, &w, &h);
+            SDL_GetWindowMinimumSize(data->window, &min_w, &min_h);
+            SDL_GetWindowMaximumSize(data->window, &max_w, &max_h);
+
+            /* Store in min_w and min_h difference between current size and minimal 
+               size so we don't need to call AdjustWindowRectEx twice */
+            min_w -= w;
+            min_h -= h;
+            max_w -= w;
+            max_h -= h;
+
             size.top = 0;
             size.left = 0;
             size.bottom = h;
             size.right = w;
 
-
             style = GetWindowLong(hwnd, GWL_STYLE);
-#ifdef _WIN32_WCE
-            menu = FALSE;
-#else
             /* DJM - according to the docs for GetMenu(), the
                return value is undefined if hwnd is a child window.
                Aparently it's too difficult for MS to check
                inside their function, so I have to do it here.
              */
             menu = (style & WS_CHILDWINDOW) ? FALSE : (GetMenu(hwnd) != NULL);
-#endif
             AdjustWindowRectEx(&size, style, menu, 0);
             w = size.right - size.left;
             h = size.bottom - size.top;
 
             /* Fix our size to the current size */
             info = (MINMAXINFO *) lParam;
-            info->ptMaxSize.x = w;
-            info->ptMaxSize.y = h;
-            info->ptMaxPosition.x = x;
-            info->ptMaxPosition.y = y;
-            info->ptMinTrackSize.x = w;
-            info->ptMinTrackSize.y = h;
-            info->ptMaxTrackSize.x = w;
-            info->ptMaxTrackSize.y = h;
+            if (SDL_GetWindowFlags(data->window) & SDL_WINDOW_RESIZABLE) {
+                info->ptMinTrackSize.x = w + min_w;
+                info->ptMinTrackSize.y = h + min_h;
+                info->ptMaxTrackSize.x = w + max_w;
+                info->ptMaxTrackSize.y = h + max_h;
+            } else {
+                info->ptMaxSize.x = w;
+                info->ptMaxSize.y = h;
+                info->ptMaxPosition.x = x;
+                info->ptMaxPosition.y = y;
+                info->ptMinTrackSize.x = w;
+                info->ptMinTrackSize.y = h;
+                info->ptMaxTrackSize.x = w;
+                info->ptMaxTrackSize.y = h;
+            }
         }
         returnCode = 0;
         break;
@@ -600,7 +657,29 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			return 0;
 		}
 		break;
-	}
+
+    case WM_DROPFILES:
+        {
+            UINT i;
+            HDROP drop = (HDROP) wParam;
+            UINT count = DragQueryFile(drop, 0xFFFFFFFF, NULL, 0);
+            for (i = 0; i < count; ++i) {
+                UINT size = DragQueryFile(drop, i, NULL, 0) + 1;
+                LPTSTR buffer = SDL_stack_alloc(TCHAR, size);
+                if (buffer) {
+                    if (DragQueryFile(drop, i, buffer, size)) {
+                        char *file = WIN_StringToUTF8(buffer);
+                        SDL_SendDropFile(file);
+                        SDL_free(file);
+                    }
+                    SDL_stack_free(buffer);
+                }
+            }
+            DragFinish(drop);
+            return 0;
+        }
+        break;
+    }
 
     /* If there's a window proc, assume it's going to handle messages */
     if (data->wndproc) {

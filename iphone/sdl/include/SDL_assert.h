@@ -49,9 +49,9 @@ on the assertion line and not in some random guts of SDL, and so each
 assert can have unique static variables associated with it.
 */
 
-#if defined(_MSC_VER) && !defined(_WIN32_WCE)
+#if defined(_MSC_VER)
 /* Don't include intrin.h here because it contains C++ code */
-extern void __cdecl __debugbreak(void);
+    extern void __cdecl __debugbreak(void);
     #define SDL_TriggerBreakpoint() __debugbreak()
 #elif (defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__)))
     #define SDL_TriggerBreakpoint() __asm__ __volatile__ ( "int $3\n\t" )
@@ -91,8 +91,6 @@ disable assertions.
 #define SDL_disabled_assert(condition) \
     do { (void) sizeof ((condition)); } while (0)
 
-#if (SDL_ASSERT_LEVEL > 0)
-
 typedef enum
 {
     SDL_ASSERTION_RETRY,  /**< Retry the assert immediately. */
@@ -112,6 +110,8 @@ typedef struct SDL_assert_data
     const char *function;
     const struct SDL_assert_data *next;
 } SDL_assert_data;
+
+#if (SDL_ASSERT_LEVEL > 0)
 
 /* Never call this directly. Use the SDL_assert* macros. */
 extern DECLSPEC SDL_assert_state SDLCALL SDL_ReportAssertion(SDL_assert_data *,

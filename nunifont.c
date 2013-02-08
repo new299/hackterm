@@ -4,6 +4,7 @@
 #include <SDL/SDL.h>
 #include <stdbool.h>
 #include <limits.h>
+#include "uthash.h"
 
 bool get_widthmap(uint16_t p);
 
@@ -21,12 +22,45 @@ bool     blink_value=false;
 
 void load_fonts(char *filename,fontchar **fontmap,uint8_t **widthmap);
 
+typedef struct {
+    UT_hash_handle hh; /* makes this structure hashable */
+    //int len;
+    uint32_t c;
+    uint32_t bg;
+    uint32_t fg;
+    int32_t bold;
+    int32_t underline;
+    int32_t italic;
+    int32_t strike;
+    SDL_Texture *texture;
+} char_render_t;
+
+typedef struct {
+    uint32_t c;
+    uint32_t bg;
+    uint32_t fg;
+    int32_t bold;
+    int32_t underline;
+    int32_t italic;
+    int32_t strike;
+} lookup_key_t;
+
+int char_render_t_keylen=-1;
+//SDL_Texture *display_cache[65535];
+void nunitfont_initcache() {
+    //unsigned keylen;
+    //char_render_t *msg, *tmp, *msgs = NULL;
+    //lookup_key_t *lookup_key;
+    char_render_t_keylen = offsetof(char_render_t, strike) + 4 - offsetof(char_render_t, c);
+}
+
 void nunifont_init() {
   load_fonts("unifont.hex",&fontmap,&widthmap);
+  nunitfont_initcache();
   initialised = true;
 }
 
-uint32_t get_pixel(uint16_t c,int c_x,int c_y) {
+uint32_t get_pixel(uint32_t c,int c_x,int c_y) {
   
   if(c_x < 0 ) return 0;
   if(c_y < 0 ) return 0;
@@ -38,76 +72,189 @@ uint32_t get_pixel(uint16_t c,int c_x,int c_y) {
   int byte = pos/8;
   int bit  = pos%8;
 
+
+    printf("fontmap base addr: %u\n",&fontmap);
+    printf("fontmap pos addr: %u\n",&fontmap[c]);
   if(fontmap[c].data[byte] & (1 << bit)) { return 65535; }
                                     else { return 0; }
 }
 
-void draw_point(SDL_Surface *screen,int x,int y,uint32_t value) {
+void draw_point(void *s,int x,int y,uint32_t value) {
 
+ // SDL_Rect rect;
+  //rect.w = 1;
+  //rect.h = 1;
+ // rect.x = x;
+ // rect.y = y;
+    SDL_Surface *screen = (SDL_Surface *) s;
+ // SDL_SetRenderDrawColor(screen, value,value,value, 255);
+  //SDL_RenderFillRect(screen, &rect);
+ // SDL_RenderDrawPoint(screen,x,y);
   int bpp = screen->format->BytesPerPixel;
   uint8_t *p = (uint8_t *) screen->pixels + (y * screen->pitch) + (x * bpp);
 
-  #ifdef __APPLE__
-  p += 1;
-  #endif
+ // #ifdef __APPLE__
+ // p += 1;
+//  #endif
 
   if((x<0)||(y<0)|| (x>=screen->w)||(y>=screen->h)) return;
 
   *(uint32_t *) p = value;
 }
+/*
+void draw_point(void *screen,int x,int y,uint32_t value) {
 
-void draw_character(SDL_Surface *screen,int x,int y,int w,uint16_t c,uint32_t bg,uint32_t fg,int bold,int underline,int italic,int strike) {
-  for(size_t c_y=0;c_y<16;c_y++) {
+////  int bpp = screen->format->BytesPerPixel;
+////  uint8_t *p = (uint8_t *) screen->pixels + (y * screen->pitch) + (x * bpp);
+
+  #ifdef __APPLE__
+////  p += 1;
+  #endif
+
+////  if((x<0)||(y<0)|| (x>=screen->w)||(y>=screen->h)) return;
+
+////  *(uint32_t *) p = value;
+}
+*/
+char_render_t *display_cache = NULL;
+
+void draw_character(void *screen,int x,int y,int w,uint32_t cin,uint32_t bg,uint32_t fg,int bold,int underline,int italic,int strike) {
+
+    printf("rendering: %u\n",cin);
+    printf("size of fontchar: %u\n",sizeof(fontchar));
+    printf("width of font:    %u\n",w);
+    SDL_Texture *texture;
+ 
+    lookup_key_t chr;
+    chr.c = cin;
+    chr.fg = fg;
+    chr.bg = bg;
+    chr.bold = bold;
+    chr.underline = underline;
+    chr.italic = italic;
+    chr.strike = strike;
+    
+    char_render_t *mchr=0;
+    HASH_FIND( hh, display_cache, &chr, char_render_t_keylen, mchr);
+    
+//    HASH_ADD( hh, msgs, encoding, keylen, msg);
+//    int char_render_t_keylen=-1;
+    if(!mchr) {
+    int format = SDL_PIXELFORMAT_ABGR8888;  /* desired texture format */
+    Uint32 Rmask, Gmask, Bmask, Amask;      /* masks for desired format */
+   
+    Rmask = 0xff000000;
+    Gmask = 0x00ff0000;
+    Bmask = 0x0000ff00;
+    Amask = 0x000000ff;
+    
+    int bpp=32;                /* bits per pixel for desired format */
+    
+    SDL_Surface *converted = SDL_CreateRGBSurface(0, w, 16, bpp, Rmask, Gmask,
+                         Bmask, Amask);
+    
+    if(converted == NULL) {
+        printf("failed %s\n",SDL_GetError());
+    }
+    
+    for(size_t c_y=0;c_y<16;c_y++) {
     for(size_t c_x=0;c_x<w;c_x++) {
 
       if((c_y==15) && (underline == 1)) {
-        draw_point(screen,x+c_x,y+c_y,fg);
-      } else 
+        draw_point(converted,c_x,c_y,fg);
+      } else
       if((c_y==8 ) && (strike == 1)) {
-        draw_point(screen,x+c_x,y+c_y,fg);
+        draw_point(converted,c_x,c_y,fg);
       } else {
 
-        int32_t value  = get_pixel(c,c_x,c_y);
-        int32_t value1 = get_pixel(c,c_x+1,c_y);
-        int32_t value2 = get_pixel(c,c_x-1,c_y);
-        int32_t value3 = get_pixel(c,c_x,c_y+1);
-        int32_t value4 = get_pixel(c,c_x,c_y-1);
+        int32_t value  = get_pixel(cin,c_x,c_y);
+        int32_t value1 = get_pixel(cin,c_x+1,c_y);
+//        int32_t value2 = get_pixel(cin,c_x-1,c_y);
+//        int32_t value3 = get_pixel(cin,c_x,c_y+1);
+//        int32_t value4 = get_pixel(cin,c_x,c_y-1);
 
         int i=0;
         if(italic==1) i=1;
 
         if(value > 0) {
-          draw_point(screen,x+c_x+i,y+c_y,fg);
+          draw_point(converted,c_x+i,c_y,fg);
         } else {
-          draw_point(screen,x+c_x+i,y+c_y,bg);
+          draw_point(converted,c_x+i,c_y,bg);
           if(bold == 1) {
             if(value1 > 0) {
-              draw_point(screen,x+c_x+i,y+c_y,fg);
+              draw_point(converted,c_x+i,c_y,fg);
             }
           }
         }
       }
     }
   }
+    texture = SDL_CreateTextureFromSurface(screen, converted);
+    
+    //SDL_Rect srcRect = { 0,0,w,16 };
+    //SDL_Rect dstRect = { x, y, w, 16 };
+    //SDL_RenderCopy(screen, texture, &srcRect, &dstRect);
+    SDL_FreeSurface(converted);
+        
+
+//    char_render_t tchr;
+        mchr = malloc(sizeof(char_render_t));
+        mchr->c = cin;
+        mchr->fg = fg;
+        mchr->bg = bg;
+        mchr->bold = bold;
+        mchr->underline = underline;
+        mchr->italic = italic;
+        mchr->strike = strike;
+        mchr->texture = texture;
+        
+    HASH_ADD( hh, display_cache, c, char_render_t_keylen, mchr);
+   // display_cache[c] = texture;
+    } //else {
+
+
+//        SDL_Rect srcRect = { 0,0,w,16 };
+        SDL_Rect dstRect = { x, y, w, 16 };
+        SDL_RenderCopy(screen, mchr->texture, NULL, &dstRect);
+   // }
 }
 
-void draw_space(SDL_Surface *screen,int x,int y,int w,uint32_t bg,uint32_t fg) {
-  for(size_t c_y=0;c_y<16;c_y++) {
-    for(size_t c_x=0;c_x<w;c_x++) {
-      draw_point(screen,x+c_x,y+c_y,bg);
-    }
-  }
+void draw_space(void *screen,int x,int y,int w,uint32_t bg,uint32_t fg) {
+    
+    SDL_Rect rect;
+    rect.w = w;
+    rect.h = 16;
+    rect.x = x;
+    rect.y = y;
+    
+  //  SDL_SetRenderDrawColor(screen, bg,bg,bg, 255);
+  //  SDL_RenderFillRect(screen, &rect);
+    
+//  for(size_t c_y=0;c_y<16;c_y++) {
+//    for(size_t c_x=0;c_x<w;c_x++) {
+//      draw_point(screen,x+c_x,y+c_y,bg);
+//    }
+//  }
 }
 
-void draw_space_h(SDL_Surface *screen,int x,int y,int w,uint32_t bg,uint32_t fg) {
-  for(size_t c_y=0;c_y<w;c_y++) {
-    for(size_t c_x=0;c_x<9;c_x++) {
-      draw_point(screen,x+c_x,y+c_y,bg);
-    }
-  }
+void draw_space_h(void *screen,int x,int y,int w,uint32_t bg,uint32_t fg) {
+    SDL_Rect rect;
+    rect.w = 8;
+    rect.h = 16;
+    rect.x = x;
+    rect.y = y;
+ //
+ //   SDL_SetRenderDrawColor(screen, bg,bg,bg, 255);
+ //   SDL_RenderFillRect(screen, &rect);
+    
+    //  for(size_t c_y=0;c_y<w;c_y++) {
+//    for(size_t c_x=0;c_x<9;c_x++) {
+//      draw_point(screen,x+c_x,y+c_y,bg);
+//    }
+//  }
 }
 
-void draw_unitext_fancy(SDL_Surface *screen,int x,int y,const uint16_t *text,
+void draw_unitext_fancy(void *screen,int x,int y,const uint16_t *text,
                                              uint32_t bg,uint32_t fg,
                                              unsigned int bold,
                                              unsigned int underline,
@@ -131,7 +278,7 @@ void draw_unitext_fancy(SDL_Surface *screen,int x,int y,const uint16_t *text,
 }
 
 
-void draw_unitext(SDL_Surface *screen,int x,int y,const uint16_t *text,uint32_t bg,uint32_t fg,int bold,int underline,int italic,int strike) {
+void draw_unitext(void *screen,int x,int y,const uint16_t *text,uint32_t bg,uint32_t fg,int bold,int underline,int italic,int strike) {
 
   if(!initialised) nunifont_init();
 
@@ -288,6 +435,7 @@ void nunifont_load_staticmap(void *fontmap_static,void *widthmap_static,int font
   widthmap      = (uint8_t  *) widthmap_static;
   fontmap_size  = fontmap_static_size;
   widthmap_size = widthmap_static_size;
+  nunitfont_initcache();
   initialised = true;
 }
 

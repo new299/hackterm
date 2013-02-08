@@ -1,11 +1,9 @@
-#define _POSIX_C_SOURCE 199309L
-#define _BSD_SOURCE
+//#define _POSIX_C_SOURCE 199309L
+//#define _BSD_SOURCE
 #define LOCAL_ENABLE
-//#define IPHONE_BUILD
 
 #include "fontmap_static.h"
 #include "widthmap_static.h"
-
 
 #include <string.h>
 #include <SDL/SDL.h>
@@ -60,7 +58,12 @@ int  new_screen_size_y;
 static int cols;
 static int rows;
 
-SDL_Surface *screen=0;
+
+#define SCREEN_WIDTH 320
+#define SCREEN_HEIGHT 480
+SDL_Window  *screen=1;
+SDL_Renderer *renderer=1;
+// NONIPHONE1.2 SDL_Surface *screen=0;
 
 bool draw_selection = false;
 int select_start_x=0;
@@ -98,13 +101,13 @@ void scroll_buffer_get(size_t line_number,VTermScreenCell **line);
 
 void regis_render() {                                        
   SDL_mutexP(regis_mutex);                                   
-  int res = SDL_BlitSurface(regis_layer,NULL,screen,NULL);   
+ // int res = SDL_BlitSurface(regis_layer,NULL,screen,NULL);
   SDL_mutexV(regis_mutex);                                   
 } 
 
 void inline_data_render() {                                        
   SDL_mutexP(inline_data_mutex);                                   
-  int res = SDL_BlitSurface(inline_data_layer,NULL,screen,NULL);   
+ // int res = SDL_BlitSurface(inline_data_layer,NULL,screen,NULL);
   SDL_mutexV(inline_data_mutex);                                   
 }
 
@@ -145,9 +148,36 @@ VTermScreenCell *grab_row(int trow,bool *dont_free) {
   return rowdata;
 }
 
+VTermScreenCell c_screen_data[1000][1000];
 
-void draw_row(VTermScreenCell *row,int ypos) {
+bool cdf =true;
 
+bool cellcompare(VTermScreenCell a,VTermScreenCell b) {
+  if(a.chars[0] != b.chars[0]) return false;
+  if(a.chars[1] != b.chars[1]) return false;
+    
+  if(a.attrs.bold != b.attrs.bold) return false;
+  if(a.attrs.underline != b.attrs.underline) return false;
+  if(a.attrs.italic != b.attrs.italic) return false;
+  if(a.attrs.blink  != b.attrs.blink) return false;
+  if(a.attrs.reverse != b.attrs.reverse) return false;
+  if(a.attrs.strike != b.attrs.strike) return false;
+  if(a.attrs.font != b.attrs.font) return false;
+  
+  return true;
+}
+
+void draw_row(VTermScreenCell *row,int crow,int ypos) {
+/*
+    if(cdf==true) {
+        for(int n=0;n<1000;n++){
+            for(int i=0;i<1000;i++) {
+                c_screen_data[n][i].chars[0]=5;
+            }
+        }
+    }
+    cdf=false;
+  */
   int xpos=0;
 
   for(int n=0;n<cols;n++) {
@@ -160,17 +190,20 @@ void draw_row(VTermScreenCell *row,int ypos) {
     VTermColor fg = row[n].fg;
     VTermColor bg = row[n].bg;
 
-    if(row[n].attrs.blink == 1) any_blinking = true;
-    draw_unitext_fancy(screen,xpos,ypos,rtext,(bg.red << 16) + (bg.green << 8) + bg.blue,
-                                              (fg.red << 16) + (fg.green << 8) + fg.blue,
-                                              row[n].attrs.bold,
-                                              row[n].attrs.underline,
-                                              row[n].attrs.italic,
-                                              row[n].attrs.blink,
-                                              row[n].attrs.reverse,
-                                              row[n].attrs.strike,
-                                              row[n].attrs.font);
-
+//    if(cellcompare(c_screen_data[crow][n],row[n]) == false) {
+      if(row[n].attrs.blink == 1) any_blinking = true;
+      draw_unitext_fancy(renderer,xpos,ypos,rtext,(bg.red << 16) + (bg.green << 8) + bg.blue,
+                                                (fg.red << 16) + (fg.green << 8) + fg.blue,
+                                                row[n].attrs.bold,
+                                                row[n].attrs.underline,
+                                                row[n].attrs.italic,
+                                                row[n].attrs.blink,
+                                                row[n].attrs.reverse,
+                                                row[n].attrs.strike,
+                                                row[n].attrs.font);
+//    }
+//    c_screen_data[crow][n] = row[n];
+      
     xpos+=(font_width+font_space);
     if(row[n].width == 2) {xpos +=(font_width+font_space);n++;}
   }
@@ -356,18 +389,29 @@ void cursor_position(int *cursorx,int *cursory) {
 }
 
 void redraw_screen() {
-  SDL_mutexP(screen_mutex);
+    
+ //   for(int n=1;n<111;n++) {
+ //       nsdl_line(renderer,rand()%111,rand()%111,rand()%111,rand()%122,rand());
+ //   }
 
-  if(new_screen_size) {
-    printf("SCREEN RESIZE DETECTED\n");
-    screen = SDL_SetVideoMode(new_screen_size_x, new_screen_size_y, 32, SDL_RESIZABLE | SDL_DOUBLEBUF);
-    terminal_resize(screen,vt,&cols,&rows);
-    new_screen_size = false;
-  }
+    //return;
+    
+ // SDL_mutexP(screen_mutex);
 
-  SDL_LockSurface(screen);
-  SDL_FillRect(screen,NULL, 0x000000); 
+  //if(new_screen_size) {
+  //  printf("SCREEN RESIZE DETECTED\n");
+   //// screen = SDL_SetVideoMode(new_screen_size_x, new_screen_size_y, 32, SDL_RESIZABLE | SDL_DOUBLEBUF);
+    //terminal_resize(screen,vt,&cols,&rows);
+    //new_screen_size = false;
+//  }
 
+ //// SDL_LockSurface(screen);
+ //// SDL_FillRect(screen,NULL, 0x000000);
+
+    
+  SDL_SetRenderDrawColor(renderer,0x00,0x00,0x00,0xff);
+  SDL_RenderClear(renderer);
+    
   any_blinking = false;
   for(int row = 0; row < rows; row++) {
 
@@ -376,8 +420,8 @@ void redraw_screen() {
 
     VTermScreenCell *rowdata=grab_row(trow,&dont_free);
 
-    if(rowdata != 0) draw_row(rowdata,row*(font_height+font_space));
-
+    if(rowdata != 0) draw_row(rowdata,trow,row*(font_height+font_space));
+    
     int cursorx=0;
     int cursory=0;
     cursor_position(&cursorx,&cursory);
@@ -415,56 +459,123 @@ void redraw_screen() {
                                  text_end_x*(font_width+font_space),text_end_y*(font_height+font_space),0xFFFFFF);
   }
   
-  SDL_UnlockSurface(screen);
-  regis_render();
-  inline_data_render();
-  ngui_render(screen);
+//  SDL_UnlockSurface(screen);
+//  regis_render();
+//  inline_data_render();
+//  ngui_render(screen);
 
-  SDL_Flip(screen);
-
-  SDL_mutexV(screen_mutex);
+////  SDL_Flip(screen);
+    SDL_RenderPresent(renderer);
+//  SDL_mutexV(screen_mutex);
 }
 
 
+
+void do_sdl_init( ){
+    if(SDL_Init(SDL_INIT_VIDEO)<0) {
+        printf("Initialisation failed");
+        return;
+    }
+    
+    // initialise SDL rendering
+    //// const SDL_VideoInfo *vid = SDL_GetVideoInfo();
+    int maxwidth  = 320;//vid->current_w;
+    int maxheight = 480;//vid->current_h-(font_height+font_space);
+    
+//#ifndef IPHONE_BUILD
+ //   screen=SDL_SetVideoMode(maxwidth,maxheight,32,SDL_RESIZABLE | SDL_DOUBLEBUF);
+//#else
+    
+    screen=SDL_CreateWindow(NULL, 0, 0, maxwidth, maxheight,SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
+//                            SDL_WINDOW_SHOWN );
+    //| SDL_NOFRAME
+    if (screen == 0) {
+        printf("Could not initialize Window");
+    }
+    
+    //screen=SDL_SetVideo(maxwidth,maxheight,32,SDL_WINDOW_SHOWN | SDL_FULLSCREEN | SDL_NOFRAME);
+    renderer = SDL_CreateRenderer(screen, -1, 0);
+    
+    //SDL_SetRenderDrawColor(renderer,111,111,111,255);
+    //SDL_RenderClear(renderer);
+    SDL_SetRenderDrawColor(renderer,0x00,0x00,0x00,0xff);
+    SDL_RenderClear(renderer);
+    
+/*
+    for(;;){
+        SDL_Rect rect;
+        rect.w = rand()%128;
+        rect.h = rand()%128;
+        rect.x = rand()%128;
+        rect.y = rand()%128;
+        
+        SDL_SetRenderDrawColor(renderer, rand()%233, rand()%232, rand()%232, 255);
+        SDL_RenderFillRect(renderer, &rect);
+        printf("render");
+        SDL_RenderPresent(renderer);
+    }
+
+*/ 
+}
+
+void sdl_read_thread();
+
+bool redraw_req=true;
 void sdl_render_thread() {
   
-  if(SDL_Init(SDL_INIT_VIDEO)<0) {
-    printf("Initialisation failed");
-    return;
-  }
 
-  // initialise SDL rendering
-  //const SDL_VideoInfo *vid = SDL_GetVideoInfo();
-  //int maxwidth  = vid->current_w;
-  //int maxheight = vid->current_h-(font_height+font_space);
+  ////SDL_LockSurface(screen);
 
-  screen=SDL_SetVideoMode(640,480,32,SDL_RESIZABLE | SDL_DOUBLEBUF);
-  if(screen==NULL) {
-    printf("Failed SDL_SetVideoMode: %d",SDL_GetError());
-    SDL_Quit();
-    return;
-  }
+    
+  //  SDL_RenderPresent(renderer);
+   //// SDL_UnlockSurface(screen);
+////    SDL_Flip(screen);
+//#endif
+    
+ // if(screen==NULL) {
+ //   printf("Failed SDL_SetVideoMode: %d",SDL_GetError());
+ //   SDL_Quit();
+ //   return;
+ // }
   
-  SDL_EnableUNICODE(1);
-  SDL_EnableKeyRepeat(500,50);
+  //SDL_EnableUNICODE(1);
+//  SDL_EnableKeyRepeat(500,50);
   
-  terminal_resize(screen,vt,&cols,&rows);
-  regis_init(screen->w,screen->h);
-  inline_data_init(screen->w,screen->h);
+  ////////terminal_resize(screen,vt,&cols,&rows);
+////  regis_init(screen->w,screen->h);
+////  inline_data_init(screen->w,screen->h);
 
 
   sdl_init_complete=true;
+
+  SDL_Event event;
+  SDL_StartTextInput();
+    
   for(;;) {
-    SDL_SemWait(redraw_sem);
-    redraw_screen();
+ //   SDL_SemWait(redraw_sem);
+//
+      if(redraw_req) {
+        redraw_screen();
+        redraw_req=false;
+      }
+
+      SDL_Event event;
+      int ret = SDL_PollEvent(&event);
+
+      //int ret = SDL_WaitEventTimeout(&event,9);
+      if(ret != 0) {
+        sdl_read_thread(&event);
+      }
+      SDL_Delay(10);
   }
 }
 
 void redraw_required() {
-  uint32_t v =  SDL_SemValue(redraw_sem);
-  if(v > 5) return;
+ // uint32_t v =  SDL_SemValue(redraw_sem);
+ // if(v > 5) return;
 
-  SDL_SemPost(redraw_sem);
+    redraw_req=true;
+ // SDL_SemPost(redraw_sem);
 }
 
 void console_read_thread() {
@@ -473,7 +584,8 @@ void console_read_thread() {
     int len;
     char buffer[10241];
     len = c_read(buffer, sizeof(buffer)-1);
-    
+    printf("readlen: %d\n",len);
+      
     if(len < 0) {
  //     if(errno == EIO) {
         hterm_quit = true;
@@ -490,8 +602,9 @@ void console_read_thread() {
         vterm_push_bytes(vt, buffer, len);
       }
       SDL_mutexV(vterm_mutex);
+      redraw_required();
     }
-    redraw_required();
+    
   }
 }
 
@@ -637,41 +750,83 @@ void process_mouse_event(SDL_Event *event) {
 }
 
 
-void sdl_read_thread() {
+void sdl_read_thread(SDL_Event *event) {
 
-  for(;sdl_init_complete==false;){}
+//  for(;sdl_init_complete==false;){}
 
-  for(;;) {
+//#ifdef IPHONE_BUILD
+  //int i = SDL_iPhoneKeyboardShow(screen);
+  //printf("iphone kb res %d\n",i);
+//#endif
+    
+ // for(;;) {
     // sending bytes from SDL to pts
-    SDL_Event event;
-    SDL_WaitEvent(&event);
-    process_mouse_event(&event);
-    ngui_receive_event(&event);
+    
+    //process_mouse_event(&event);
+    //ngui_receive_event(&event);
     
     // SDL_GetKeyState not present in SDL 1.3
-    #ifdef IPHONE_BUILD
-    uint8_t *keystate = SDL_GetKeyState(NULL); 
+    #ifndef IPHONE_BUILD
+    //uint8_t *keystate = SDL_GetKeyState(NULL);
     #else
-    uint8_t *keystate;// = SDL_GetKeyState(NULL); // FIXFIXFIXFIXFIXFIX SDL1.3
+    //uint8_t *keystate = SDL_GetKeyboardState(NULL);// = SDL_GetKeyState(NULL); // FIXFIXFIXFIXFIXFIX SDL1.3
     #endif
 
-    if(event.type == SDL_QUIT) {
-      hterm_quit = true;
-      SDL_CondSignal(cond_quit);
-      return;
+   // if(event.type == SDL_QUIT) {
+     // hterm_quit = true;
+     // SDL_CondSignal(cond_quit);
+    //  return;
+   // }
+//
+    if (event->type == SDL_WINDOWEVENT &&
+        event->window.event == SDL_WINDOWEVENT_RESIZED) {
+        redraw_required();
+    }
+    
+    printf("event\n");
+    if(event->type == SDL_TEXTINPUT) {
+        printf("text input\n");
+        char buffer[222];
+        //buffer[3]=0;
+       // strcat(buffer, event->text.text);
+        c_write(event->text.text,strlen(event->text.text));
+    }
+    if(event->type == SDL_TEXTEDITING) {
+        printf("text editing\n");
     }
 
-    if(event.type == SDL_KEYDOWN) {
+    if(event->type == SDL_KEYDOWN) {
+        printf("key down\n");
+ 
+ //int index = keyToIndex(event.key.keysym);
+ SDL_Scancode scancode = event->key.keysym.scancode;
+        if(scancode == SDL_SCANCODE_RETURN) {
+            char buf[4];
+            buf[0] = 13;
+            buf[1] = 0;
+
+            c_write(buf,1);
+        }
+        
+        if(scancode == SDL_SCANCODE_DELETE) {
+            char buf[4];
+            buf[0] = 127;
+            buf[1] = 0;
+            
+            c_write(buf,1);
+        }
+//    }
+        /*
       scroll_offset = 0;
-      if(event.key.keysym.sym == SDLK_LSHIFT) continue;
-      if(event.key.keysym.sym == SDLK_RSHIFT) continue;
+//      if(event.key.keysym.sym == SDLK_LSHIFT) continue;
+//      if(event.key.keysym.sym == SDLK_RSHIFT) continue;
       if(event.key.keysym.sym == SDLK_LEFT) {
         char buf[4];
         buf[0] = 0x1b;
         buf[1] = 'O';
         buf[2] = 'D';
         buf[3] = 0;
-        c_write(buf,3);
+      ///  c_write(buf,3);
 
 
       } else 
@@ -681,7 +836,7 @@ void sdl_read_thread() {
         buf[1] = 'O';
         buf[2] = 'C';
         buf[3] = 0;
-        c_write(buf,3);
+     ///   c_write(buf,3);
       } else 
       if(event.key.keysym.sym == SDLK_UP) {
         char buf[4];
@@ -689,7 +844,7 @@ void sdl_read_thread() {
         buf[1] = 'O';
         buf[2] = 'A';
         buf[3] = 0;
-        c_write(buf,3);
+     ///   c_write(buf,3);
       } else 
       if(event.key.keysym.sym == SDLK_DOWN) {
         char buf[4];
@@ -697,38 +852,40 @@ void sdl_read_thread() {
         buf[1] = 'O';
         buf[2] = 'B';
         buf[3] = 0;
-        c_write(buf,3);
-      } else
-      if((event.key.keysym.sym == SDLK_p) && (keystate[SDLK_LCTRL])) {
+     ///   c_write(buf,3);
+      } else {
+  //    if((event.key.keysym.sym == SDLK_p) && (keystate[SDLK_LCTRL])) {
 
         // perform text paste
-        uint8_t *text = paste_text();
-        if(text != 0) {
-          c_write(text,strlen(text));
-          free(text);
-        }
-      } else {
- 
+  //      uint8_t *text = paste_text();
+  //      if(text != 0) {
+  //        c_write(text,strlen(text));
+  ////        free(text);
+  //      }
+ //     } else {
+ */
         // normal character
-        char buf[2];
-        buf[0] = event.key.keysym.unicode;
+/*        char buf[2];
+        buf[0] = event->key.keysym.sym;
         buf[1]=0;
         if(buf[0] != 0) {
-          c_write(buf,1);
-        }
-      }
+        c_write(buf,1);
+        }*/
+   // //  }
     }
+        
 
-
-    if(event.type == SDL_VIDEORESIZE) {
+/*
+    if(event->type == SDL_VIDEORESIZE) {
       printf("resize detected A\n");
-      new_screen_size_x = event.resize.w;
-      new_screen_size_y = event.resize.h;
+      new_screen_size_x = event->resize.w;
+      new_screen_size_y = event->resize.h;
       new_screen_size   = true;
 
       redraw_required();
     }
   }
+ */
 }
 
 void timed_repeat() {
@@ -738,7 +895,7 @@ void timed_repeat() {
     if(draw_selection == true) {
 
       if(select_end_y <= 0            ) scroll_offset++;
-      if(select_end_y >= (screen->h-1)) {if(scroll_offset != 0) scroll_offset--;}
+////      if(select_end_y >= (screen->h-1)) {if(scroll_offset != 0) scroll_offset--;}
 
       redraw_required();
     }
@@ -788,11 +945,13 @@ void receive_ssh_info(char *o1,char *o2,char *o3) {
 
   ssh_received=true;
 
-  ngui_delete_info_prompt(prompt_id);
+//  ngui_delete_info_prompt(prompt_id);
 }
 
 int main(int argc, char **argv) {
-
+    
+  do_sdl_init();
+    
   nunifont_load_staticmap(__fontmap_static,__widthmap_static,__fontmap_static_len,__widthmap_static_len);
 
   regis_mutex  = SDL_CreateMutex();
@@ -816,25 +975,26 @@ int main(int argc, char **argv) {
   #endif
 
   //char *open_arg1 = "localhost";
-  char open_arg1[100];// = "127.0.0.1        ";
-  char open_arg2[100];// = "new              ";
-  char open_arg3[100];// = "password         ";
+  char open_arg1[100] = "127.0.0.1";
+  char open_arg2[100] = "root";
+  char open_arg3[100] = "xxxxxx";
   
-  rows = 10;
-  cols = 10;
+  rows = 80;
+  cols = 100;
   vterm_initialisation();
-
+  if(vt != 0) vterm_set_size(vt,rows,cols);
+    
   // iPhone build uses sdl 2.
   #ifdef IPHONE_BUILD
-  SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0,0);
-  SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0,0);
+  // SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0,0);
+  //SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0,0);
   #else
-  SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0);
-  SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0);
+//  SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0);
+  //SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0);
   #endif
 
-  for(;sdl_init_complete == false;);
-  ngui_set_screen(screen, redraw_required);
+  //for(;sdl_init_complete == false;);
+  //ngui_set_screen(screen, redraw_required);
 
   if(connection_type == CONNECTION_LOCAL) {
     c_open   = &local_open;
@@ -851,24 +1011,24 @@ int main(int argc, char **argv) {
     c_resize = &ssh_resize;
 
     // we now need to read connection information.
-    
-    prompt_id = ngui_add_info_prompt(-1,-1,
+ 
+  /*  prompt_id = ngui_add_info_prompt(-1,-1,
                                      "hostname:","username:","password:",
                                      0,0,1,
                                      receive_ssh_info);
+*/
+//    for(;ssh_received == false;);
 
-    for(;ssh_received == false;);
+ //   strcpy(open_arg1,ssh_hostname);
+ //   strcpy(open_arg2,ssh_username);
+ //   strcpy(open_arg3,ssh_password);
 
-    strcpy(open_arg1,ssh_hostname);
-    strcpy(open_arg2,ssh_username);
-    strcpy(open_arg3,ssh_password);
-
-    printf("arg1: %s\n",open_arg1);
-    printf("arg2: %s\n",open_arg2);
-    printf("arg3: %s\n",open_arg3);
+ //   printf("arg1: %s\n",open_arg1);
+ //   printf("arg2: %s\n",open_arg2);
+ //   printf("arg3: %s\n",open_arg3);
   }
 
-  int open_ret = c_open(open_arg1,open_arg2,open_arg3);
+    int open_ret = c_open(open_arg1,open_arg2,open_arg3);
 
   
   SDL_Thread *thread3;
@@ -876,12 +1036,14 @@ int main(int argc, char **argv) {
   if(open_ret >= 0) {
     // iPhone build uses sdl 2, which requires extra arg here.
     #ifdef IPHONE_BUILD
-    thread3 = SDL_CreateThread(console_read_thread,0,0);
-    thread5 = SDL_CreateThread(timed_repeat       ,0,0);
+      thread3 = SDL_CreateThread(console_read_thread,0,0);
+  //  thread5 = SDL_CreateThread(timed_repeat       ,0,0);
     #else
-    thread3 = SDL_CreateThread(console_read_thread,0);
-    thread5 = SDL_CreateThread(timed_repeat       ,0);
+  //  thread3 = SDL_CreateThread(console_read_thread,0);
+  //  thread5 = SDL_CreateThread(timed_repeat       ,0);
     #endif
+
+    sdl_render_thread();
 
     SDL_mutexP(quit_mutex);
 

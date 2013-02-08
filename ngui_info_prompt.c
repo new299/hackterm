@@ -93,6 +93,8 @@ int  ngui_add_info_prompt(int x,int y,
   ngui_info_prompts[ngui_info_prompts_size].p3_opt = p3_opt;
   ngui_info_prompts[ngui_info_prompts_size].callback = callback;
   
+  printf("screen w %d h %d\n",ngui_screen->w,ngui_screen->h);
+    
   int l1 = ngui_add_textlabel((ngui_screen->w/2)-(strlen(p1)*8),
                               (ngui_screen->h/2)-(strlen(p1)*8),
                               p1);

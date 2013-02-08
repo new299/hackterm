@@ -22,12 +22,16 @@
 #define _SDL_uikitwindow_h
 
 #include "../SDL_sysvideo.h"
+#import "SDL_uikitvideo.h"
 #import "SDL_uikitopenglview.h"
 #import "SDL_uikitviewcontroller.h"
 
 typedef struct SDL_WindowData SDL_WindowData;
 
 extern int UIKit_CreateWindow(_THIS, SDL_Window * window);
+extern void UIKit_ShowWindow(_THIS, SDL_Window * window);
+extern void UIKit_HideWindow(_THIS, SDL_Window * window);
+extern void UIKit_RaiseWindow(_THIS, SDL_Window * window);
 extern void UIKit_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen);
 extern void UIKit_DestroyWindow(_THIS, SDL_Window * window);
 extern SDL_bool UIKit_GetWindowWMInfo(_THIS, SDL_Window * window,

@@ -25,12 +25,9 @@
 #include "SDL_audio.h"
 #include "SDL_audio_c.h"
 
-/* #define DEBUG_CONVERT */
+#include "SDL_assert.h"
 
-/* !!! FIXME */
-#ifndef assert
-#define assert(x)
-#endif
+/* #define DEBUG_CONVERT */
 
 /* Effectively mix right and left channels into a single channel */
 static void SDLCALL
@@ -881,9 +878,9 @@ SDL_FindFrequencyMultiple(const int src_rate, const int dst_rate)
     int lo, hi;
     int div;
 
-    assert(src_rate != 0);
-    assert(dst_rate != 0);
-    assert(src_rate != dst_rate);
+    SDL_assert(src_rate != 0);
+    SDL_assert(dst_rate != 0);
+    SDL_assert(src_rate != dst_rate);
 
     if (src_rate < dst_rate) {
         lo = src_rate;
@@ -971,6 +968,12 @@ SDL_BuildAudioCVT(SDL_AudioCVT * cvt,
      * !!! FIXME: good in practice as it sounds in theory, though.
      */
 
+    /* Sanity check target pointer */
+    if (cvt == NULL) {
+        SDL_InvalidParamError("cvt");
+        return -1;
+    }
+    
     /* there are no unsigned types over 16 bits, so catch this up front. */
     if ((SDL_AUDIO_BITSIZE(src_fmt) > 16) && (!SDL_AUDIO_ISSIGNED(src_fmt))) {
         SDL_SetError("Invalid source format");
@@ -982,6 +985,10 @@ SDL_BuildAudioCVT(SDL_AudioCVT * cvt,
     }
 
     /* prevent possible divisions by zero, etc. */
+    if ((src_channels == 0) || (dst_channels == 0)) {
+        SDL_SetError("Source or destination channels is zero");
+        return -1;
+    }
     if ((src_rate == 0) || (dst_rate == 0)) {
         SDL_SetError("Source or destination rate is zero");
         return -1;

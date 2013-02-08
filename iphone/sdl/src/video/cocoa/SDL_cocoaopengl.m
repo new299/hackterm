@@ -32,8 +32,15 @@
 #include "SDL_loadso.h"
 #include "SDL_opengl.h"
 
-
 #define DEFAULT_OPENGL  "/System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib"
+
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED < 1070
+#define kCGLPFAOpenGLProfile 99
+#define kCGLOGLPVersion_Legacy 0x1000
+#define kCGLOGLPVersion_3_2_Core 0x3200
+#endif
+
 
 int
 Cocoa_GL_LoadLibrary(_THIS, const char *path)
@@ -70,7 +77,9 @@ Cocoa_GL_UnloadLibrary(_THIS)
 SDL_GLContext
 Cocoa_GL_CreateContext(_THIS, SDL_Window * window)
 {
-    NSAutoreleasePool *pool;
+    const int wantver = (_this->gl_config.major_version << 8) |
+                        (_this->gl_config.minor_version);
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     SDL_DisplayData *displaydata = (SDL_DisplayData *)display->driverdata;
     NSOpenGLPixelFormatAttribute attr[32];
@@ -78,108 +87,127 @@ Cocoa_GL_CreateContext(_THIS, SDL_Window * window)
     NSOpenGLContext *context;
     int i = 0;
 
-    pool = [[NSAutoreleasePool alloc] init];
-
-#ifndef FULLSCREEN_TOGGLEABLE
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        attr[i++] = NSOpenGLPFAFullScreen;
-    }
-#endif
-
-    attr[i++] = NSOpenGLPFAColorSize;
-    attr[i++] = SDL_BYTESPERPIXEL(display->current_mode.format)*8;
-
-    attr[i++] = NSOpenGLPFADepthSize;
-    attr[i++] = _this->gl_config.depth_size;
-
-    if (_this->gl_config.double_buffer) {
-        attr[i++] = NSOpenGLPFADoubleBuffer;
+    if (_this->gl_config.profile_mask == SDL_GL_CONTEXT_PROFILE_ES) {
+        SDL_SetError ("OpenGL ES not supported on this platform");
+        return NULL;
     }
 
-    if (_this->gl_config.stereo) {
-        attr[i++] = NSOpenGLPFAStereo;
+    /* Sadly, we'll have to update this as life progresses, since we need to
+       set an enum for context profiles, not a context version number */
+    if (wantver > 0x0302) {
+        SDL_SetError ("OpenGL > 3.2 is not supported on this platform");
+        return NULL;
     }
 
-    if (_this->gl_config.stencil_size) {
-        attr[i++] = NSOpenGLPFAStencilSize;
-        attr[i++] = _this->gl_config.stencil_size;
-    }
+    @autoreleasepool {
+        /* specify a profile if we're on Lion (10.7) or later. */
+        if (data->osversion >= 0x1070) {
+            NSOpenGLPixelFormatAttribute profile = kCGLOGLPVersion_Legacy;
+            if (_this->gl_config.profile_mask == SDL_GL_CONTEXT_PROFILE_CORE) {
+                if (wantver == 0x0302) {
+                    profile = kCGLOGLPVersion_3_2_Core;
+                }
+            }
+            attr[i++] = kCGLPFAOpenGLProfile;
+            attr[i++] = profile;
+        }
 
-    if ((_this->gl_config.accum_red_size +
-         _this->gl_config.accum_green_size +
-         _this->gl_config.accum_blue_size +
-         _this->gl_config.accum_alpha_size) > 0) {
-        attr[i++] = NSOpenGLPFAAccumSize;
-        attr[i++] = _this->gl_config.accum_red_size + _this->gl_config.accum_green_size + _this->gl_config.accum_blue_size + _this->gl_config.accum_alpha_size;
-    }
+    #ifndef FULLSCREEN_TOGGLEABLE
+        if (window->flags & SDL_WINDOW_FULLSCREEN) {
+            attr[i++] = NSOpenGLPFAFullScreen;
+        }
+    #endif
 
-    if (_this->gl_config.multisamplebuffers) {
-        attr[i++] = NSOpenGLPFASampleBuffers;
-        attr[i++] = _this->gl_config.multisamplebuffers;
-    }
+        attr[i++] = NSOpenGLPFAColorSize;
+        attr[i++] = SDL_BYTESPERPIXEL(display->current_mode.format)*8;
 
-    if (_this->gl_config.multisamplesamples) {
-        attr[i++] = NSOpenGLPFASamples;
-        attr[i++] = _this->gl_config.multisamplesamples;
-        attr[i++] = NSOpenGLPFANoRecovery;
-    }
+        attr[i++] = NSOpenGLPFADepthSize;
+        attr[i++] = _this->gl_config.depth_size;
 
-    if (_this->gl_config.accelerated >= 0) {
-        if (_this->gl_config.accelerated) {
-            attr[i++] = NSOpenGLPFAAccelerated;
-        } else {
-            attr[i++] = NSOpenGLPFARendererID;
-            attr[i++] = kCGLRendererGenericFloatID;
+        if (_this->gl_config.double_buffer) {
+            attr[i++] = NSOpenGLPFADoubleBuffer;
+        }
+
+        if (_this->gl_config.stereo) {
+            attr[i++] = NSOpenGLPFAStereo;
+        }
+
+        if (_this->gl_config.stencil_size) {
+            attr[i++] = NSOpenGLPFAStencilSize;
+            attr[i++] = _this->gl_config.stencil_size;
+        }
+
+        if ((_this->gl_config.accum_red_size +
+             _this->gl_config.accum_green_size +
+             _this->gl_config.accum_blue_size +
+             _this->gl_config.accum_alpha_size) > 0) {
+            attr[i++] = NSOpenGLPFAAccumSize;
+            attr[i++] = _this->gl_config.accum_red_size + _this->gl_config.accum_green_size + _this->gl_config.accum_blue_size + _this->gl_config.accum_alpha_size;
+        }
+
+        if (_this->gl_config.multisamplebuffers) {
+            attr[i++] = NSOpenGLPFASampleBuffers;
+            attr[i++] = _this->gl_config.multisamplebuffers;
+        }
+
+        if (_this->gl_config.multisamplesamples) {
+            attr[i++] = NSOpenGLPFASamples;
+            attr[i++] = _this->gl_config.multisamplesamples;
+            attr[i++] = NSOpenGLPFANoRecovery;
+        }
+
+        if (_this->gl_config.accelerated >= 0) {
+            if (_this->gl_config.accelerated) {
+                attr[i++] = NSOpenGLPFAAccelerated;
+            } else {
+                attr[i++] = NSOpenGLPFARendererID;
+                attr[i++] = kCGLRendererGenericFloatID;
+            }
+        }
+
+        attr[i++] = NSOpenGLPFAScreenMask;
+        attr[i++] = CGDisplayIDToOpenGLDisplayMask(displaydata->display);
+        attr[i] = 0;
+
+        fmt = [[NSOpenGLPixelFormat alloc] initWithAttributes:attr];
+        if (fmt == nil) {
+            SDL_SetError ("Failed creating OpenGL pixel format");
+            return NULL;
+        }
+
+        context = [[NSOpenGLContext alloc] initWithFormat:fmt shareContext:nil];
+
+        [fmt release];
+
+        if (context == nil) {
+            SDL_SetError ("Failed creating OpenGL context");
+            return NULL;
+        }
+
+        /*
+         * Wisdom from Apple engineer in reference to UT2003's OpenGL performance:
+         *  "You are blowing a couple of the internal OpenGL function caches. This
+         *  appears to be happening in the VAO case.  You can tell OpenGL to up
+         *  the cache size by issuing the following calls right after you create
+         *  the OpenGL context.  The default cache size is 16."    --ryan.
+         */
+
+        #ifndef GLI_ARRAY_FUNC_CACHE_MAX
+        #define GLI_ARRAY_FUNC_CACHE_MAX 284
+        #endif
+
+        #ifndef GLI_SUBMIT_FUNC_CACHE_MAX
+        #define GLI_SUBMIT_FUNC_CACHE_MAX 280
+        #endif
+
+        {
+            GLint cache_max = 64;
+            CGLContextObj ctx = [context CGLContextObj];
+            CGLSetParameter (ctx, GLI_SUBMIT_FUNC_CACHE_MAX, &cache_max);
+            CGLSetParameter (ctx, GLI_ARRAY_FUNC_CACHE_MAX, &cache_max);
         }
     }
-
-    attr[i++] = NSOpenGLPFAScreenMask;
-    attr[i++] = CGDisplayIDToOpenGLDisplayMask(displaydata->display);
-    attr[i] = 0;
-
-    fmt = [[NSOpenGLPixelFormat alloc] initWithAttributes:attr];
-    if (fmt == nil) {
-        SDL_SetError ("Failed creating OpenGL pixel format");
-        [pool release];
-        return NULL;
-    }
-
-    context = [[NSOpenGLContext alloc] initWithFormat:fmt shareContext:nil];
-
-    [fmt release];
-
-    if (context == nil) {
-        SDL_SetError ("Failed creating OpenGL context");
-        [pool release];
-        return NULL;
-    }
-
-    /*
-     * Wisdom from Apple engineer in reference to UT2003's OpenGL performance:
-     *  "You are blowing a couple of the internal OpenGL function caches. This
-     *  appears to be happening in the VAO case.  You can tell OpenGL to up
-     *  the cache size by issuing the following calls right after you create
-     *  the OpenGL context.  The default cache size is 16."    --ryan.
-     */
-
-    #ifndef GLI_ARRAY_FUNC_CACHE_MAX
-    #define GLI_ARRAY_FUNC_CACHE_MAX 284
-    #endif
-
-    #ifndef GLI_SUBMIT_FUNC_CACHE_MAX
-    #define GLI_SUBMIT_FUNC_CACHE_MAX 280
-    #endif
-
-    {
-        GLint cache_max = 64;
-        CGLContextObj ctx = [context CGLContextObj];
-        CGLSetParameter (ctx, GLI_SUBMIT_FUNC_CACHE_MAX, &cache_max);
-        CGLSetParameter (ctx, GLI_ARRAY_FUNC_CACHE_MAX, &cache_max);
-    }
-
     /* End Wisdom from Apple Engineer section. --ryan. */
-
-    [pool release];
 
     if ( Cocoa_GL_MakeCurrent(_this, window, context) < 0 ) {
         Cocoa_GL_DeleteContext(_this, context);
@@ -192,108 +220,94 @@ Cocoa_GL_CreateContext(_THIS, SDL_Window * window)
 int
 Cocoa_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 {
-    NSAutoreleasePool *pool;
+    @autoreleasepool {
+        if (context) {
+            SDL_WindowData *windowdata = (SDL_WindowData *)window->driverdata;
+            NSOpenGLContext *nscontext = (NSOpenGLContext *)context;
 
-    pool = [[NSAutoreleasePool alloc] init];
-
-    if (context) {
-        SDL_WindowData *windowdata = (SDL_WindowData *)window->driverdata;
-        NSOpenGLContext *nscontext = (NSOpenGLContext *)context;
-
-#ifndef FULLSCREEN_TOGGLEABLE
-        if (window->flags & SDL_WINDOW_FULLSCREEN) {
-            [nscontext setFullScreen];
-        } else
-#endif
-        {
-            [nscontext setView:[windowdata->nswindow contentView]];
-            [nscontext update];
+            if (window->flags & SDL_WINDOW_SHOWN) {
+    #ifndef FULLSCREEN_TOGGLEABLE
+                if (window->flags & SDL_WINDOW_FULLSCREEN) {
+                    [nscontext setFullScreen];
+                } else
+    #endif
+                {
+                    [nscontext setView:[windowdata->nswindow contentView]];
+                    [nscontext update];
+                }
+            }
+            [nscontext makeCurrentContext];
+        } else {
+            [NSOpenGLContext clearCurrentContext];
         }
-        [nscontext makeCurrentContext];
-    } else {
-        [NSOpenGLContext clearCurrentContext];
     }
 
-    [pool release];
     return 0;
 }
 
 int
 Cocoa_GL_SetSwapInterval(_THIS, int interval)
 {
-    NSAutoreleasePool *pool;
     NSOpenGLContext *nscontext;
     GLint value;
     int status;
 
-    pool = [[NSAutoreleasePool alloc] init];
-
-    nscontext = [NSOpenGLContext currentContext];
-    if (nscontext != nil) {
-        value = interval;
-        [nscontext setValues:&value forParameter:NSOpenGLCPSwapInterval];
-        status = 0;
-    } else {
-        SDL_SetError("No current OpenGL context");
-        status = -1;
+    @autoreleasepool {
+        nscontext = [NSOpenGLContext currentContext];
+        if (nscontext != nil) {
+            value = interval;
+            [nscontext setValues:&value forParameter:NSOpenGLCPSwapInterval];
+            status = 0;
+        } else {
+            SDL_SetError("No current OpenGL context");
+            status = -1;
+        }
     }
 
-    [pool release];
     return status;
 }
 
 int
 Cocoa_GL_GetSwapInterval(_THIS)
 {
-    NSAutoreleasePool *pool;
     NSOpenGLContext *nscontext;
     GLint value;
-    int status;
+    int status = 0;
 
-    pool = [[NSAutoreleasePool alloc] init];
-
-    nscontext = [NSOpenGLContext currentContext];
-    if (nscontext != nil) {
-        [nscontext getValues:&value forParameter:NSOpenGLCPSwapInterval];
-        status = (int)value;
-    } else {
-        SDL_SetError("No current OpenGL context");
-        status = -1;
+    @autoreleasepool {
+        nscontext = [NSOpenGLContext currentContext];
+        if (nscontext != nil) {
+            [nscontext getValues:&value forParameter:NSOpenGLCPSwapInterval];
+            status = (int)value;
+        }
     }
 
-    [pool release];
     return status;
 }
 
 void
 Cocoa_GL_SwapWindow(_THIS, SDL_Window * window)
 {
-    NSAutoreleasePool *pool;
     NSOpenGLContext *nscontext;
 
-    pool = [[NSAutoreleasePool alloc] init];
-
-    /* FIXME: Do we need to get the context for the window? */
-    nscontext = [NSOpenGLContext currentContext];
-    if (nscontext != nil) {
-        [nscontext flushBuffer];
+    @autoreleasepool {
+        /* FIXME: Do we need to get the context for the window? */
+        nscontext = [NSOpenGLContext currentContext];
+        if (nscontext != nil) {
+            [nscontext flushBuffer];
+        }
     }
-
-    [pool release];
 }
 
 void
 Cocoa_GL_DeleteContext(_THIS, SDL_GLContext context)
 {
-    NSAutoreleasePool *pool;
     NSOpenGLContext *nscontext = (NSOpenGLContext *)context;
 
-    pool = [[NSAutoreleasePool alloc] init];
-
-    [nscontext clearDrawable];
-    [nscontext release];
-
-    [pool release];
+    @autoreleasepool {
+        [nscontext clearDrawable];
+        [nscontext release];
+    }
 }
 
 #endif /* SDL_VIDEO_OPENGL_CGL */

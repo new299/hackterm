@@ -22,6 +22,7 @@
 
 #if SDL_VIDEO_DRIVER_COCOA
 
+#include "SDL_assert.h"
 #include "SDL_events.h"
 #include "SDL_cocoavideo.h"
 
@@ -31,68 +32,124 @@
 static SDL_Cursor *
 Cocoa_CreateDefaultCursor()
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSCursor *nscursor;
-    SDL_Cursor *cursor = NULL;
+    @autoreleasepool {
+        NSCursor *nscursor;
+        SDL_Cursor *cursor = NULL;
 
-    nscursor = [NSCursor arrowCursor];
+        nscursor = [NSCursor arrowCursor];
 
-    if (nscursor) {
-        cursor = SDL_calloc(1, sizeof(*cursor));
-        if (cursor) {
-            cursor->driverdata = nscursor;
-            [nscursor retain];
+        if (nscursor) {
+            cursor = SDL_calloc(1, sizeof(*cursor));
+            if (cursor) {
+                cursor->driverdata = nscursor;
+                [nscursor retain];
+            }
         }
+        
+        return cursor;
     }
-
-    [pool release];
-
-    return cursor;
 }
 
 static SDL_Cursor *
 Cocoa_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSImage *nsimage;
-    NSCursor *nscursor = NULL;
-    SDL_Cursor *cursor = NULL;
+    @autoreleasepool {
+        NSImage *nsimage;
+        NSCursor *nscursor = NULL;
+        SDL_Cursor *cursor = NULL;
 
-    nsimage = Cocoa_CreateImage(surface);
-    if (nsimage) {
-        nscursor = [[NSCursor alloc] initWithImage: nsimage hotSpot: NSMakePoint(hot_x, hot_y)];
-    }
-
-    if (nscursor) {
-        cursor = SDL_calloc(1, sizeof(*cursor));
-        if (cursor) {
-            cursor->driverdata = nscursor;
+        nsimage = Cocoa_CreateImage(surface);
+        if (nsimage) {
+            nscursor = [[NSCursor alloc] initWithImage: nsimage hotSpot: NSMakePoint(hot_x, hot_y)];
         }
+
+        if (nscursor) {
+            cursor = SDL_calloc(1, sizeof(*cursor));
+            if (cursor) {
+                cursor->driverdata = nscursor;
+            }
+        }
+        
+        return cursor;
     }
+}
 
-    [pool release];
+static SDL_Cursor *
+Cocoa_CreateSystemCursor(SDL_SystemCursor id)
+{
+    @autoreleasepool {
+        NSCursor *nscursor = NULL;
+        SDL_Cursor *cursor = NULL;
 
-    return cursor;
+        switch(id)
+        {
+        case SDL_SYSTEM_CURSOR_ARROW:
+            nscursor = [NSCursor arrowCursor];
+            break;
+        case SDL_SYSTEM_CURSOR_IBEAM:
+            nscursor = [NSCursor IBeamCursor];
+            break;
+        case SDL_SYSTEM_CURSOR_WAIT:
+            nscursor = [NSCursor arrowCursor];
+            break;
+        case SDL_SYSTEM_CURSOR_CROSSHAIR:
+            nscursor = [NSCursor crosshairCursor];
+            break;
+        case SDL_SYSTEM_CURSOR_WAITARROW:
+            nscursor = [NSCursor arrowCursor];
+            break;
+        case SDL_SYSTEM_CURSOR_SIZENWSE:
+        case SDL_SYSTEM_CURSOR_SIZENESW:
+            nscursor = [NSCursor closedHandCursor];
+            break;
+        case SDL_SYSTEM_CURSOR_SIZEWE:
+            nscursor = [NSCursor resizeLeftRightCursor];
+            break;
+        case SDL_SYSTEM_CURSOR_SIZENS:
+            nscursor = [NSCursor resizeUpDownCursor];
+            break;
+        case SDL_SYSTEM_CURSOR_SIZEALL:
+            nscursor = [NSCursor closedHandCursor];
+            break;
+        case SDL_SYSTEM_CURSOR_NO:
+            nscursor = [NSCursor operationNotAllowedCursor];
+            break;
+        case SDL_SYSTEM_CURSOR_HAND:
+            nscursor = [NSCursor pointingHandCursor];
+            break;
+        default:
+            SDL_assert(!"Unknown system cursor");
+            return NULL;
+        }
+
+        if (nscursor) {
+            cursor = SDL_calloc(1, sizeof(*cursor));
+            if (cursor) {
+                // We'll free it later, so retain it here
+                [nscursor retain];
+                cursor->driverdata = nscursor;
+            }
+        }
+            
+        return cursor;
+    }
 }
 
 static void
 Cocoa_FreeCursor(SDL_Cursor * cursor)
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSCursor *nscursor = (NSCursor *)cursor->driverdata;
+    @autoreleasepool {
+        NSCursor *nscursor = (NSCursor *)cursor->driverdata;
 
-    [nscursor release];
-    SDL_free(cursor);
-
-    [pool release];
+        [nscursor release];
+        SDL_free(cursor);
+    }
 }
 
 static int
 Cocoa_ShowCursor(SDL_Cursor * cursor)
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-    if (SDL_GetMouseFocus()) {
+    @autoreleasepool {
         if (cursor) {
             NSCursor *nscursor = (NSCursor *)cursor->driverdata;
 
@@ -102,8 +159,6 @@ Cocoa_ShowCursor(SDL_Cursor * cursor)
             [NSCursor hide];
         }
     }
-
-    [pool release];
 
     return 0;
 }
@@ -141,6 +196,7 @@ Cocoa_InitMouse(_THIS)
     SDL_Mouse *mouse = SDL_GetMouse();
 
     mouse->CreateCursor = Cocoa_CreateCursor;
+    mouse->CreateSystemCursor = Cocoa_CreateSystemCursor;
     mouse->ShowCursor = Cocoa_ShowCursor;
     mouse->FreeCursor = Cocoa_FreeCursor;
     mouse->WarpMouse = Cocoa_WarpMouse;

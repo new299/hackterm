@@ -2,35 +2,47 @@
 #include <SDL/SDL.h>
 #include <stdint.h>
 
-void nsdl_point(SDL_Surface *screen,int x,int y,uint32_t value) {
+// require initialisation function
+void nsdl_init() {}
 
-  int bpp = screen->format->BytesPerPixel;
-  uint8_t *p = (uint8_t *) screen->pixels + (y * screen->pitch) + (x * bpp);
+void nsdl_point(void *screen,int x,int y,uint32_t value) {
 
-  #ifdef __APPLE__
-  p += 1;
-  #endif
-
-  if((x<0)||(y<0)|| (x>=screen->w)||(y>=screen->h)) return;
-
-  *(uint32_t *) p = value;
-}
-
-uint32_t nsdl_getpoint(SDL_Surface *screen,int x,int y) {
-
-  int bpp = screen->format->BytesPerPixel;
-  uint8_t *p = (uint8_t *) screen->pixels + (y * screen->pitch) + (x * bpp);
+  SDL_Rect rect;
+  rect.w = 1;
+  rect.h = 1;
+  rect.x = x;
+  rect.y = y;
+    
+  SDL_SetRenderDrawColor(screen, rand()%233, rand()%232, rand()%232, 255);
+  SDL_RenderFillRect(screen, &rect);
+    
+ // int bpp = screen->format->BytesPerPixel;
+ // uint8_t *p = (uint8_t *) screen->pixels + (y * screen->pitch) + (x * bpp);
 
   #ifdef __APPLE__
-  p += 1;
+ // p += 1;
   #endif
 
-  if((x<0)||(y<0)|| (x>=screen->w)||(y>=screen->h)) return 0;
+//  if((x<0)||(y<0)|| (x>=screen->w)||(y>=screen->h)) return;
 
-  return (*(uint32_t *)p);
+//  *(uint32_t *) p = value;
 }
 
-void nsdl_rectangle_hashed(SDL_Surface *screen,int sx,int sy,int ex,int ey,uint32_t value) {
+uint32_t nsdl_getpoint(void *screen,int x,int y) {
+
+////  int bpp = screen->format->BytesPerPixel;
+////  uint8_t *p = (uint8_t *) screen->pixels + (y * screen->pitch) + (x * bpp);
+////
+////  #ifdef __APPLE__
+////  p += 1;
+////  #endif
+
+////  if((x<0)||(y<0)|| (x>=screen->w)||(y>=screen->h)) return 0;
+
+////  return (*(uint32_t *)p);
+}
+
+void nsdl_rectangle_hashed(void *screen,int sx,int sy,int ex,int ey,uint32_t value) {
 
   int n=0;
 
@@ -47,7 +59,7 @@ void nsdl_rectangle_hashed(SDL_Surface *screen,int sx,int sy,int ex,int ey,uint3
 
 }
 
-void nsdl_rectangle_shade(SDL_Surface *screen,int sx,int sy,int ex,int ey,uint32_t value_start,uint32_t value_end) {
+void nsdl_rectangle_shade(void *screen,int sx,int sy,int ex,int ey,uint32_t value_start,uint32_t value_end) {
   
   int shade=value_start;
   int shade_inc = ((value_end-value_start)/(ex-sx))/2;
@@ -62,7 +74,7 @@ void nsdl_rectangle_shade(SDL_Surface *screen,int sx,int sy,int ex,int ey,uint32
   }
 }
 
-void nsdl_rectangle_softalph(SDL_Surface *screen,int sx,int sy,int ex,int ey,uint32_t value) {
+void nsdl_rectangle_softalph(void *screen,int sx,int sy,int ex,int ey,uint32_t value) {
   int shade=value;
 
   for(int x=sx;x<ex;x++) {
@@ -73,7 +85,7 @@ void nsdl_rectangle_softalph(SDL_Surface *screen,int sx,int sy,int ex,int ey,uin
   }
 }
 
-void nsdl_rectangle_wire(SDL_Surface *screen,int sx,int sy,int ex,int ey,uint32_t value) {
+void nsdl_rectangle_wire(void *screen,int sx,int sy,int ex,int ey,uint32_t value) {
 
   for(int x=sx;x<ex;x++) {
     nsdl_point(screen,x,sy,value);
@@ -86,7 +98,7 @@ void nsdl_rectangle_wire(SDL_Surface *screen,int sx,int sy,int ex,int ey,uint32_
   }
 }
 
-void nsdl_line(SDL_Surface *screen,int start_x,int start_y,int end_x,int end_y,int color) {
+void nsdl_line(void *screen,int start_x,int start_y,int end_x,int end_y,int color) {
 
   // Bresenham's
   int cx = start_x;

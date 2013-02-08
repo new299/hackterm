@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D5ED0D1516A57A0D003F887B /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D5ED0D1416A57A0D003F887B /* Default-568h@2x.png */; };
+		D550D13916C01036000D4D6A /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D550D13216C00DBF000D4D6A /* libSDL2.a */; };
 		D5ED0D8416A57FD6003F887B /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0D8316A57FD6003F887B /* main.c */; };
 		D5ED0DBD16A582CB003F887B /* encoding.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0DB216A582CA003F887B /* encoding.c */; };
 		D5ED0DBE16A582CB003F887B /* input.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0DB316A582CB003F887B /* input.c */; };
@@ -17,7 +17,6 @@
 		D5ED0DC216A582CB003F887B /* state.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0DB816A582CB003F887B /* state.c */; };
 		D5ED0DC316A582CB003F887B /* unicode.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0DB916A582CB003F887B /* unicode.c */; };
 		D5ED0DC416A582CB003F887B /* vterm.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0DBC16A582CB003F887B /* vterm.c */; };
-		D5ED0DF316A59480003F887B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D5ED0DF016A59384003F887B /* libSDL.a */; };
 		D5ED0E0116A594BE003F887B /* base64.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0DF416A594BE003F887B /* base64.c */; };
 		D5ED0E0216A594BE003F887B /* inlinedata.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0DF516A594BE003F887B /* inlinedata.c */; };
 		D5ED0E0316A594BE003F887B /* local.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0DF616A594BE003F887B /* local.c */; };
@@ -81,7 +80,6 @@
 		FD15FD6B0E086911003BDF25 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D3623EB0D0F72F000981E51 /* CoreGraphics.framework */; };
 		FD15FD6C0E086911003BDF25 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDB96ED30DEFC9C700FAF19F /* OpenGLES.framework */; };
 		FD15FD6D0E086911003BDF25 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDB96EDF0DEFC9DC00FAF19F /* QuartzCore.framework */; };
-		FD787AA10E22A5CC003E8E36 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = FD787AA00E22A5CC003E8E36 /* Default.png */; };
 		FD925B1A0E0F276600E92347 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = FD925B180E0F276600E92347 /* Icon.png */; };
 		FDB651D00E43D1AD00F688B5 /* icon.bmp in Resources */ = {isa = PBXBuildFile; fileRef = FDB651CC0E43D19800F688B5 /* icon.bmp */; };
 		FDF0D7A90E12D53500247964 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDF0D71D0E12D2AB00247964 /* CoreAudio.framework */; };
@@ -89,16 +87,16 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		D5ED0DEF16A59384003F887B /* PBXContainerItemProxy */ = {
+		D550D13116C00DBF000D4D6A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = D5ED0DE516A59383003F887B /* SDL.xcodeproj */;
+			containerPortal = D550D12716C00DBE000D4D6A /* SDL.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = FD6526630DE8FCCB002AD96B;
 			remoteInfo = libSDL;
 		};
-		D5ED0DF116A59384003F887B /* PBXContainerItemProxy */ = {
+		D550D13316C00DBF000D4D6A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = D5ED0DE516A59383003F887B /* SDL.xcodeproj */;
+			containerPortal = D550D12716C00DBE000D4D6A /* SDL.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 006E982211955059001DE610;
 			remoteInfo = testsdl;
@@ -110,6 +108,7 @@
 		1D3623EB0D0F72F000981E51 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D550D12716C00DBE000D4D6A /* SDL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SDL.xcodeproj; path = "SDL/Xcode-iOS/SDL/SDL.xcodeproj"; sourceTree = "<group>"; };
 		D5ED0D1416A57A0D003F887B /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		D5ED0D8316A57FD6003F887B /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = main.c; path = ../main.c; sourceTree = SOURCE_ROOT; };
 		D5ED0DB216A582CA003F887B /* encoding.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = encoding.c; path = ../libvterm/src/encoding.c; sourceTree = SOURCE_ROOT; };
@@ -120,7 +119,6 @@
 		D5ED0DB816A582CB003F887B /* state.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = state.c; path = ../libvterm/src/state.c; sourceTree = "<group>"; };
 		D5ED0DB916A582CB003F887B /* unicode.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = unicode.c; path = ../libvterm/src/unicode.c; sourceTree = "<group>"; };
 		D5ED0DBC16A582CB003F887B /* vterm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = vterm.c; path = ../libvterm/src/vterm.c; sourceTree = "<group>"; };
-		D5ED0DE516A59383003F887B /* SDL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SDL.xcodeproj; path = sdl/dummy/XCodeProj/SDL.xcodeproj; sourceTree = "<group>"; };
 		D5ED0DF416A594BE003F887B /* base64.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = base64.c; path = ../base64.c; sourceTree = "<group>"; };
 		D5ED0DF516A594BE003F887B /* inlinedata.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = inlinedata.c; path = ../inlinedata.c; sourceTree = "<group>"; };
 		D5ED0DF616A594BE003F887B /* local.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = local.c; path = ../local.c; sourceTree = "<group>"; };
@@ -408,8 +406,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D550D13916C01036000D4D6A /* libSDL2.a in Frameworks */,
 				D5ED0F3416A5A641003F887B /* libz.dylib in Frameworks */,
-				D5ED0DF316A59480003F887B /* libSDL.a in Frameworks */,
 				FDF0D7A90E12D53500247964 /* CoreAudio.framework in Frameworks */,
 				FDF0D7AA0E12D53500247964 /* AudioToolbox.framework in Frameworks */,
 				FD15FD690E086911003BDF25 /* Foundation.framework in Frameworks */,
@@ -436,6 +434,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				D550D12716C00DBE000D4D6A /* SDL.xcodeproj */,
 				D5ED0F3716A5A6D1003F887B /* kex.c */,
 				D5ED0F3516A5A677003F887B /* png.c */,
 				D5ED0F3316A5A641003F887B /* libz.dylib */,
@@ -477,7 +476,6 @@
 				D5ED0E1916A59FF1003F887B /* pngwrite.c */,
 				D5ED0E1A16A59FF1003F887B /* pngwtran.c */,
 				D5ED0E1B16A59FF1003F887B /* pngwutil.c */,
-				D5ED0DE516A59383003F887B /* SDL.xcodeproj */,
 				D5ED0D1416A57A0D003F887B /* Default-568h@2x.png */,
 				D5ED0D8316A57FD6003F887B /* main.c */,
 				D5ED0DB216A582CA003F887B /* encoding.c */,
@@ -533,11 +531,11 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		D5ED0DE616A59383003F887B /* Products */ = {
+		D550D12816C00DBE000D4D6A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D5ED0DF016A59384003F887B /* libSDL.a */,
-				D5ED0DF216A59384003F887B /* testsdl.app */,
+				D550D13216C00DBF000D4D6A /* libSDL2.a */,
+				D550D13416C00DBF000D4D6A /* testsdl.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -858,8 +856,8 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = D5ED0DE616A59383003F887B /* Products */;
-					ProjectRef = D5ED0DE516A59383003F887B /* SDL.xcodeproj */;
+					ProductGroup = D550D12816C00DBE000D4D6A /* Products */;
+					ProjectRef = D550D12716C00DBE000D4D6A /* SDL.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -870,18 +868,18 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		D5ED0DF016A59384003F887B /* libSDL.a */ = {
+		D550D13216C00DBF000D4D6A /* libSDL2.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = libSDL.a;
-			remoteRef = D5ED0DEF16A59384003F887B /* PBXContainerItemProxy */;
+			path = libSDL2.a;
+			remoteRef = D550D13116C00DBF000D4D6A /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		D5ED0DF216A59384003F887B /* testsdl.app */ = {
+		D550D13416C00DBF000D4D6A /* testsdl.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
 			path = testsdl.app;
-			remoteRef = D5ED0DF116A59384003F887B /* PBXContainerItemProxy */;
+			remoteRef = D550D13316C00DBF000D4D6A /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -893,8 +891,6 @@
 			files = (
 				FDB651D00E43D1AD00F688B5 /* icon.bmp in Resources */,
 				FD925B1A0E0F276600E92347 /* Icon.png in Resources */,
-				FD787AA10E22A5CC003E8E36 /* Default.png in Resources */,
-				D5ED0D1516A57A0D003F887B /* Default-568h@2x.png in Resources */,
 				D5ED0F2A16A5A5DB003F887B /* doxyfile in Resources */,
 				D5ED0F2B16A5A5DB003F887B /* doxyfile in Resources */,
 				D5ED0F2C16A5A5DB003F887B /* SDL_config.h.cmake in Resources */,
@@ -1027,10 +1023,12 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/lib\"",
 				);
+				OTHER_CFLAGS = "-DIPHONE_BUILD";
 				PRODUCT_NAME = Happy;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -1052,10 +1050,12 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/lib\"",
 				);
+				OTHER_CFLAGS = "-DIPHONE_BUILD";
 				PRODUCT_NAME = Happy;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
