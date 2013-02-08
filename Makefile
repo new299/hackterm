@@ -29,3 +29,6 @@ install:
 deb: 
 	tar czvf ../hterm_0.0.1.orig.tar.gz ../hackterm
 	debuild -us -uc
+
+#xxd -i ./fontmap_static  fontmap_static.h
+
