@@ -72,9 +72,6 @@ uint32_t get_pixel(uint32_t c,int c_x,int c_y) {
   int byte = pos/8;
   int bit  = pos%8;
 
-
-    printf("fontmap base addr: %u\n",&fontmap);
-    printf("fontmap pos addr: %u\n",&fontmap[c]);
   if(fontmap[c].data[byte] & (1 << bit)) { return 65535; }
                                     else { return 0; }
 }
@@ -120,9 +117,6 @@ char_render_t *display_cache = NULL;
 
 void draw_character(void *screen,int x,int y,int w,uint32_t cin,uint32_t bg,uint32_t fg,int bold,int underline,int italic,int strike) {
 
-    printf("rendering: %u\n",cin);
-    printf("size of fontchar: %u\n",sizeof(fontchar));
-    printf("width of font:    %u\n",w);
     SDL_Texture *texture;
  
     lookup_key_t chr;

@@ -51,9 +51,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "101"
-         endingLineNumber = "101"
-         landmarkName = "draw_point()"
-         landmarkType = "7">
+         endingLineNumber = "101">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
