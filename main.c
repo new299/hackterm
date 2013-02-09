@@ -58,9 +58,9 @@ int  new_screen_size_y;
 static int cols;
 static int rows;
 
+int display_width;
+int display_height;
 
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 480
 SDL_Window  *screen=1;
 SDL_Renderer *renderer=1;
 // NONIPHONE1.2 SDL_Surface *screen=0;
@@ -299,6 +299,7 @@ static int screen_bell(void* d) {
 
 int state_erase(VTermRect r,void *user) {
   printf("********************************************** clear received\n");
+  redraw_required();
   return 0;
 }
 
@@ -329,6 +330,7 @@ int csi_handler(const char *leader, const long args[], int argcount, const char 
     if(sdl_init_complete) {
       if(!regis_recent()) regis_clear();
       inline_data_clear();
+      redraw_required();
     }
   }
 
@@ -364,19 +366,21 @@ VTermParserCallbacks cb_parser = {
 };
 
 
-void terminal_resize(SDL_Surface *screen,VTerm *vt,int *cols,int *rows) {
+void terminal_resize() {
 
-  printf("terminal resize, size: %d %d\n",screen->w,screen->h);
+  SDL_GetWindowSize(screen,&display_width,&display_height);
+  printf("terminal resize, size: %d %d\n",display_width,display_height);
 
-  *rows = screen->h/(font_height+font_space);
-  *cols = screen->w/(font_width+font_space);
+  //TODO: Width and Height are not swapped with rotation, so we will need some code to detection rotation and act appropriately
+  rows = display_width/16;
+  cols = display_height/8;
+    
+  printf("resized: %d %d\n",cols,rows);
 
-  printf("resized: %d %d\n",*cols,*rows);
-
-  if(c_resize != NULL) (*c_resize)(*rows,*cols);
+  if(c_resize != NULL) (*c_resize)(cols,rows);
 
   SDL_mutexP(vterm_mutex);
-  if(vt != 0) vterm_set_size(vt,*rows,*cols);
+  if(vt != 0) vterm_set_size(vt,rows,cols);
   SDL_mutexV(vterm_mutex);
 }
 
@@ -471,7 +475,7 @@ void redraw_screen() {
 
 
 
-void do_sdl_init( ){
+void do_sdl_init() {
     if(SDL_Init(SDL_INIT_VIDEO)<0) {
         printf("Initialisation failed");
         return;
@@ -479,16 +483,14 @@ void do_sdl_init( ){
     
     // initialise SDL rendering
     //// const SDL_VideoInfo *vid = SDL_GetVideoInfo();
-    int maxwidth  = 320;//vid->current_w;
-    int maxheight = 480;//vid->current_h-(font_height+font_space);
+    //int maxwidth  = 320;//vid->current_w;
+    //int maxheight = 480;//vid->current_h-(font_height+font_space);
     
-//#ifndef IPHONE_BUILD
- //   screen=SDL_SetVideoMode(maxwidth,maxheight,32,SDL_RESIZABLE | SDL_DOUBLEBUF);
-//#else
     
-    screen=SDL_CreateWindow(NULL, 0, 0, maxwidth, maxheight,SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
-//                            SDL_WINDOW_SHOWN );
-    //| SDL_NOFRAME
+    screen=SDL_CreateWindow(NULL, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 0, 0,SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
+    
+    SDL_GetWindowSize(screen,&display_width,&display_height);
+
     if (screen == 0) {
         printf("Could not initialize Window");
     }
@@ -552,11 +554,11 @@ void sdl_render_thread() {
   SDL_StartTextInput();
     
   for(;;) {
- //   SDL_SemWait(redraw_sem);
-//
-      if(redraw_req) {
+//      SDL_SemWait(redraw_sem);
+      int ok = SDL_SemWaitTimeout(redraw_sem,10);
+      if(ok == 0) {
         redraw_screen();
-        redraw_req=false;
+//        redraw_req=false;
       }
 
       SDL_Event event;
@@ -566,16 +568,16 @@ void sdl_render_thread() {
       if(ret != 0) {
         sdl_read_thread(&event);
       }
-      SDL_Delay(10);
+//      SDL_Delay(10);
   }
 }
 
 void redraw_required() {
- // uint32_t v =  SDL_SemValue(redraw_sem);
- // if(v > 5) return;
+  uint32_t v =  SDL_SemValue(redraw_sem);
+  if(v > 5) return;
 
     redraw_req=true;
- // SDL_SemPost(redraw_sem);
+  SDL_SemPost(redraw_sem);
 }
 
 void console_read_thread() {
@@ -766,11 +768,11 @@ void sdl_read_thread(SDL_Event *event) {
     //ngui_receive_event(&event);
     
     // SDL_GetKeyState not present in SDL 1.3
-    #ifndef IPHONE_BUILD
+    //#ifndef IPHONE_BUILD
     //uint8_t *keystate = SDL_GetKeyState(NULL);
-    #else
+    //#else
     //uint8_t *keystate = SDL_GetKeyboardState(NULL);// = SDL_GetKeyState(NULL); // FIXFIXFIXFIXFIXFIX SDL1.3
-    #endif
+    //#endif
 
    // if(event.type == SDL_QUIT) {
      // hterm_quit = true;
@@ -791,12 +793,12 @@ void sdl_read_thread(SDL_Event *event) {
        // strcat(buffer, event->text.text);
         c_write(event->text.text,strlen(event->text.text));
     }
-    if(event->type == SDL_TEXTEDITING) {
-        printf("text editing\n");
-    }
+    //if(event->type == SDL_TEXTEDITING) {
+    //    printf("text editing\n");
+    //}
 
-    if(event->type == SDL_KEYDOWN) {
-        printf("key down\n");
+    //if(event->type == SDL_KEYDOWN) {
+    //    printf("key down\n");
  
  //int index = keyToIndex(event.key.keysym);
  SDL_Scancode scancode = event->key.keysym.scancode;
@@ -816,43 +818,41 @@ void sdl_read_thread(SDL_Event *event) {
             c_write(buf,1);
         }
 //    }
-        /*
+        
       scroll_offset = 0;
 //      if(event.key.keysym.sym == SDLK_LSHIFT) continue;
 //      if(event.key.keysym.sym == SDLK_RSHIFT) continue;
-      if(event.key.keysym.sym == SDLK_LEFT) {
+      if(scancode == SDL_SCANCODE_LEFT) {
         char buf[4];
         buf[0] = 0x1b;
         buf[1] = 'O';
         buf[2] = 'D';
         buf[3] = 0;
-      ///  c_write(buf,3);
-
-
+        c_write(buf,3);
       } else 
-      if(event.key.keysym.sym == SDLK_RIGHT) {
+      if(scancode == SDL_SCANCODE_RIGHT) {
         char buf[4];
         buf[0] = 0x1b;
         buf[1] = 'O';
         buf[2] = 'C';
         buf[3] = 0;
-     ///   c_write(buf,3);
+        c_write(buf,3);
       } else 
-      if(event.key.keysym.sym == SDLK_UP) {
+      if(scancode == SDL_SCANCODE_UP) {
         char buf[4];
         buf[0] = 0x1b;
         buf[1] = 'O';
         buf[2] = 'A';
         buf[3] = 0;
-     ///   c_write(buf,3);
+        c_write(buf,3);
       } else 
-      if(event.key.keysym.sym == SDLK_DOWN) {
+      if(scancode == SDL_SCANCODE_DOWN) {
         char buf[4];
         buf[0] = 0x1b;
         buf[1] = 'O';
         buf[2] = 'B';
         buf[3] = 0;
-     ///   c_write(buf,3);
+        c_write(buf,3);
       } else {
   //    if((event.key.keysym.sym == SDLK_p) && (keystate[SDLK_LCTRL])) {
 
@@ -863,7 +863,7 @@ void sdl_read_thread(SDL_Event *event) {
   ////        free(text);
   //      }
  //     } else {
- */
+ 
         // normal character
 /*        char buf[2];
         buf[0] = event->key.keysym.sym;
@@ -908,6 +908,9 @@ void timed_repeat() {
 
 void vterm_initialisation() {
   vt=0;
+
+  rows = display_height/16;
+  cols = display_width/8;
 
   printf("init rows: %d cols: %d\n",rows,cols);
   vt = vterm_new(rows, cols);
@@ -977,12 +980,13 @@ int main(int argc, char **argv) {
   //char *open_arg1 = "localhost";
   char open_arg1[100] = "127.0.0.1";
   char open_arg2[100] = "root";
-  char open_arg3[100] = "xxxxxx";
+  char open_arg3[100] = "tastycakes";
   
-  rows = 80;
-  cols = 100;
+  //rows = 80;
+  //cols = 100;
   vterm_initialisation();
-  if(vt != 0) vterm_set_size(vt,rows,cols);
+  
+  //if(vt != 0) vterm_set_size(vt,rows,cols);
     
   // iPhone build uses sdl 2.
   #ifdef IPHONE_BUILD
@@ -1028,8 +1032,8 @@ int main(int argc, char **argv) {
  //   printf("arg3: %s\n",open_arg3);
   }
 
-    int open_ret = c_open(open_arg1,open_arg2,open_arg3);
-
+  int open_ret = c_open(open_arg1,open_arg2,open_arg3);
+  terminal_resize();
   
   SDL_Thread *thread3;
   SDL_Thread *thread5;

@@ -157,7 +157,7 @@ int ssh_open(char *hostname,char *username,char *password) {
    * See /etc/termcap for more options
    */
   error=0;
-  if (error = libssh2_channel_request_pty(channel, "vanilla")) {
+  if (error = libssh2_channel_request_pty(channel, "xterm")) {
     fprintf(stderr, "Failed requesting pty: %d\n",error);
     if(error == LIBSSH2_ERROR_ALLOC) printf("alloc error\n");
     if(error == LIBSSH2_ERROR_SOCKET_SEND) printf("eror socket\n");
@@ -226,4 +226,8 @@ int ssh_close() {
     libssh2_exit();
 }
 
-int ssh_resize(int cols,int rows){}
+int ssh_resize(int cols,int rows){
+
+  libssh2_channel_request_pty_size(channel,cols,rows);
+
+}
