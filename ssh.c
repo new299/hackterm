@@ -177,7 +177,7 @@ int ssh_open(char *hostname,char *username,char *password) {
   return 1;
 }
 
-int ssh_write(char *bytes,int len) {
+int ssh_write(unsigned char *bytes,int len) {
   libssh2_channel_write(channel,bytes,len);
      // libssh2_channel_write_stderr()
      

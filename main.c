@@ -787,29 +787,30 @@ void sdl_read_thread(SDL_Event *event) {
     
     printf("event\n");
     if(event->type == SDL_TEXTINPUT) {
-        printf("text input\n");
+        printf("herm text input: %s\n",event->text.text);
         char buffer[222];
-        //buffer[3]=0;
+        //buffer[3]=0;do
+        
        // strcat(buffer, event->text.text);
         c_write(event->text.text,strlen(event->text.text));
     }
-    //if(event->type == SDL_TEXTEDITING) {
-    //    printf("text editing\n");
-    //}
+    if(event->type == SDL_TEXTEDITING) {
+        printf("hterm text editing\n");
+    }
 
-    //if(event->type == SDL_KEYDOWN) {
-    //    printf("key down\n");
+    if(event->type == SDL_KEYDOWN) {
+        printf("hterm key down\n");
  
  //int index = keyToIndex(event.key.keysym);
  SDL_Scancode scancode = event->key.keysym.scancode;
-        if(scancode == SDL_SCANCODE_RETURN) {
+/*        if(scancode == SDL_SCANCODE_RETURN) {
             char buf[4];
             buf[0] = 13;
             buf[1] = 0;
 
             c_write(buf,1);
         }
-        
+*/        
         if(scancode == SDL_SCANCODE_DELETE) {
             char buf[4];
             buf[0] = 127;
@@ -817,6 +818,7 @@ void sdl_read_thread(SDL_Event *event) {
             
             c_write(buf,1);
         }
+ 
 //    }
         
       scroll_offset = 0;
@@ -873,7 +875,7 @@ void sdl_read_thread(SDL_Event *event) {
         }*/
    // //  }
     }
-        
+    }
 
 /*
     if(event->type == SDL_VIDEORESIZE) {

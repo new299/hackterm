@@ -21,6 +21,7 @@
 
 #import <UIKit/UIKit.h>
 #import "SDL_uikitviewcontroller.h"
+#import "SDLTextView.h"
 
 #include "SDL_touch.h"
 
@@ -43,7 +44,7 @@
 #endif
 
 #if SDL_IPHONE_KEYBOARD
-    UITextField *textField;
+    SDLTextView *textInput;
     BOOL keyboardVisible;
 #endif
 
@@ -55,11 +56,14 @@
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event;
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;
 
+-(void) keyPressed: (NSNotification*) notification;
+    
 #if SDL_IPHONE_KEYBOARD
 - (void)showKeyboard;
 - (void)hideKeyboard;
 - (void)initializeKeyboard;
 @property (readonly) BOOL keyboardVisible;
+//@property (nonatomic, retain) EditableCoreTextView *textInput;
 
 SDL_bool UIKit_HasScreenKeyboardSupport(_THIS);
 void UIKit_ShowScreenKeyboard(_THIS, SDL_Window *window);

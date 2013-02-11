@@ -160,6 +160,10 @@
 		AA9FF9511637C6E5000DF050 /* SDL_messagebox.h in Headers */ = {isa = PBXBuildFile; fileRef = AA9FF9501637C6E5000DF050 /* SDL_messagebox.h */; };
 		AABCC3941640643D00AB8930 /* SDL_uikitmessagebox.h in Headers */ = {isa = PBXBuildFile; fileRef = AABCC3921640643D00AB8930 /* SDL_uikitmessagebox.h */; };
 		AABCC3951640643D00AB8930 /* SDL_uikitmessagebox.m in Sources */ = {isa = PBXBuildFile; fileRef = AABCC3931640643D00AB8930 /* SDL_uikitmessagebox.m */; };
+		D54C12B716C69D6F00B5A8FD /* SDLTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = D54C12B616C69D6F00B5A8FD /* SDLTextView.m */; };
+		D54C12B916C69D8000B5A8FD /* SDLTextView.h in Headers */ = {isa = PBXBuildFile; fileRef = D54C12B816C69D8000B5A8FD /* SDLTextView.h */; };
+		D54C12BC16C78A1E00B5A8FD /* SDLUIApplication.h in Headers */ = {isa = PBXBuildFile; fileRef = D54C12BA16C78A1D00B5A8FD /* SDLUIApplication.h */; };
+		D54C12BD16C78A1E00B5A8FD /* SDLUIApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = D54C12BB16C78A1D00B5A8FD /* SDLUIApplication.m */; };
 		FD3F4A760DEA620800C5B771 /* SDL_getenv.c in Sources */ = {isa = PBXBuildFile; fileRef = FD3F4A700DEA620800C5B771 /* SDL_getenv.c */; };
 		FD3F4A770DEA620800C5B771 /* SDL_iconv.c in Sources */ = {isa = PBXBuildFile; fileRef = FD3F4A710DEA620800C5B771 /* SDL_iconv.c */; };
 		FD3F4A780DEA620800C5B771 /* SDL_malloc.c in Sources */ = {isa = PBXBuildFile; fileRef = FD3F4A720DEA620800C5B771 /* SDL_malloc.c */; };
@@ -419,6 +423,10 @@
 		AA9FF9501637C6E5000DF050 /* SDL_messagebox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_messagebox.h; sourceTree = "<group>"; };
 		AABCC3921640643D00AB8930 /* SDL_uikitmessagebox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_uikitmessagebox.h; sourceTree = "<group>"; };
 		AABCC3931640643D00AB8930 /* SDL_uikitmessagebox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDL_uikitmessagebox.m; sourceTree = "<group>"; };
+		D54C12B616C69D6F00B5A8FD /* SDLTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDLTextView.m; sourceTree = "<group>"; };
+		D54C12B816C69D8000B5A8FD /* SDLTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDLTextView.h; sourceTree = "<group>"; };
+		D54C12BA16C78A1D00B5A8FD /* SDLUIApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDLUIApplication.h; sourceTree = "<group>"; };
+		D54C12BB16C78A1D00B5A8FD /* SDLUIApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDLUIApplication.m; sourceTree = "<group>"; };
 		FD0BBFEF0E3933DD00D833B1 /* SDL_uikitview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_uikitview.h; sourceTree = "<group>"; };
 		FD3F4A700DEA620800C5B771 /* SDL_getenv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_getenv.c; sourceTree = "<group>"; };
 		FD3F4A710DEA620800C5B771 /* SDL_iconv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_iconv.c; sourceTree = "<group>"; };
@@ -854,6 +862,10 @@
 		FD689F090E26E5D900F90B21 /* uikit */ = {
 			isa = PBXGroup;
 			children = (
+				D54C12BA16C78A1D00B5A8FD /* SDLUIApplication.h */,
+				D54C12BB16C78A1D00B5A8FD /* SDLUIApplication.m */,
+				D54C12B816C69D8000B5A8FD /* SDLTextView.h */,
+				D54C12B616C69D6F00B5A8FD /* SDLTextView.m */,
 				FDC656440E560DF800311C8E /* jumphack.c */,
 				FDC656450E560DF800311C8E /* jumphack.h */,
 				FDC261780E3A3FC8001C4554 /* keyinfotable.h */,
@@ -1264,6 +1276,8 @@
 				AA9FF9511637C6E5000DF050 /* SDL_messagebox.h in Headers */,
 				AABCC3941640643D00AB8930 /* SDL_uikitmessagebox.h in Headers */,
 				AA0AD06516647BD400CE5896 /* SDL_gamecontroller.h in Headers */,
+				D54C12B916C69D8000B5A8FD /* SDLTextView.h in Headers */,
+				D54C12BC16C78A1E00B5A8FD /* SDLUIApplication.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1484,6 +1498,8 @@
 				AA704DD7162AA90A0076D1C1 /* SDL_dropevents.c in Sources */,
 				AABCC3951640643D00AB8930 /* SDL_uikitmessagebox.m in Sources */,
 				AA0AD06216647BBB00CE5896 /* SDL_gamecontroller.c in Sources */,
+				D54C12B716C69D6F00B5A8FD /* SDLTextView.m in Sources */,
+				D54C12BD16C78A1E00B5A8FD /* SDLUIApplication.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -33,6 +33,7 @@
 #include "SDL_uikitappdelegate.h"
 #include "SDL_uikitmodes.h"
 #include "SDL_uikitwindow.h"
+#import "SDLTextView.h"
 #endif
 
 @implementation SDL_uikitview
@@ -224,58 +225,70 @@
     return keyboardVisible;
 }
 
+-(void) keyPressed: (NSNotification*) notification
+{
+    printf("something!\n\n\n");
+  //  NSLog([[notification object]text]);
+}
+
+
 /* Set ourselves up as a UITextFieldDelegate */
 - (void)initializeKeyboard
 {
-    textField = [[UITextField alloc] initWithFrame: CGRectZero];
-    textField.delegate = self;
+    textInput = [[SDLTextView alloc] init];
+ //   textField.delegate = self;
     /* placeholder so there is something to delete! */
-    textField.text = @" ";
+ //   textField.text = @" ";
 
     /* set UITextInputTrait properties, mostly to defaults */
-    textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
-    textField.autocorrectionType = UITextAutocorrectionTypeNo;
-    textField.enablesReturnKeyAutomatically = YES; // WAS NO
+ //   textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
+ //   textField.autocorrectionType = UITextAutocorrectionTypeNo;
+ //   textField.enablesReturnKeyAutomatically = YES; // WAS NO
  //   textField.keyboardAppearance = UIKeyboardAppearanceDefault;
-    textField.keyboardType = UIKeyboardTypeDefault;
+ //   textField.keyboardType = UIKeyboardTypeDefault;
  //   textField.returnKeyType = UIReturnKeyGo; //UIReturnKeyDefault;
  //   textField.secureTextEntry = NO;
 
-   [textField becomeFirstResponder];
-   [textField reloadInputViews];
-   [textField setKeyboardType:UIKeyboardTypeDefault];
-    textField.hidden = YES;
-    keyboardVisible = NO;
+
+   [textInput reloadInputViews];
+  // [textInput setKeyboardType:UIKeyboardTypeDefault];
+ //   textField.hidden = YES;
+    keyboardVisible = YES;
     /* add the UITextField (hidden) to our view */
-    [self addSubview: textField];
-    [textField release];
+  [self addSubview: textInput];
+   [textInput becomeFirstResponder];
+    //[textInput release];
+    [[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(keyPressed:) name: nil object: nil];
+
 }
+
 
 /* reveal onscreen virtual keyboard */
 - (void)showKeyboard
 {
     keyboardVisible = YES;
-    [textField becomeFirstResponder];
+    [textInput becomeFirstResponder];
 }
 
 /* hide onscreen virtual keyboard */
 - (void)hideKeyboard
 {
     keyboardVisible = NO;
-    [textField resignFirstResponder];
+////////////////    [textInput resignFirstResponder];
 }
 
-/* UITextFieldDelegate method.  Invoked when user types something. */
+
+/* UITextFieldDelegate method.  Invoked when user types something. 
 - (BOOL)textField:(UITextField *)_textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
 {
     if ([string length] == 0) {
-        /* it wants to replace text with nothing, ie a delete */
+        /* it wants to replace text with nothing, ie a delete 
         SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_DELETE);
         SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_DELETE);
     }
     else {
         /* go through all the characters in the string we've been sent
-           and convert them to key presses */
+           and convert them to key presses 
         int i;
         for (i = 0; i < [string length]; i++) {
 
@@ -285,34 +298,34 @@
             SDL_Scancode code;
 
             if (c < 127) {
-                /* figure out the SDL_Scancode and SDL_keymod for this unichar */
+                /* figure out the SDL_Scancode and SDL_keymod for this unichar 
                 code = unicharToUIKeyInfoTable[c].code;
                 mod  = unicharToUIKeyInfoTable[c].mod;
             }
             else {
-                /* we only deal with ASCII right now */
+                /* we only deal with ASCII right now 
                 code = SDL_SCANCODE_UNKNOWN;
                 mod = 0;
             }
 
             if (mod & KMOD_SHIFT) {
-                /* If character uses shift, press shift down */
+                /* If character uses shift, press shift down 
                 SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_LSHIFT);
             }
-            /* send a keydown and keyup even for the character */
+            /* send a keydown and keyup even for the character 
             SDL_SendKeyboardKey(SDL_PRESSED, code);
             SDL_SendKeyboardKey(SDL_RELEASED, code);
             if (mod & KMOD_SHIFT) {
-                /* If character uses shift, press shift back up */
+                /* If character uses shift, press shift back up 
                 SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_LSHIFT);
             }
         }
         SDL_SendKeyboardText([string UTF8String]);
     }
-    return NO; /* don't allow the edit! (keep placeholder text there) */
+    return NO; /* don't allow the edit! (keep placeholder text there) 
 }
 
-/* Terminates the editing session */
+/* Terminates the editing session 
 - (BOOL)textFieldShouldReturn:(UITextField*)_textField
 {
     SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_RETURN);
@@ -321,6 +334,7 @@
     SDL_StartTextInput();
     return YES;
 }
+*/
 
 #endif
 

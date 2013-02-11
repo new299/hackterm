@@ -28,6 +28,7 @@
 #include "../../SDL_hints_c.h"
 #include "SDL_system.h"
 
+#include "SDLUIApplication.h"
 #include "SDL_uikitappdelegate.h"
 #include "SDL_uikitmodes.h"
 #include "../../events/SDL_events_c.h"
@@ -56,9 +57,11 @@ int main(int argc, char **argv)
         strcpy(forward_argv[i], argv[i]);
     }
     forward_argv[i] = NULL;
+    
+   SDLUIApplication *t = [SDLUIApplication alloc];
 
     /* Give over control to run loop, SDLUIKitDelegate will handle most things from here */
-    UIApplicationMain(argc, argv, NULL, [SDLUIKitDelegate getAppDelegateClassName]);
+    UIApplicationMain(argc, argv, @"SDLUIApplication", [SDLUIKitDelegate getAppDelegateClassName]);
 
     /* free the memory we used to hold copies of argc and argv */
     for (i = 0; i < forward_argc; i++) {
