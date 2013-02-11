@@ -248,7 +248,7 @@
  //   textField.keyboardType = UIKeyboardTypeDefault;
  //   textField.returnKeyType = UIReturnKeyGo; //UIReturnKeyDefault;
  //   textField.secureTextEntry = NO;
-
+   
 
    [textInput reloadInputViews];
   // [textInput setKeyboardType:UIKeyboardTypeDefault];

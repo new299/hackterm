@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		D550D13916C01036000D4D6A /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D550D13216C00DBF000D4D6A /* libSDL2.a */; };
+		D5B5C90416C9529700DD079C /* hterm.png in Resources */ = {isa = PBXBuildFile; fileRef = D5B5C90316C9529700DD079C /* hterm.png */; };
+		D5B5C90616C952DF00DD079C /* hterm57.png in Resources */ = {isa = PBXBuildFile; fileRef = D5B5C90516C952DF00DD079C /* hterm57.png */; };
 		D5ED0D8416A57FD6003F887B /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0D8316A57FD6003F887B /* main.c */; };
 		D5ED0DBD16A582CB003F887B /* encoding.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0DB216A582CA003F887B /* encoding.c */; };
 		D5ED0DBE16A582CB003F887B /* input.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0DB316A582CB003F887B /* input.c */; };
@@ -109,6 +111,8 @@
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D550D12716C00DBE000D4D6A /* SDL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SDL.xcodeproj; path = "SDL/Xcode-iOS/SDL/SDL.xcodeproj"; sourceTree = "<group>"; };
+		D5B5C90316C9529700DD079C /* hterm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hterm.png; sourceTree = "<group>"; };
+		D5B5C90516C952DF00DD079C /* hterm57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hterm57.png; sourceTree = "<group>"; };
 		D5ED0D1416A57A0D003F887B /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		D5ED0D8316A57FD6003F887B /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = main.c; path = ../main.c; sourceTree = SOURCE_ROOT; };
 		D5ED0DB216A582CA003F887B /* encoding.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = encoding.c; path = ../libvterm/src/encoding.c; sourceTree = SOURCE_ROOT; };
@@ -382,7 +386,7 @@
 		D5ED0F3316A5A641003F887B /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		D5ED0F3516A5A677003F887B /* png.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = png.c; path = libpng/png.c; sourceTree = "<group>"; };
 		D5ED0F3716A5A6D1003F887B /* kex.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = kex.c; path = ../libssh2/src/kex.c; sourceTree = "<group>"; };
-		FD15FCB20E086866003BDF25 /* Happy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Happy.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FD15FCB20E086866003BDF25 /* hterm.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = hterm.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD787AA00E22A5CC003E8E36 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		FD925B180E0F276600E92347 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		FDB651C60E43D19800F688B5 /* license.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = license.txt; sourceTree = "<group>"; };
@@ -426,7 +430,7 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FD15FCB20E086866003BDF25 /* Happy.app */,
+				FD15FCB20E086866003BDF25 /* hterm.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -434,6 +438,8 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				D5B5C90516C952DF00DD079C /* hterm57.png */,
+				D5B5C90316C9529700DD079C /* hterm.png */,
 				D550D12716C00DBE000D4D6A /* SDL.xcodeproj */,
 				D5ED0F3716A5A6D1003F887B /* kex.c */,
 				D5ED0F3516A5A677003F887B /* png.c */,
@@ -831,7 +837,7 @@
 			);
 			name = hackterm;
 			productName = BMPTest;
-			productReference = FD15FCB20E086866003BDF25 /* Happy.app */;
+			productReference = FD15FCB20E086866003BDF25 /* hterm.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -896,6 +902,8 @@
 				D5ED0F2C16A5A5DB003F887B /* SDL_config.h.cmake in Resources */,
 				D5ED0F2D16A5A5DB003F887B /* SDL_config.h.in in Resources */,
 				D5ED0F2E16A5A5DB003F887B /* SDL_config.h.in in Resources */,
+				D5B5C90416C9529700DD079C /* hterm.png in Resources */,
+				D5B5C90616C952DF00DD079C /* hterm57.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1027,7 +1035,7 @@
 					"\"$(SRCROOT)/lib\"",
 				);
 				OTHER_CFLAGS = "-DIPHONE_BUILD";
-				PRODUCT_NAME = Happy;
+				PRODUCT_NAME = hterm;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
@@ -1055,7 +1063,7 @@
 					"\"$(SRCROOT)/lib\"",
 				);
 				OTHER_CFLAGS = "-DIPHONE_BUILD";
-				PRODUCT_NAME = Happy;
+				PRODUCT_NAME = hterm;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;

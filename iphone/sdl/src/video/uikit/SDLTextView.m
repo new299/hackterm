@@ -30,7 +30,12 @@
 
         self.userInteractionEnabled = YES;
         self.autoresizesSubviews = YES;
+        [self setAutocorrectionType:UITextAutocorrectionTypeNo];
+        [self setAutocapitalizationType:UITextAutocapitalizationTypeNone];
+        [self setSpellCheckingType:UITextSpellCheckingTypeNo];
     }
+    
+    //[self setAutocorrectionType:UITextAutocorrectionTypeNo];
     
     [[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(keyPressed:) name: nil object: nil];
     
