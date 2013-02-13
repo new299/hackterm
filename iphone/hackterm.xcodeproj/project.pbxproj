@@ -10,6 +10,7 @@
 		D550D13916C01036000D4D6A /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D550D13216C00DBF000D4D6A /* libSDL2.a */; };
 		D5B5C90416C9529700DD079C /* hterm.png in Resources */ = {isa = PBXBuildFile; fileRef = D5B5C90316C9529700DD079C /* hterm.png */; };
 		D5B5C90616C952DF00DD079C /* hterm57.png in Resources */ = {isa = PBXBuildFile; fileRef = D5B5C90516C952DF00DD079C /* hterm57.png */; };
+		D5B5C90716C95CB100DD079C /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D5ED0D1416A57A0D003F887B /* Default-568h@2x.png */; };
 		D5ED0D8416A57FD6003F887B /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0D8316A57FD6003F887B /* main.c */; };
 		D5ED0DBD16A582CB003F887B /* encoding.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0DB216A582CA003F887B /* encoding.c */; };
 		D5ED0DBE16A582CB003F887B /* input.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0DB316A582CB003F887B /* input.c */; };
@@ -904,6 +905,7 @@
 				D5ED0F2E16A5A5DB003F887B /* SDL_config.h.in in Resources */,
 				D5B5C90416C9529700DD079C /* hterm.png in Resources */,
 				D5B5C90616C952DF00DD079C /* hterm57.png in Resources */,
+				D5B5C90716C95CB100DD079C /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

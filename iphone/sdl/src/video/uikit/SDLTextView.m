@@ -35,8 +35,6 @@
         [self setSpellCheckingType:UITextSpellCheckingTypeNo];
     }
     
-    //[self setAutocorrectionType:UITextAutocorrectionTypeNo];
-    
     [[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(keyPressed:) name: nil object: nil];
     
     return self;
