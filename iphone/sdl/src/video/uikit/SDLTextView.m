@@ -4,16 +4,25 @@
 #include "keyinfotable.h"
 
 @interface StubPosition : UITextPosition {
+@public
+    NSInteger index;
+    
 }
 
+- (NSInteger)index;
 + (StubPosition *)positionWithIndex:(NSUInteger)index;
 
 @end
 
 @interface StubRange : UITextRange {
+    
+@public
+    StubPosition *_start;
+    StubPosition *_end;
 }
 
 @end
+
 
 @implementation SDLTextView
 
@@ -55,7 +64,7 @@
 - (BOOL)isAccessibilityElement
 {
 
-    return YES;
+    return NO;
 }
 
 - (BOOL)resignFirstResponder
@@ -63,26 +72,60 @@
 	return [super resignFirstResponder];
 }
 
-- (void)tap:(UITapGestureRecognizer *)tap
-{
-}
+//- (void)tap:(UITapGestureRecognizer *)tap
+//{
+//}
 
 - (NSString *)textInRange:(UITextRange *)range
 {
-    return @"";
+    return @"                    ";
 }
 
 - (void)replaceRange:(UITextRange *)range withText:(NSString *)text
 {
 }
 
+int c=10;
 - (UITextRange *)selectedTextRange
 {
-    return [StubRange alloc];
+    StubRange *i = [StubRange alloc];
+    int j=c;
+    printf("random point: %d\n",j);
+    i->_start = [StubPosition positionWithIndex:j];
+    i->_end   = [StubPosition positionWithIndex:j];
+    
+    return i;
 }
 
 - (void)setSelectedTextRange:(UITextRange *)range
 {
+    
+    NSUInteger s = [[range start] index];
+    NSUInteger e = [[range end]  index];
+//    printf("range %u %u\n",*,*[[range end] index]);
+    printf("selected range changed %d %d\n",s,e);
+
+    int cur  = s;
+    
+    
+    // and this is why you shouldn't code at 4am.
+    int j=c-1;
+    int next = ((j-6)%9)+6;
+    if(s==next) { printf("left\n"); SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_LEFT); SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_LEFT);}
+
+    j=c+1;
+    next = ((j-6)%9)+6;
+    if(s==next) { printf("right\n"); SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_RIGHT); SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_RIGHT);}
+    
+    j=c+3;
+    next = ((j-6)%9)+6;
+    if(s==next) { printf("dwm\n"); SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_DOWN); SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_DOWN);}
+    
+    j=c-3;
+    if(j<6) next=15-(6-j); else next=j;
+    if(s==next) { printf("up\n"); SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_UP);   SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_UP);}
+    
+    c=s;
 }
 
 bool skip_char=false;
@@ -103,38 +146,88 @@ bool skip_char=false;
 
 - (UITextPosition *)beginningOfDocument
 {
-    return [StubPosition positionWithIndex:0];
+    return [StubPosition positionWithIndex:6];
 }
 
 - (UITextPosition *)endOfDocument
 {
-    return [StubPosition positionWithIndex:1];
+    return [StubPosition positionWithIndex:14];
 }
 
 - (UITextRange *)textRangeFromPosition:(UITextPosition *)fromPosition toPosition:(UITextPosition *)toPosition
 {
-    return [StubRange alloc];
+    printf("newrange %d %d\n",[fromPosition index],[toPosition index]);
+    StubRange *s = [StubRange alloc];
+    s->_start = fromPosition;
+    s->_end   = toPosition;
+    return s;
 }
 
 
 - (UITextPosition *)positionFromPosition:(UITextPosition *)position offset:(NSInteger)offset
 {
-    return [StubPosition positionWithIndex:1];
+//    return position;
+printf("positionfromposition %d %d\n",[position index],offset);
+    return [StubPosition positionWithIndex:[position index]+offset];
 }
 
 - (UITextPosition *)positionFromPosition:(UITextPosition *)position inDirection:(UITextLayoutDirection)direction offset:(NSInteger)offset
 {
-    return [StubPosition positionWithIndex:1];
+    int i = [position index];
+    
+    if(direction == UITextLayoutDirectionUp   ) {
+      int j=i-(3*offset);
+      if(j<6) {
+      
+        j=j-6;
+        j=0-j;
+        j=j%9;
+        j=15-j;
+      }
+      
+      return [StubPosition positionWithIndex:j];
+    }
+    
+    if(direction == UITextLayoutDirectionDown ) {
+      int j=i+(3*offset);
+      if(j>14) {
+      
+        j=j-6;
+        j=j%9;
+        j=6+j;
+      }
+      
+      return [StubPosition positionWithIndex:j];
+    }
+    
+    if(direction == UITextLayoutDirectionLeft ) {
+      int j=i-(1*offset);
+//      if(j==5) j=8; else
+//      if(j==8) j=11; else
+      if(j==5)j=14;
+      return [StubPosition positionWithIndex:j];
+    }
+    
+    if(direction == UITextLayoutDirectionRight) {
+      int j=i+(1*offset);
+     // if(j==9) j=6; else
+     // if(j==12) j=9; else
+      if(j==15) j=6;
+      return [StubPosition positionWithIndex:j];
+    }
 }
 
 - (NSComparisonResult)comparePosition:(UITextPosition *)position toPosition:(UITextPosition *)other
 {
-    return NSOrderedAscending;
+    printf("comparing %d %d\n",[position index],[other index]);
+    if([position index] > [other index])return NSOrderedAscending;
+    if([position index] < [other index])return NSOrderedDescending;
+    return NSOrderedSame;
 }
 
-- (NSInteger)offsetFromPosition:(UITextPosition *)from toPosition:(UITextPosition *)toPosition
+- (NSInteger)offsetFromPosition:(UITextPosition *)from toPosition:(UITextPosition *)to
 {
-    return 1;
+    return [to index] - [from index];
 }
 
 - (id <UITextInputTokenizer>)tokenizer
@@ -144,7 +237,12 @@ bool skip_char=false;
 
 - (UITextPosition *)positionWithinRange:(UITextRange *)range farthestInDirection:(UITextLayoutDirection)direction
 {
-    return [StubPosition positionWithIndex:1];
+    printf("range here: %d %d",[[range start] index],[[range end] index]);
+    if(direction == UITextLayoutDirectionLeft ) return [StubPosition positionWithIndex:9];
+    if(direction == UITextLayoutDirectionRight) return [StubPosition positionWithIndex:11];
+    if(direction == UITextLayoutDirectionUp   ) return [StubPosition positionWithIndex:0];
+    if(direction == UITextLayoutDirectionDown ) return [StubPosition positionWithIndex:20];
+    return [StubPosition positionWithIndex:0];
 }
 
 - (UITextRange *)characterRangeByExtendingPosition:(UITextPosition *)position inDirection:(UITextLayoutDirection)direction
@@ -163,14 +261,14 @@ bool skip_char=false;
 
 - (CGRect)firstRectForRange:(UITextRange *)range
 {
-    CGRect rect = CGRectMake(1,2,1,2);
+    CGRect rect = CGRectMake([[range start] index],[[range start] index]+1,[[range end] index],[[range end] index]+1);
     return rect;
 }
 
 - (CGRect)caretRectForPosition:(UITextPosition *)position
 {
     StubPosition *pos = (StubPosition *)position;
-    CGRect rect = CGRectMake(1,1,1,1);
+    CGRect rect = CGRectMake([position index],[position index]+1,[position index]+1,[position index]+1);
     return rect;
 }
 
@@ -278,21 +376,35 @@ bool last_skipped=false;
 + (StubPosition *)positionWithIndex:(NSUInteger)index
 {
     StubPosition *pos = [[StubPosition alloc] init];
+    pos->index=index;
     return [pos autorelease];
+}
+
+- (NSInteger)index
+{
+    return index;
 }
 
 @end
 
 @implementation StubRange 
 
+- (id)init {
+    if(self = [super init]) {
+        _start = [StubPosition positionWithIndex:0];
+        _end   = [StubPosition positionWithIndex:0];
+    }
+    return self;
+}
+
 - (UITextPosition *)start
 {
-    return [StubPosition positionWithIndex:1];
+    return _start;
 }
 
 - (UITextPosition *)end
 {
-	return [StubPosition positionWithIndex:1];
+    return _end;
 }
 
 -(BOOL)isEmpty

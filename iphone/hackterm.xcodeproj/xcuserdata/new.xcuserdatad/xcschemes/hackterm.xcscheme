@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "FD15FCB10E086866003BDF25"
-               BuildableName = "Happy.app"
+               BuildableName = "hterm.app"
                BlueprintName = "hackterm"
                ReferencedContainer = "container:hackterm.xcodeproj">
             </BuildableReference>
@@ -33,7 +33,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "FD15FCB10E086866003BDF25"
-            BuildableName = "Happy.app"
+            BuildableName = "hterm.app"
             BlueprintName = "hackterm"
             ReferencedContainer = "container:hackterm.xcodeproj">
          </BuildableReference>
@@ -52,7 +52,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "FD15FCB10E086866003BDF25"
-            BuildableName = "Happy.app"
+            BuildableName = "hterm.app"
             BlueprintName = "hackterm"
             ReferencedContainer = "container:hackterm.xcodeproj">
          </BuildableReference>
@@ -70,7 +70,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "FD15FCB10E086866003BDF25"
-            BuildableName = "Happy.app"
+            BuildableName = "hterm.app"
             BlueprintName = "hackterm"
             ReferencedContainer = "container:hackterm.xcodeproj">
          </BuildableReference>
