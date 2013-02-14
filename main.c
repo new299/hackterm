@@ -198,7 +198,7 @@ void draw_row(VTermScreenCell *row,int crow,int ypos) {
 
 //    if(cellcompare(c_screen_data[crow][n],row[n]) == false) {
       if(row[n].attrs.blink == 1) any_blinking = true;
-      draw_unitext_fancy(renderer,xpos,ypos,rtext,(bg.red << 16) + (bg.green << 8) + bg.blue,
+      draw_unitext_fancy_renderer(renderer,xpos,ypos,rtext,(bg.red << 16) + (bg.green << 8) + bg.blue,
                                                 (fg.red << 16) + (fg.green << 8) + fg.blue,
                                                 row[n].attrs.bold,
                                                 row[n].attrs.underline,

@@ -6,6 +6,7 @@
 #include <SDL/SDL.h>       
 #include <SDL/SDL_thread.h>
 #include <time.h>
+#include "nunifont.h"
 
 int pen_x = 0;
 int pen_y = 0;
@@ -44,7 +45,8 @@ char *regis_process_cmd_text(char *cmd) {
       wdata[n+1] = 0;
     }
     SDL_mutexP(regis_mutex);
-    draw_unitext(regis_layer,pen_x,pen_y,wdata,0x0,0xFFFFFFFF);
+    
+    draw_unitext_surface(regis_layer,pen_x,pen_y,wdata,0x0,0xFFFFFFFF,0,0,0,0);
     SDL_mutexV(regis_mutex);
   } else 
   if(*(cmd+1) == '(') {
