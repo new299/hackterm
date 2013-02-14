@@ -99,11 +99,17 @@ int (*c_resize)(int rows,int cols) = 0;
 
 void scroll_buffer_get(size_t line_number,VTermScreenCell **line);
 
-void regis_render() {                                        
-  SDL_mutexP(regis_mutex);                                   
- // int res = SDL_BlitSurface(regis_layer,NULL,screen,NULL);
-  SDL_mutexV(regis_mutex);                                   
-} 
+void regis_render() {
+  SDL_mutexP(regis_mutex);
+
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, regis_layer);
+    
+  SDL_RenderCopy(renderer, texture, NULL, NULL);
+  SDL_DestroyTexture(texture);
+
+//  int res = SDL_BlitSurface(regis_layer,NULL,screen,NULL);
+  SDL_mutexV(regis_mutex);
+}
 
 void inline_data_render() {                                        
   SDL_mutexP(inline_data_mutex);                                   
@@ -328,7 +334,7 @@ int csi_handler(const char *leader, const long args[], int argcount, const char 
   if(command == 'J') {
     printf("************************* this clear\n");
     if(sdl_init_complete) {
-      if(!regis_recent()) regis_clear();
+      //if(!regis_recent()) regis_clear();
       inline_data_clear();
       redraw_required();
     }
@@ -464,8 +470,8 @@ void redraw_screen() {
   }
   
 //  SDL_UnlockSurface(screen);
-//  regis_render();
-//  inline_data_render();
+  regis_render();
+ // inline_data_render();
 //  ngui_render(screen);
 
 ////  SDL_Flip(screen);
@@ -544,7 +550,7 @@ void sdl_render_thread() {
 //  SDL_EnableKeyRepeat(500,50);
   
   ////////terminal_resize(screen,vt,&cols,&rows);
-////  regis_init(screen->w,screen->h);
+  
 ////  inline_data_init(screen->w,screen->h);
 
 
@@ -956,6 +962,7 @@ void receive_ssh_info(char *o1,char *o2,char *o3) {
 int main(int argc, char **argv) {
     
   do_sdl_init();
+  regis_init(display_width,display_height);
     
   nunifont_load_staticmap(__fontmap_static,__widthmap_static,__fontmap_static_len,__widthmap_static_len);
 

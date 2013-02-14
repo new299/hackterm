@@ -102,7 +102,7 @@ int c=10;
     
     NSUInteger s = [[range start] index];
     NSUInteger e = [[range end]  index];
-//    printf("range %u %u\n",*,*[[range end] index]);
+
     printf("selected range changed %d %d\n",s,e);
 
     int cur  = s;

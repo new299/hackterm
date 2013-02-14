@@ -28,6 +28,29 @@ void nsdl_point(void *screen,int x,int y,uint32_t value) {
 //  *(uint32_t *) p = value;
 }
 
+void nsdl_pointS(SDL_Surface *screen,int x,int y,uint32_t value) {
+
+  SDL_Rect rect;
+  rect.w = 1;
+  rect.h = 1;
+  rect.x = x;
+  rect.y = y;
+    
+//  SDL_SetRenderDrawColor(screen, rand()%233, rand()%232, rand()%232, 255);
+//  SDL_RenderFillRect(screen, &rect);
+    
+  int bpp = screen->format->BytesPerPixel;
+  uint8_t *p = (uint8_t *) screen->pixels + (y * screen->pitch) + (x * bpp);
+
+  #ifdef __APPLE__
+ // p += 1;
+  #endif
+
+  if((x<0)||(y<0)|| (x>=screen->w)||(y>=screen->h)) return;
+
+  *(uint32_t *) p = value;
+}
+
 uint32_t nsdl_getpoint(void *screen,int x,int y) {
 
 ////  int bpp = screen->format->BytesPerPixel;
@@ -115,7 +138,7 @@ void nsdl_line(void *screen,int start_x,int start_y,int end_x,int end_y,int colo
   int err = dx-dy;
 
   for(int n=0;n<1000;n++) {
-    nsdl_point(screen,cx,cy,color);
+    nsdl_pointS(screen,cx,cy,color);
     if((cx==end_x) && (cy==end_y)) return;
     int e2 = 2*err;
     if(e2 > (0-dy)) { err = err - dy; cx = cx + sx; }
