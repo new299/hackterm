@@ -102,11 +102,12 @@ void scroll_buffer_get(size_t line_number,VTermScreenCell **line);
 void regis_render() {
   SDL_mutexP(regis_mutex);
 
-  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, regis_layer);
+  if(!regis_cleared()) {
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, regis_layer);
     
-  SDL_RenderCopy(renderer, texture, NULL, NULL);
-  SDL_DestroyTexture(texture);
-
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
+    SDL_DestroyTexture(texture);
+  }
 //  int res = SDL_BlitSurface(regis_layer,NULL,screen,NULL);
   SDL_mutexV(regis_mutex);
 }
@@ -198,8 +199,8 @@ void draw_row(VTermScreenCell *row,int crow,int ypos) {
 
 //    if(cellcompare(c_screen_data[crow][n],row[n]) == false) {
       if(row[n].attrs.blink == 1) any_blinking = true;
-      draw_unitext_fancy_renderer(renderer,xpos,ypos,rtext,(bg.red << 16) + (bg.green << 8) + bg.blue,
-                                                (fg.red << 16) + (fg.green << 8) + fg.blue,
+      draw_unitext_fancy_renderer(renderer,xpos,ypos,rtext,(bg.red << 24) + (bg.green << 16) + (bg.blue << 8) + 0xff,
+                                                (fg.red << 24) + (fg.green << 16) + (fg.blue << 8) + 0xff,
                                                 row[n].attrs.bold,
                                                 row[n].attrs.underline,
                                                 row[n].attrs.italic,
@@ -487,11 +488,12 @@ void do_sdl_init() {
         return;
     }
     
-    // initialise SDL rendering
-    //// const SDL_VideoInfo *vid = SDL_GetVideoInfo();
-    //int maxwidth  = 320;//vid->current_w;
-    //int maxheight = 480;//vid->current_h-(font_height+font_space);
-    
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE  , 8);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE , 8);
+    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
+//    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     
     screen=SDL_CreateWindow(NULL, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 0, 0,SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
     
@@ -501,29 +503,14 @@ void do_sdl_init() {
         printf("Could not initialize Window");
     }
     
-    //screen=SDL_SetVideo(maxwidth,maxheight,32,SDL_WINDOW_SHOWN | SDL_FULLSCREEN | SDL_NOFRAME);
-    renderer = SDL_CreateRenderer(screen, -1, 0);
+    renderer = SDL_CreateRenderer(screen, -1, SDL_RENDERER_ACCELERATED);
     
-    //SDL_SetRenderDrawColor(renderer,111,111,111,255);
-    //SDL_RenderClear(renderer);
+    //SDL_BITSPERPIXEL(format);
+    
+    
     SDL_SetRenderDrawColor(renderer,0x00,0x00,0x00,0xff);
     SDL_RenderClear(renderer);
-    
-/*
-    for(;;){
-        SDL_Rect rect;
-        rect.w = rand()%128;
-        rect.h = rand()%128;
-        rect.x = rand()%128;
-        rect.y = rand()%128;
-        
-        SDL_SetRenderDrawColor(renderer, rand()%233, rand()%232, rand()%232, 255);
-        SDL_RenderFillRect(renderer, &rect);
-        printf("render");
-        SDL_RenderPresent(renderer);
-    }
-
-*/ 
+    set_system_bg(0);
 }
 
 void sdl_read_thread();

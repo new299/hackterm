@@ -20,6 +20,8 @@ int widthmap_size  =0;
 bool     initialised=false;
 bool     blink_value=false;
 
+uint32_t system_bg;
+
 void load_fonts(char *filename,fontchar **fontmap,uint8_t **widthmap);
 
 typedef struct {
@@ -58,6 +60,12 @@ void nunifont_init() {
   load_fonts("unifont.hex",&fontmap,&widthmap);
   nunitfont_initcache();
   initialised = true;
+}
+
+void set_system_bg(uint32_t b) {
+
+  system_bg = b;
+
 }
 
 uint32_t get_pixel(uint32_t c,int c_x,int c_y) {
@@ -167,8 +175,7 @@ void draw_character(void *screen,int x,int y,int w,uint32_t cin,uint32_t bg,uint
     HASH_FIND( hh, display_cache, &chr, char_render_t_keylen, mchr);
     
     if(!mchr) {
-      int format = SDL_PIXELFORMAT_ABGR8888;  /* desired texture format */
-      Uint32 Rmask, Gmask, Bmask, Amask;      /* masks for desired format */
+      uint32_t Rmask, Gmask, Bmask, Amask;      /* masks for desired format */
    
       Rmask = 0xff000000;
       Gmask = 0x00ff0000;
@@ -177,15 +184,34 @@ void draw_character(void *screen,int x,int y,int w,uint32_t cin,uint32_t bg,uint
     
       int bpp=32;                /* bits per pixel for desired format */
     
-      SDL_Surface *converted = SDL_CreateRGBSurface(0, w, 16, bpp, Rmask, Gmask, Bmask, Amask);
+      SDL_Surface *converted = SDL_CreateRGBSurface(SDL_HWSURFACE, w, 16, bpp, Rmask, Gmask, Bmask, Amask);
     
       if(converted == NULL) {
         printf("failed %s\n",SDL_GetError());
       }
-    
+      
       draw_character_surface(converted,0,0,w,cin,bg,fg,bold,underline,italic,strike);
 
       texture = SDL_CreateTextureFromSurface(screen, converted);
+    
+    uint32_t format;
+    int access;
+    int ww;
+    int hh;
+    int v = SDL_QueryTexture(texture,
+                     &format,
+                     &access,
+                     &ww,
+                     &hh);
+    printf("rgba8 %u\n",SDL_PIXELFORMAT_ABGR8888);
+    printf("rgb565 %u\n",SDL_PIXELFORMAT_BGRA8888);
+    printf("bgra %u\n",SDL_PIXELFORMAT_BGR24);
+    printf("rgb8 %u\n",SDL_PIXELFORMAT_RGB24);
+    printf("argb8 %u\n",SDL_PIXELFORMAT_BGR565);
+    printf("last8 %u\n",SDL_PIXELFORMAT_RGB565);
+    
+        
+
     
       SDL_FreeSurface(converted);
 
@@ -206,7 +232,21 @@ void draw_character(void *screen,int x,int y,int w,uint32_t cin,uint32_t bg,uint
     SDL_RenderCopy(screen, mchr->texture, NULL, &dstRect);
 }
 
-void draw_space(void *screen,int x,int y,int w,uint32_t bg,uint32_t fg) {
+void draw_space_surface(void *screen,int x,int y,int w,uint32_t bg,uint32_t fg) {
+    SDL_Rect rect;
+    rect.w = w;
+    rect.h = 16;
+    rect.x = x;
+    rect.y = y;
+
+  for(size_t c_y=0;c_y<16;c_y++) {
+    for(size_t c_x=0;c_x<w;c_x++) {
+      draw_point(screen,x+c_x,y+c_y,bg);
+    }
+  }
+}
+
+void draw_space_renderer(void *renderer,int x,int y,int w,uint32_t bg,uint32_t fg) {
     
     SDL_Rect rect;
     rect.w = w;
@@ -214,22 +254,31 @@ void draw_space(void *screen,int x,int y,int w,uint32_t bg,uint32_t fg) {
     rect.x = x;
     rect.y = y;
     
-  //  SDL_SetRenderDrawColor(screen, bg,bg,bg, 255);
-  //  SDL_RenderFillRect(screen, &rect);
+    uint32_t  Rmask = 0xff000000;
+    uint32_t  Gmask = 0x00ff0000;
+    uint32_t  Bmask = 0x0000ff00;
+    uint32_t  Amask = 0x000000ff;
     
-//  for(size_t c_y=0;c_y<16;c_y++) {
-//    for(size_t c_x=0;c_x<w;c_x++) {
-//      draw_point(screen,x+c_x,y+c_y,bg);
-//    }
-//  }
+//    uint32_t Rmask = 0xff000000;
+//    uint32_t Gmask = 0x00ff0000;
+//    uint32_t Bmask = 0x0000ff00;
+//   uint32_t Amask = 0x000000ff;
+    
+    int r=(bg & Rmask)>>24;
+    int g=(bg & Gmask)>>16;
+    int b=(bg & Bmask)>>8;
+    int a=(bg & Amask);
+    
+    SDL_SetRenderDrawColor(renderer,r,g,b,a);
+    SDL_RenderFillRect(renderer, &rect);
 }
 
-void draw_space_h(void *screen,int x,int y,int w,uint32_t bg,uint32_t fg) {
-    SDL_Rect rect;
-    rect.w = 8;
-    rect.h = 16;
-    rect.x = x;
-    rect.y = y;
+//void draw_space_h(void *screen,int x,int y,int w,uint32_t bg,uint32_t fg) {
+ //   SDL_Rect rect;
+ //   rect.w = 8;
+ //   rect.h = 16;
+ //   rect.x = x;
+ //   rect.y = y;
  //
  //   SDL_SetRenderDrawColor(screen, bg,bg,bg, 255);
  //   SDL_RenderFillRect(screen, &rect);
@@ -239,7 +288,7 @@ void draw_space_h(void *screen,int x,int y,int w,uint32_t bg,uint32_t fg) {
 //      draw_point(screen,x+c_x,y+c_y,bg);
 //    }
 //  }
-}
+//}
 
 void draw_unitext_fancy_surface(void *screen,int x,int y,const uint16_t *text,
                                              uint32_t bg,uint32_t fg,
@@ -291,8 +340,8 @@ void draw_unitext_surface(void *screen,int x,int y,const uint16_t *text,uint32_t
   for(size_t n=0;n<length;n++) {
 
     if(text[n] == ' ') {
-      draw_space(screen,c_x,c_y,8+spacing,bg,fg);
-      draw_space_h(screen,c_x,c_y+16,spacing,bg,fg);
+      draw_space_surface(screen,c_x,c_y,8+spacing,bg,fg);
+//      draw_space_h(screen,c_x,c_y+16,spacing,bg,fg);
       c_x += 8 + spacing; 
     } else {
       int w=8;
@@ -300,10 +349,10 @@ void draw_unitext_surface(void *screen,int x,int y,const uint16_t *text,uint32_t
       draw_character_surface(screen,c_x,c_y,w,text[n],bg,fg,bold,underline,italic,strike);
 
       //draw spacing
-      draw_space(screen,c_x+w,c_y,spacing,bg,fg);
-      draw_space_h(screen,c_x,c_y+16,spacing,bg,fg);
-      if(w==16) draw_space_h(screen,c_x+8,c_y+16,spacing,bg,fg);
-      if(w==16) draw_space(screen,c_x+w+1,c_y,spacing,bg,fg);
+      draw_space_surface(screen,c_x+w,c_y,spacing,bg,fg);
+//      draw_space_h(screen,c_x,c_y+16,spacing,bg,fg);
+//      if(w==16) draw_space_h(screen,c_x+8,c_y+16,spacing,bg,fg);
+      if(w==16) draw_space_surface(screen,c_x+w+1,c_y,spacing,bg,fg);
       if(w==8 ) c_x+=w+spacing;
       if(w==16) c_x+=w+spacing+spacing;
     }
@@ -327,19 +376,21 @@ void draw_unitext_renderer(void *renderer,int x,int y,const uint16_t *text,uint3
   for(size_t n=0;n<length;n++) {
 
     if(text[n] == ' ') {
-      draw_space(renderer,c_x,c_y,8+spacing,bg,fg);
-      draw_space_h(renderer,c_x,c_y+16,spacing,bg,fg);
+      int w=8;
+      //draw_character(renderer,c_x,c_y,w,text[n],bg,fg,bold,underline,italic,strike);
+      if(bg!=system_bg) draw_space_renderer(renderer,c_x,c_y,8+spacing,bg,fg);
+ //     draw_space_h(renderer,c_x,c_y+16,spacing,bg,fg);
       c_x += 8 + spacing; 
     } else {
       int w=8;
       if(get_widthmap(text[n]) != true) w=16; else w=8;
       draw_character(renderer,c_x,c_y,w,text[n],bg,fg,bold,underline,italic,strike);
 
-      //draw spacing
-      draw_space(renderer,c_x+w,c_y,spacing,bg,fg);
-      draw_space_h(renderer,c_x,c_y+16,spacing,bg,fg);
-      if(w==16) draw_space_h(renderer,c_x+8,c_y+16,spacing,bg,fg);
-      if(w==16) draw_space(renderer,c_x+w+1,c_y,spacing,bg,fg);
+      //draw spacing - currently no spacing.
+ //     draw_space_renderer(renderer,c_x+w,c_y,spacing,bg,fg);
+ //     draw_space_h(renderer,c_x,c_y+16,spacing,bg,fg);
+//      if(w==16) draw_space_h(renderer,c_x+8,c_y+16,spacing,bg,fg);
+//      if(w==16) draw_space_renderer(renderer,c_x+w+1,c_y,spacing,bg,fg);
       if(w==8 ) c_x+=w+spacing;
       if(w==16) c_x+=w+spacing+spacing;
     }

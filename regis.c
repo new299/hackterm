@@ -15,9 +15,18 @@ SDL_Surface *regis_layer=0;
 
 SDL_mutex *regis_mutex=0;
 
+bool regis_is_clear=true;
+
+bool regis_cleared() {
+
+  if(regis_is_clear) return true; else return false;
+
+}
+
 void regis_clear() {
   SDL_mutexP(regis_mutex);
-  SDL_FillRect(regis_layer,NULL, 0x000000); 
+  SDL_FillRect(regis_layer,NULL, 0x000000);
+  regis_is_clear=true;
   SDL_mutexV(regis_mutex);
 }
 
@@ -45,7 +54,6 @@ char *regis_process_cmd_text(char *cmd) {
       wdata[n+1] = 0;
     }
     SDL_mutexP(regis_mutex);
-    
     draw_unitext_surface(regis_layer,pen_x,pen_y,wdata,0x0,0xFFFFFFFF,0,0,0,0);
     SDL_mutexV(regis_mutex);
   } else 
@@ -128,6 +136,7 @@ char *regis_process_cmd_vector(char *cmd) {
 
 
 char *regis_process_command(char *cmd) {
+  regis_is_clear=false;
   if(cmd[0] == 'S') return regis_process_cmd_screen(cmd);    else
   if(cmd[0] == 'T') return regis_process_cmd_text(cmd);      else
   if(cmd[0] == 'W') return regis_process_cmd_w(cmd);         else
