@@ -179,12 +179,12 @@ void draw_row(VTermScreenCell *row,int crow,int ypos) {
     if(cdf==true) {
         for(int n=0;n<1000;n++){
             for(int i=0;i<1000;i++) {
-                c_screen_data[n][i].chars[0]=5;
+                c_screen_data[n][i].chars[0]=0;
             }
         }
     }
     cdf=false;
-  */
+ */
   int xpos=0;
 
   for(int n=0;n<cols;n++) {
@@ -197,7 +197,7 @@ void draw_row(VTermScreenCell *row,int crow,int ypos) {
     VTermColor fg = row[n].fg;
     VTermColor bg = row[n].bg;
 
-//    if(cellcompare(c_screen_data[crow][n],row[n]) == false) {
+    //if(cellcompare(c_screen_data[crow][n],row[n]) == false) {
       if(row[n].attrs.blink == 1) any_blinking = true;
       draw_unitext_fancy_renderer(renderer,xpos,ypos,rtext,(bg.red << 24) + (bg.green << 16) + (bg.blue << 8) + 0xff,
                                                 (fg.red << 24) + (fg.green << 16) + (fg.blue << 8) + 0xff,
@@ -208,8 +208,8 @@ void draw_row(VTermScreenCell *row,int crow,int ypos) {
                                                 row[n].attrs.reverse,
                                                 row[n].attrs.strike,
                                                 row[n].attrs.font);
-//    }
-//    c_screen_data[crow][n] = row[n];
+    //}
+    //c_screen_data[crow][n] = row[n];
       
     xpos+=(font_width+font_space);
     if(row[n].width == 2) {xpos +=(font_width+font_space);n++;}
@@ -440,8 +440,17 @@ void redraw_screen() {
       int width=font_width+font_space;
       if((cursorx < cols) && (cursory < rows) && (rowdata != 0)) {
         if(rowdata[cursorx].width == 2) width+=(font_width+font_space);
-        nsdl_rectangle_softalph(screen,cursorx*(font_width+font_space),row*(font_height+font_space),(cursorx*(font_width+font_space))+width,(row*(font_height+font_space))+(font_height+font_space),0xFF);
-        nsdl_rectangle_wire    (screen,cursorx*(font_width+font_space),row*(font_height+font_space),(cursorx*(font_width+font_space))+width,(row*(font_height+font_space))+(font_height+font_space),UINT_MAX);
+ //       nsdl_rectangle_softalph(screen,cursorx*(font_width+font_space),row*(font_height+font_space),(cursorx*(font_width+font_space))+width,(row*(font_height+font_space))+(font_height+font_space),0xFF);
+ //       nsdl_rectangle_wire    (screen,cursorx*(font_width+font_space),row*(font_height+font_space),(cursorx*(font_width+font_space))+width,(row*(font_height+font_space))+(font_height+font_space),UINT_MAX);
+
+         SDL_SetRenderDrawColor(renderer,0xEF,0xEF,0xEF,0xA0);
+         SDL_Rect r;
+         r.x = cursorx*(font_width+font_space);
+         r.y = row*(font_height+font_space);
+         r.w = width;
+         r.h = font_height+font_space;
+         SDL_RenderFillRect(renderer,&r);
+
       }
     }
 
@@ -507,10 +516,11 @@ void do_sdl_init() {
     
     //SDL_BITSPERPIXEL(format);
     
-    
+    SDL_SetRenderDrawBlendMode(renderer,
+                               SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(renderer,0x00,0x00,0x00,0xff);
     SDL_RenderClear(renderer);
-    set_system_bg(0);
+    set_system_bg(255);//alpha always 255
 }
 
 void sdl_read_thread();
