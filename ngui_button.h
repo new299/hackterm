@@ -11,6 +11,6 @@ void ngui_receiveall_button(SDL_Event *event);
 
 void ngui_renderall_button();
 
-extern SDL_Surface *ngui_screen;
+extern SDL_Renderer *ngui_renderer;
 
 #endif

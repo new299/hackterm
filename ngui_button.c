@@ -19,9 +19,14 @@ int ngui_buttons_size = 0;
 ngui_button_data ngui_buttons[50];
 
 void ngui_receive_event_button(SDL_Event *event, ngui_button_data *d) {
+
+  printf("button received event\n");
+  printf("event type: %x\n",event->type);
   if(event->type == SDL_MOUSEBUTTONDOWN) {
-    // event->button.x;
-    // event->button.y;
+    printf("button received button down\n");
+    printf("%d\n", event->button.x);
+    printf("%d\n", event->button.y);
+
     int x = event->button.x;
     int y = event->button.y;
     if((x > (d->x-d->x_padding)) && (x < ((d->x)+(strlen(d->text)*8)+d->x_padding)) &&
@@ -36,9 +41,9 @@ void ngui_render_button(ngui_button_data *d) {
   uint16_t text[100];
   for(int n=0;n<100;n++) text[n] = d->text[n];
 
-  nsdl_rectangle_shade(ngui_screen,d->x-d->x_padding,d->y-d->y_padding,d->x+(strlen(d->text))*8+d->x_padding,d->y+16+d->y_padding,1000,10000);
+//  nsdl_rectangle_shade(ngui_screen,d->x-d->x_padding,d->y-d->y_padding,d->x+(strlen(d->text))*8+d->x_padding,d->y+16+d->y_padding,1000,10000);
 
-  draw_unitext(ngui_screen,
+  draw_unitext_renderer(ngui_renderer,
               d->x,
               d->y,
               text,

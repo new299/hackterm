@@ -69,11 +69,11 @@ void ngui_render_textbox(ngui_textbox_data *d) {
 
   printf("text is %s\n",d->text);
   if(d->selected) {
-    nsdl_rectangle_shade(ngui_screen,d->x-d->x_padding,d->y-d->y_padding,d->x+(strlen(d->text))*8+d->x_padding,d->y+16+d->y_padding,1000,10000);
+//    nsdl_rectangle_shade(ngui_screen,d->x-d->x_padding,d->y-d->y_padding,d->x+(strlen(d->text))*8+d->x_padding,d->y+16+d->y_padding,1000,10000);
   }
 
   if(d->passwordbox == false) {
-    draw_unitext(ngui_screen,
+    draw_unitext_renderer(ngui_renderer,
                  d->x,
                  d->y,
                  text,
@@ -84,7 +84,7 @@ void ngui_render_textbox(ngui_textbox_data *d) {
       if(text[n] != 0) text[n] = '*';
     }
 
-    draw_unitext(ngui_screen,
+    draw_unitext_renderer(ngui_renderer,
                  d->x,
                  d->y,
                  text,
