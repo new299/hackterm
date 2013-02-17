@@ -377,7 +377,6 @@ VTermParserCallbacks cb_parser = {
 
 void terminal_resize() {
 
-  SDL_GetWindowSize(screen,&display_width,&display_height);
   printf("terminal resize, size: %d %d\n",display_width,display_height);
 
   //TODO: Width and Height are not swapped with rotation, so we will need some code to detection rotation and act appropriately
@@ -555,7 +554,15 @@ void redraw_required() {
   SDL_SemPost(redraw_sem);
 }
 
+char open_arg1[100];
+char open_arg2[100];
+char open_arg3[100];
+
 void console_read_thread() {
+
+  int open_ret = c_open(open_arg1,open_arg2,open_arg3);
+  terminal_resize();
+
   for(;;) {
     // sending bytes from pts to vterm
     int len;
@@ -1014,10 +1021,11 @@ int main(int argc, char **argv) {
   #endif
 
   //char *open_arg1 = "localhost";
-  char open_arg1[100] = "127.0.0.1";
-  char open_arg2[100] = "root";
-  char open_arg3[100] = "tastycakes";
+  strcpy(open_arg1,"127.0.0.1");
+  strcpy(open_arg2,"root");
+  strcpy(open_arg3,"tastycakes");
   
+  SDL_GetWindowSize(screen,&display_width,&display_height);
   vterm_initialisation();
   
   //if(vt != 0) vterm_set_size(vt,rows,cols);
@@ -1064,29 +1072,17 @@ int main(int argc, char **argv) {
  //   printf("arg3: %s\n",open_arg3);
   }
 
-  int open_ret = c_open(open_arg1,open_arg2,open_arg3);
-  terminal_resize();
-  
   SDL_Thread *thread3;
-  SDL_Thread *thread5;
-  if(open_ret >= 0) {
-    // iPhone build uses sdl 2, which requires extra arg here.
-    #ifdef IPHONE_BUILD
-      thread3 = SDL_CreateThread(console_read_thread,0,0);
-  //  thread5 = SDL_CreateThread(timed_repeat       ,0,0);
-    #else
-  //  thread3 = SDL_CreateThread(console_read_thread,0);
-  //  thread5 = SDL_CreateThread(timed_repeat       ,0);
-    #endif
+//  SDL_Thread *thread5;
+  thread3 = SDL_CreateThread(console_read_thread,0,0);
+  sdl_render_thread();
 
-    sdl_render_thread();
+  //SDL_mutexP(quit_mutex);
 
-    SDL_mutexP(quit_mutex);
-
-    SDL_CondWait(cond_quit,quit_mutex);
-  } else {
-    printf("Unable to connect\n");
-  }
+  //  SDL_CondWait(cond_quit,quit_mutex);
+  //} else {
+  //  printf("Unable to connect\n");
+  //}
 
   SDL_Quit();
 
