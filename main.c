@@ -99,6 +99,8 @@ int (*c_resize)(int rows,int cols) = 0;
 
 void scroll_buffer_get(size_t line_number,VTermScreenCell **line);
 
+bool hterm_next_key_ctrl=false;
+
 void regis_render() {
   SDL_mutexP(regis_mutex);
 
@@ -761,11 +763,17 @@ void sdl_read_thread(SDL_Event *event) {
     printf("event\n");
     if(event->type == SDL_TEXTINPUT) {
         printf("herm text input: %s\n",event->text.text);
-        char buffer[222];
-        //buffer[3]=0;do
+        char buffer[255];
         
-       // strcat(buffer, event->text.text);
-        c_write(event->text.text,strlen(event->text.text));
+        strcpy(buffer, event->text.text);
+        if(hterm_next_key_ctrl == true) {
+          int i=buffer[0];
+          if(i>=97) i = i-97+65;
+          i-=64;
+          buffer[0]=i;
+          hterm_next_key_ctrl = false;
+        }
+        c_write(buffer,strlen(buffer));
     }
     if(event->type == SDL_TEXTEDITING) {
         printf("hterm text editing\n");
@@ -929,21 +937,45 @@ void receive_ssh_info(char *o1,char *o2,char *o3) {
 void virtual_kb_up(char *c) {
   printf("VIRTUAL UP\n");
   SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_UP);
+  SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_UP);
 }
 
 void virtual_kb_down(char *c) {
   printf("VIRTUAL DOWN\n");
   SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_DOWN);
+  SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_DOWN);
 }
 
 void virtual_kb_left(char *c) {
   printf("VIRTUAL DOWN\n");
   SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_LEFT);
+  SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_LEFT);
 }
 
 void virtual_kb_right(char *c) {
   printf("VIRTUAL DOWN\n");
   SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_RIGHT);
+  SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_RIGHT);
+}
+
+void virtual_kb_esc(char *c) {
+  printf("VIRTUAL ESC\n");
+  char text[5];
+  text[0] = 27;
+  text[1] = 0;
+  SDL_SendKeyboardText(text);
+  SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_ESCAPE);
+}
+
+void virtual_kb_ctrl(char *c) {
+  printf("VIRTUAL CTRL\n");
+  hterm_next_key_ctrl=true;
+//  SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_CTRL);
+}
+
+void virtual_kb_alt(char *c) {
+  printf("VIRTUAL ALT\n");
+  SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_RALT);
 }
 
 int main(int argc, char **argv) {
@@ -955,6 +987,9 @@ int main(int argc, char **argv) {
   ngui_add_button(200 ,150,"down" ,virtual_kb_down);
   ngui_add_button(50  ,100,"left" ,virtual_kb_left);
   ngui_add_button(300 ,100,"right",virtual_kb_right);
+  ngui_add_button(300 ,50,"esc",virtual_kb_esc);
+  ngui_add_button(50 ,50,"ctrl",virtual_kb_ctrl);
+
     
   nunifont_load_staticmap(__fontmap_static,__widthmap_static,__fontmap_static_len,__widthmap_static_len);
 
