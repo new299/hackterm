@@ -48,17 +48,20 @@ typedef struct {
 } lookup_key_t;
 
 int char_render_t_keylen=-1;
-//SDL_Texture *display_cache[65535];
-void nunitfont_initcache() {
+
+char_render_t *display_cache = NULL;
+
+void nunifont_initcache() {
     //unsigned keylen;
     //char_render_t *msg, *tmp, *msgs = NULL;
     //lookup_key_t *lookup_key;
     char_render_t_keylen = offsetof(char_render_t, strike) + 4 - offsetof(char_render_t, c);
+    display_cache = NULL; // REALLY NEED TO REALLOC!
 }
 
 void nunifont_init() {
   load_fonts("unifont.hex",&fontmap,&widthmap);
-  nunitfont_initcache();
+  nunifont_initcache();
   initialised = true;
 }
 
@@ -121,7 +124,7 @@ void draw_point(void *screen,int x,int y,uint32_t value) {
 ////  *(uint32_t *) p = value;
 }
 */
-char_render_t *display_cache = NULL;
+
 
 void draw_character_surface(SDL_Surface *screen,int x,int y,int w,uint32_t cin,uint32_t bg,uint32_t fg,int bold,int underline,int italic,int strike) {
     for(size_t c_y=y;c_y<(y+16);c_y++) {
@@ -519,7 +522,7 @@ void nunifont_load_staticmap(void *fontmap_static,void *widthmap_static,int font
   widthmap      = (uint8_t  *) widthmap_static;
   fontmap_size  = fontmap_static_size;
   widthmap_size = widthmap_static_size;
-  nunitfont_initcache();
+  nunifont_initcache();
   initialised = true;
 }
 

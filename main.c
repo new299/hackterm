@@ -380,8 +380,8 @@ void terminal_resize() {
   printf("terminal resize, size: %d %d\n",display_width,display_height);
 
   //TODO: Width and Height are not swapped with rotation, so we will need some code to detection rotation and act appropriately
-  rows = display_width/16;
-  cols = display_height/8;
+  rows = display_height/16;
+  cols = display_width/8;
     
   printf("resized: %d %d\n",cols,rows);
 
@@ -497,7 +497,8 @@ void do_sdl_init() {
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
 //    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     
-    screen=SDL_CreateWindow(NULL, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 0, 0,SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    screen=SDL_CreateWindow(NULL, 0, 0, 0, 0,SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
     
     SDL_GetWindowSize(screen,&display_width,&display_height);
 
@@ -762,8 +763,19 @@ void sdl_read_thread(SDL_Event *event) {
     //  return;
    // }
 //
+
     if (event->type == SDL_WINDOWEVENT &&
         event->window.event == SDL_WINDOWEVENT_RESIZED) {
+        SDL_GetWindowSize(screen,&display_width,&display_height);
+        //SDL_RecreateWindow(screen,SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
+        SDL_DestroyRenderer(renderer);
+        renderer = SDL_CreateRenderer(screen, -1, SDL_RENDERER_ACCELERATED);
+        ngui_set_renderer(renderer, redraw_required);
+        nunifont_initcache();
+        SDL_StartTextInput();
+
+        terminal_resize();
+        SDL_RaiseWindow(screen);
         redraw_required();
     }
     
