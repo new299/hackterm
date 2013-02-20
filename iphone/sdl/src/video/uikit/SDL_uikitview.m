@@ -231,34 +231,61 @@
   //  NSLog([[notification object]text]);
 }
 
+-(void)keyboardWillShow:(NSNotification*)notification {
+
+  NSDictionary* keyboardInfo = [notification userInfo];
+  NSValue* keyboardFrameBegin = [keyboardInfo valueForKey:UIKeyboardFrameBeginUserInfoKey];
+  CGRect keyboardFrameBeginRect = [keyboardFrameBegin CGRectValue];
+  
+  SDL_Window *window = self->viewcontroller.window;
+  SDL_WindowData *data = window->driverdata;
+  SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
+  SDL_DisplayModeData *displaymodedata = (SDL_DisplayModeData *) display->current_mode.driverdata;
+    
+    
+  const CGSize size = data->view.bounds.size;
+  
+  int kb_h = keyboardFrameBeginRect.size.height;
+  int kb_w = keyboardFrameBeginRect.size.width;
+
+  if(kb_h > kb_w) {
+    int t = kb_h;
+    kb_h = kb_w;
+    kb_w = t;
+  }
+
+  int w, h;
+  w = (int)(size.width  * displaymodedata->scale);
+  h = (int)(size.height * displaymodedata->scale)-kb_h;
+
+  SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MOVED, w, h);
+  NSLog(@"%@", NSStringFromCGRect(keyboardFrameBeginRect));
+}
+ 
+-(void)keyboardWillHide:(NSNotification*)notification {
+  // Animate the current view back to its original position
+}
 
 /* Set ourselves up as a UITextFieldDelegate */
 - (void)initializeKeyboard
 {
-    textInput = [[SDLTextView alloc] init];
- //   textField.delegate = self;
-    /* placeholder so there is something to delete! */
- //   textField.text = @" ";
+  textInput = [[SDLTextView alloc] init];
 
-    /* set UITextInputTrait properties, mostly to defaults */
- //   textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
- //   textField.autocorrectionType = UITextAutocorrectionTypeNo;
- //   textField.enablesReturnKeyAutomatically = YES; // WAS NO
- //   textField.keyboardAppearance = UIKeyboardAppearanceDefault;
- //   textField.keyboardType = UIKeyboardTypeDefault;
- //   textField.returnKeyType = UIReturnKeyGo; //UIReturnKeyDefault;
- //   textField.secureTextEntry = NO;
-   
-
-   [textInput reloadInputViews];
-  // [textInput setKeyboardType:UIKeyboardTypeDefault];
- //   textField.hidden = YES;
-    keyboardVisible = YES;
-    /* add the UITextField (hidden) to our view */
+  [textInput reloadInputViews];
+  keyboardVisible = YES;
   [self addSubview: textInput];
-   [textInput becomeFirstResponder];
-    //[textInput release];
-    [[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(keyPressed:) name: nil object: nil];
+  [textInput becomeFirstResponder];
+  [[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(keyPressed:) name: nil object: nil];
+
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(keyboardWillShow:)
+                                               name:UIKeyboardWillShowNotification
+                                             object:nil];
+
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(keyboardWillHide:)
+                                               name:UIKeyboardWillHideNotification
+                                             object:nil];
 
 }
 
