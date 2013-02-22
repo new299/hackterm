@@ -769,6 +769,9 @@ void sdl_read_thread(SDL_Event *event) {
        ((event->window.event == SDL_WINDOWEVENT_RESIZED) || (event->window.event == SDL_WINDOWEVENT_RESTORED))
       ) {
         SDL_GetWindowSize(screen,&display_width,&display_height);
+        
+        
+        
         //SDL_RecreateWindow(screen,SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
         SDL_DestroyRenderer(renderer);
         renderer = SDL_CreateRenderer(screen, -1, SDL_RENDERER_ACCELERATED);

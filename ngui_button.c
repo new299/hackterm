@@ -41,6 +41,17 @@ void ngui_render_button(ngui_button_data *d) {
   uint16_t text[100];
   for(int n=0;n<100;n++) text[n] = d->text[n];
 
+
+  SDL_Rect rect;
+  
+  rect.x = d->x-d->x_padding;
+  rect.y = d->y-d->y_padding;
+  rect.w = (strlen(d->text))*8+d->x_padding;
+  rect.h = 16+d->y_padding;
+
+  SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
+  
+  SDL_RenderDrawRect(ngui_renderer,&rect);
 //  nsdl_rectangle_shade(ngui_screen,d->x-d->x_padding,d->y-d->y_padding,d->x+(strlen(d->text))*8+d->x_padding,d->y+16+d->y_padding,1000,10000);
 
   draw_unitext_renderer(ngui_renderer,

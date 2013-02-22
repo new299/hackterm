@@ -256,7 +256,7 @@
 
   int w, h;
   w = (int)(size.width  * displaymodedata->scale);
-  h = (int)(size.height * displaymodedata->scale)-kb_h;
+  h = (int)(size.height * displaymodedata->scale)-(kb_h*displaymodedata->scale);
 
   SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MOVED, w, h);
   NSLog(@"%@", NSStringFromCGRect(keyboardFrameBeginRect));
