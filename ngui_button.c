@@ -81,22 +81,22 @@ void draw_esc_icon(int x,int y) {
 
   SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
   // E
-  SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*4),x   ,y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*4),x   ,y+(16*6));
-  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*6),x+16,y+(16*6));
-  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*5),x+16,y+(16*5));
+  SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*0),x   ,y+(16*0));
+  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*0),x   ,y+(16*2));
+  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*2),x+16,y+(16*2));
+  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*1),x+16,y+(16*1));
   
   // S
-  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*4),x+(16*2),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*4),x+(16*2),y+(16*5));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*5),x+(16*3),y+(16*5));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*5),x+(16*3),y+(16*6));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*6),x+(16*2),y+(16*6));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*0),x+(16*2),y+(16*0));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*0),x+(16*2),y+(16*1));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*1),x+(16*3),y+(16*1));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*1),x+(16*3),y+(16*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*2),x+(16*2),y+(16*2));
   
   // C
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*4),x+(16*4),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*4),x+(16*4),y+(16*6));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*6),x+(16*5),y+(16*6));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*0),x+(16*4),y+(16*0));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*0),x+(16*4),y+(16*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*2),x+(16*5),y+(16*2));
 
 }
 
@@ -116,24 +116,22 @@ void draw_tab_icon  (int x,int y){
   SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
   // T
   SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*4),x   ,y+(16*4));  // Top line
-  SDL_RenderDrawLine(ngui_renderer,x+16    ,y+(16*4),x+16,y+(16*6));
+  SDL_RenderDrawLine(ngui_renderer,x+16    ,y+(16*4),x+16,y+(16*6)-1);
   
   // A
   SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*4),x+(16*3),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*4),x+(16*3),y+(16*6));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*4),x+(16*4),y+(16*6));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*4),x+(16*3),y+(16*6)-1);
+  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*4),x+(16*4),y+(16*6)-1);
   SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*5),x+(16*3),y+(16*5));
 
   // B
-  SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*4),x+(16*5),y+(16*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*6)-2,y+(16*4),x+(16*5),y+(16*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*4),x+(16*5),y+(16*6)-1);
+  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*6)-1,x+(16*6)-2,y+(16*6)-1);
   
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*4),x+(16*5),y+(16*6));
-  
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*6),x+(16*6),y+(16*6));
-  
-  SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*6),x+(16*6),y+(16*4));
-  
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*5),x+(16*6),y+(16*5));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*6)-1,y+(16*6)-1,x+(16*6)-1,y+(16*5)+2);
+  SDL_RenderDrawLine(ngui_renderer,x+(16*6)-1,y+(16*5)-2,x+(16*6)-1,y+(16*4)+1);
+  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*5),x+(16*6)-2,y+(16*5));
 }
 
 void draw_alt_icon  (int x,int y){
@@ -152,21 +150,21 @@ void draw_alt_icon  (int x,int y){
   SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
   // A
   SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*4),x   ,y+(16*4));  // Top line
-  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*4),x   ,y+(16*6));  // Down line
+  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*4),x   ,y+(16*6)-1);  // Down line
 //  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*6),x+16,y+(16*6)); //Bottom line
   SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*5),x+16,y+(16*5));  // Midline
-  SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*4),x+16,y+(16*6));  // Right down line
+  SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*4),x+16,y+(16*6)-1);  // Right down line
   
   // L
 //  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*4),x+(16*2),y+(16*4)); top
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*4),x+(16*2),y+(16*6)); // left
+  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*4),x+(16*2),y+(16*6)-1); // left
 //  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*5),x+(16*3),y+(16*5));
 //  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*5),x+(16*3),y+(16*6));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*6),x+(16*2),y+(16*6)); //bottom
+  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*6)-1,x+(16*2),y+(16*6)-1); //bottom
   
   // T
   SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*4),x+(16*4),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*4),x+(16*5),y+(16*6));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*4),x+(16*5),y+(16*6)-1);
 //  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*6),x+(16*5),y+(16*6));
 
 }
@@ -186,20 +184,18 @@ void draw_ctrl_icon (int x,int y){
   SDL_RenderDrawRect(ngui_renderer,&rect);
 
   SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
-  // E
-  SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*4),x   ,y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*4),x   ,y+(16*6));
-  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*6),x+16,y+(16*6));
-//  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*5),x+16,y+(16*5));
+  // C
+  SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*0),x   ,y+(16*0));
+  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*0),x   ,y+(16*2));
+  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*2),x+16,y+(16*2));
   
   // T
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*4),x+(16*2)   ,y+(16*4));  // Top line
-  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*4),x+(16*3),y+(16*6));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*0),x+(16*2)   ,y+(16*0));  // Top line
+  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*0),x+(16*3),y+(16*2));
 
   // L
-//  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*4),x+(16*4),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*4),x+(16*5),y+(16*6));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*6),x+(16*6),y+(16*6));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*0),x+(16*5),y+(16*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*2),x+(16*6),y+(16*2));
 
 }
 
@@ -244,8 +240,8 @@ void draw_down_icon (int x,int y){
   SDL_RenderDrawRect(ngui_renderer,&rect);
 
   SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*6),x+(16*4),y+(16*6));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*6),x+(16*4),y+(16*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*6)-1,x+(16*4),y+(16*6)-1);
+  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*6)-1,x+(16*4),y+(16*4));
   SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*4),x+(16*5),y+(16*4));
   SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*4),x+(16*5),y+(16*2));
   SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*2),x+(16*6),y+(16*2));
@@ -255,7 +251,7 @@ void draw_down_icon (int x,int y){
   SDL_RenderDrawLine(ngui_renderer,x+(16*0),y+(16*2),x+(16*1),y+(16*2));
   SDL_RenderDrawLine(ngui_renderer,x+(16*1),y+(16*2),x+(16*1),y+(16*4));
   SDL_RenderDrawLine(ngui_renderer,x+(16*1),y+(16*4),x+(16*2),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*4),x+(16*2),y+(16*6));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*4),x+(16*2),y+(16*6)-1);
 }
 
 void draw_right_icon (int x,int y){
@@ -271,7 +267,7 @@ void draw_right_icon (int x,int y){
   SDL_RenderDrawRect(ngui_renderer,&rect);
 
   SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
-  SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*2),x+(16*6),y+(16*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*6)-1,y+(16*2),x+(16*6)-1,y+(16*4));
   SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*4),x+(16*4),y+(16*4));
   SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*4),x+(16*4),y+(16*5));
   SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*5),x+(16*2),y+(16*5));
