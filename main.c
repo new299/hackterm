@@ -791,6 +791,15 @@ void sdl_read_thread(SDL_Event *event) {
       display_width  = w;
       display_height = h;
       terminal_resize();
+      
+      ngui_move_button("Iup"   ,display_width-(16*6*2),display_height-(16*6*3));
+      ngui_move_button("Idown" ,display_width-(16*6*2),display_height-(16*6*1));
+      ngui_move_button("Ileft" ,display_width-(16*6*3),display_height-(16*6*2));
+      ngui_move_button("Iright",display_width-(16*6*1),display_height-(16*6*2));
+      ngui_move_button("Iesc"  ,display_width-(16*6*3),display_height-(16*6*3));
+      ngui_move_button("Ialt"  ,display_width-(16*6*3),display_height-(16*6*1));
+      ngui_move_button("Ictrl" ,display_width-(16*6*1),display_height-(16*6*3));
+      ngui_move_button("Itab"  ,display_width-(16*6*1),display_height-(16*6*1));
     }
     
     printf("event\n");
@@ -998,6 +1007,7 @@ void virtual_kb_esc(char *c) {
   text[1] = 0;
   SDL_SendKeyboardText(text);
   SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_ESCAPE);
+  SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_ESCAPE);
 }
 
 void virtual_kb_ctrl(char *c) {
@@ -1009,6 +1019,17 @@ void virtual_kb_ctrl(char *c) {
 void virtual_kb_alt(char *c) {
   printf("VIRTUAL ALT\n");
   SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_RALT);
+  SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_RALT);
+}
+
+void virtual_kb_tab(char *c) {
+  printf("VIRTUAL TAB\n");
+  char text[5];
+  text[0] = '\t';
+  text[1] = 0;
+  SDL_SendKeyboardText(text);
+  SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_TAB);
+  SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_TAB);
 }
 
 int main(int argc, char **argv) {
@@ -1016,12 +1037,14 @@ int main(int argc, char **argv) {
   do_sdl_init();
   regis_init(display_width,display_height);
   ngui_set_renderer(renderer, redraw_required);
-  ngui_add_button(200 ,50 ,"up"   ,virtual_kb_up);
-  ngui_add_button(200 ,150,"down" ,virtual_kb_down);
-  ngui_add_button(50  ,100,"left" ,virtual_kb_left);
-  ngui_add_button(300 ,100,"right",virtual_kb_right);
-  ngui_add_button(300 ,50,"esc",virtual_kb_esc);
-  ngui_add_button(50 ,50,"ctrl",virtual_kb_ctrl);
+  ngui_add_button(display_width-(16*6*2),display_height-(16*6*3),"Iup"   ,virtual_kb_up   );
+  ngui_add_button(display_width-(16*6*2),display_height-(16*6*1),"Idown" ,virtual_kb_down );
+  ngui_add_button(display_width-(16*6*3),display_height-(16*6*2),"Ileft" ,virtual_kb_left );
+  ngui_add_button(display_width-(16*6*1),display_height-(16*6*3),"Iright",virtual_kb_right);
+  ngui_add_button(display_width-(16*6*3),display_height-(16*6*3),"Iesc"  ,virtual_kb_esc  );
+  ngui_add_button(display_width-(16*6*3),display_height-(16*6*1),"Ialt"  ,virtual_kb_alt  );
+  ngui_add_button(display_width-(16*6*1),display_height-(16*6*3),"Ictrl" ,virtual_kb_ctrl );
+  ngui_add_button(display_width-(16*6*1),display_height-(16*6*1),"Itab"  ,virtual_kb_tab  );
 
     
   nunifont_load_staticmap(__fontmap_static,__widthmap_static,__fontmap_static_len,__widthmap_static_len);
