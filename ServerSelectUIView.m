@@ -15,6 +15,12 @@
 @synthesize password;
 @synthesize connectComplete = _connectComplete;
 
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+{
+    return (interfaceOrientation == UIInterfaceOrientationPortrait
+            || interfaceOrientation == UIInterfaceOrientationLandscapeLeft
+            || interfaceOrientation == UIInterfaceOrientationLandscapeRight);
+}
 
 
 - (id)initWithFrame:(CGRect)frame
@@ -45,15 +51,6 @@
 - (IBAction)bookmarkPressed:(id)sender {
 }
 
-
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
-{
-    // Drawing code
-}
-*/
 
 - (void)dealloc {
     [super dealloc];

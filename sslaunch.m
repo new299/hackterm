@@ -21,6 +21,9 @@ void display_serverselect_run() {
 UIView *view;
 void display_serverselect(SDL_Window * window)
 {
+
+
+
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     SDL_DisplayData *displaydata = display->driverdata;
