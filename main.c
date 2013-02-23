@@ -90,6 +90,10 @@ SDL_sem    *redraw_sem;
 SDL_mutex  *quit_mutex;
 VTermState *vs;
 
+char open_arg1[100];
+char open_arg2[100];
+char open_arg3[100];
+
 // Funtions used to communicate with host
 int (*c_open)(char *hostname,char *username, char *password) = 0;
 int (*c_close)() = 0;
@@ -500,6 +504,18 @@ void do_sdl_init() {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     screen=SDL_CreateWindow(NULL, 0, 0, 0, 0,SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
     
+    display_serverselect(screen);
+    
+    for(;;) {
+      display_serverselect_run();
+
+      bool c = display_serverselect_get(open_arg1,open_arg2,open_arg3);
+      if(c) {
+        display_serverselect_complete();
+        break;
+      }
+    }
+    
     SDL_GetWindowSize(screen,&display_width,&display_height);
 
     if (screen == 0) {
@@ -555,9 +571,6 @@ void redraw_required() {
   SDL_SemPost(redraw_sem);
 }
 
-char open_arg1[100];
-char open_arg2[100];
-char open_arg3[100];
 
 void console_read_thread() {
 
@@ -1075,9 +1088,9 @@ int main(int argc, char **argv) {
   #endif
 
   //char *open_arg1 = "localhost";
-  strcpy(open_arg1,"127.0.0.1");
-  strcpy(open_arg2,"root");
-  strcpy(open_arg3,"tastycakes");
+  //strcpy(open_arg1,"127.0.0.1");
+  //strcpy(open_arg2,"root");
+  //strcpy(open_arg3,"tastycakes");
   
   SDL_GetWindowSize(screen,&display_width,&display_height);
   vterm_initialisation();
