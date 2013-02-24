@@ -48,15 +48,15 @@ int ssh_open(char *hostname,char *username,char *password) {
   
   struct sockaddr_in sin;
 
-  unsigned long hostaddr;
-  hostaddr = inet_addr(hostname);
+  //unsigned long hostaddr;
+  //hostaddr = inet_addr(hostname);
 
   struct addrinfo *result;
   struct addrinfo *res;
   int error;
  
   // resolve
-  error = getaddrinfo(hostname, NULL, NULL, &result);
+  error = getaddrinfo(hostname, "22", NULL, &result);
   if (error != 0) {
     return -1;
   }
@@ -73,11 +73,11 @@ int ssh_open(char *hostname,char *username,char *password) {
     if (*hostname != '\0') {
       printf("hostname: %s\n", hostname);
       sin = *((struct sockaddr_in *) (res->ai_addr));
+      break;
     }
   }
 
   freeaddrinfo(result);
-   
 
   sock = socket(AF_INET, SOCK_STREAM, 0);
   printf("socket: %d\n",sock);
