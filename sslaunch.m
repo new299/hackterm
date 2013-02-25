@@ -20,10 +20,11 @@ ServerSelectUIView *view;
 SDL_Window *win;
 RecentItemsDataSource *source;
 
-int last_selection = 0;
+int last_selection = -1;
 void display_serverselect_run() {
 
-  [[NSRunLoop currentRunLoop] runMode:UITrackingRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
+  [[NSRunLoop currentRunLoop] runMode:UITrackingRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.005]];
+    [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.005]];
 
   if(source.selection != last_selection) {
     if(source.selection == 0) {
@@ -58,7 +59,7 @@ void display_serverselect_run() {
 
 
 //  [[NSRunLoop currentRunLoop] runMode:UITrackingRunLoopMode beforeDate:[NSDate distantFuture]];
-//  [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+
 
 }
 
