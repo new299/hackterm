@@ -16,6 +16,8 @@
 
 @property (retain, nonatomic) IBOutlet UITextField *password;
 
+@property (retain, nonatomic) IBOutlet UITableView *recentservers;
+
 @property BOOL connectComplete;
 
 @end

@@ -10,6 +10,7 @@
 
 @implementation ServerSelectUIView
 
+
 @synthesize hostname;
 @synthesize username;
 @synthesize password;
@@ -51,8 +52,8 @@
 - (IBAction)bookmarkPressed:(id)sender {
 }
 
-
 - (void)dealloc {
+    [_recentservers release];
     [super dealloc];
 }
 @end
