@@ -27,7 +27,7 @@
 #include "SDL_render.h"
 #include "SDL_sysrender.h"
 #include "software/SDL_render_sw_c.h"
-
+//#include "SDL_uikitview.h"
 
 #define SDL_WINDOWRENDERDATA    "_SDL_WindowRenderData"
 
@@ -284,6 +284,10 @@ SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
         SDL_LogInfo(SDL_LOG_CATEGORY_RENDER,
                     "Created renderer: %s", renderer->info.name);
     }
+
+//    SDL_uikitview *view = getWindowView(screen);
+//    view->touch_reinit();
+
     return renderer;
 }
 

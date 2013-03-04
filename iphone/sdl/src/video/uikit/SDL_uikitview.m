@@ -43,8 +43,12 @@
     [super dealloc];
 }
 
+
+//NW - THIS GETS SCREWED
 - (id)initWithFrame:(CGRect)frame
 {
+    SDL_TouchQuit(); // reinit of rotation/recreation.
+
     self = [super initWithFrame: frame];
 
 
@@ -74,6 +78,26 @@
 
     return self;
 
+}
+
+- (void) touch_reinit {
+    SDL_Touch touch;
+    touch.id = 0; //TODO: Should be -1?
+
+    //touch.driverdata = SDL_malloc(sizeof(EventTouchData));
+    //EventTouchData* data = (EventTouchData*)(touch.driverdata);
+
+    touch.x_min = 0;
+    touch.x_max = 1;
+    touch.native_xres = touch.x_max - touch.x_min;
+    touch.y_min = 0;
+    touch.y_max = 1;
+    touch.native_yres = touch.y_max - touch.y_min;
+    touch.pressure_min = 0;
+    touch.pressure_max = 1;
+    touch.native_pressureres = touch.pressure_max - touch.pressure_min;
+
+    touchId = SDL_AddTouch(&touch, "IPHONE SCREEN");
 }
 
 - (CGPoint)touchLocation:(UITouch *)touch shouldNormalize:(BOOL)normalize
@@ -370,7 +394,7 @@
 /* iPhone keyboard addition functions */
 #if SDL_IPHONE_KEYBOARD
 
-static SDL_uikitview * getWindowView(SDL_Window * window)
+SDL_uikitview * getWindowView(SDL_Window * window)
 {
     if (window == NULL) {
         SDL_SetError("Window does not exist");

@@ -22,6 +22,7 @@
 
 #if SDL_VIDEO_DRIVER_UIKIT
 
+#include "SDL_uikitview.h"
 #include "SDL_uikitopengles.h"
 #include "SDL_uikitopenglview.h"
 #include "SDL_uikitappdelegate.h"
@@ -149,6 +150,10 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
         SDL_SetMouseFocus(window);
         SDL_SetKeyboardFocus(window);
     }
+    
+    // reinit the touch stuff?
+//    SDL_uikitview *v = getWindowView(window);
+//    [v touch_reinit];
 
     return view;
 }

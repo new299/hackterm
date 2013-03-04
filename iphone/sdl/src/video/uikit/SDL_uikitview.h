@@ -25,7 +25,7 @@
 
 #include "SDL_touch.h"
 
-#define IPHONE_TOUCH_EFFICIENT_DANGEROUS
+//#define IPHONE_TOUCH_EFFICIENT_DANGEROUS
 
 #ifndef IPHONE_TOUCH_EFFICIENT_DANGEROUS
 #define MAX_SIMULTANEOUS_TOUCHES 5
@@ -57,6 +57,7 @@
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;
 
 -(void) keyPressed: (NSNotification*) notification;
+-(void) touch_reinit;
     
 #if SDL_IPHONE_KEYBOARD
 - (void)showKeyboard;
@@ -68,6 +69,8 @@ SDL_bool UIKit_HasScreenKeyboardSupport(_THIS);
 void UIKit_ShowScreenKeyboard(_THIS, SDL_Window *window);
 void UIKit_HideScreenKeyboard(_THIS, SDL_Window *window);
 SDL_bool UIKit_IsScreenKeyboardShown(_THIS, SDL_Window *window);
+
+SDL_uikitview * getWindowView(SDL_Window * window);
 
 #endif
 

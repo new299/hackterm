@@ -35,6 +35,8 @@
 #include "inlinedata.h"
 #include "ngui.h"
 
+
+
 #define CONNECTION_LOCAL 1
 #define CONNECTION_SSH   2
 
@@ -719,17 +721,17 @@ void process_mouse_event(SDL_Event *event) {
        }
      } else {
        // select text
-       select_start_scroll_offset = scroll_offset;
-       select_start_x = event->button.x;
-       select_start_y = event->button.y;
-       select_end_x = event->button.x;
-       select_end_y = event->button.y;
-       draw_selection = true;
+//       select_start_scroll_offset = scroll_offset;
+//       select_start_x = event->button.x;
+//       select_start_y = event->button.y;
+//       select_end_x = event->button.x;
+//       select_end_y = event->button.y;
+//       draw_selection = true;
      }
   }
   
   if(event->type == SDL_FINGERUP) {
-    draw_selection = false;
+//    draw_selection = false;
   }
 
 
