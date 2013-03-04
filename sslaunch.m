@@ -51,8 +51,9 @@ void display_serverselect_run() {
       [[view username] setText:@"root"];
       [[view password] setText:@"tastycakes"];
     }
+    last_selection = source.selection;
   }
-  last_selection = source.selection;
+
   
   [view setNeedsDisplay];
   [[view hostname] setNeedsDisplay];
@@ -75,6 +76,7 @@ void display_serverselect(SDL_Window *window)
     viewcon = [[[NSBundle mainBundle] loadNibNamed:@"ServerSelect" owner:nil options:nil] objectAtIndex:0];
     
     source = [[RecentItemsDataSource alloc] initWithStyle:UITableViewStylePlain];
+    source.selection=-1;
 
     view = viewcon.view;
     

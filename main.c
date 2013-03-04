@@ -549,17 +549,23 @@ void sdl_render_thread() {
   SDL_StartTextInput();
     
   for(;;) {
-    int ok = SDL_SemWaitTimeout(redraw_sem,10);
+    int ok = SDL_SemWaitTimeout(redraw_sem,1);
     if(ok == 0) {
       redraw_screen();
     }
 
     SDL_Event event;
-    int ret = SDL_PollEvent(&event);
-
-    if(ret != 0) {
-      sdl_read_thread(&event);
+    
+    int ret = 1;
+    for(;ret==1;) {
+    
+      ret = SDL_PollEvent(&event);
+      if(ret != 0) {
+        sdl_read_thread(&event);
+      }
     }
+
+
   }
 }
 
@@ -679,13 +685,59 @@ void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_e
   *ilen  = len;
 }
 
+int delta_sum=0;
+
 void process_mouse_event(SDL_Event *event) {
   
+  if(event->type == SDL_FINGERMOTION) {
+   
+     SDL_Touch *t = SDL_GetTouch(event->tfinger.touchId);
+
+     if(t->num_fingers != 0) {
+       printf("fingers");
+     }
+
+     if(t->max_fingers == 2) {
+    //   SDL_Finger *f = SDL_GetFinger(t,event->tfinger.fingerId);
+    //   if(f == 0) return;
+       int delta = event->tfinger.dy;
+       delta_sum += delta;
+       printf("delta: %d\n",delta);
+       printf("delta_sum: %d\n",delta_sum);
+       if(delta_sum > 500) {
+         scroll_offset++;
+         redraw_required();
+         printf("finger scroll up %d\n",scroll_offset);
+         delta_sum-=500;
+       }
+       if(delta_sum < -500) {
+         scroll_offset--;
+         if(scroll_offset < 0) scroll_offset = 0;
+         redraw_required();
+         printf("finger scroll down %d\n",scroll_offset);
+         delta_sum+=500;
+       }
+     } else {
+       // select text
+       select_start_scroll_offset = scroll_offset;
+       select_start_x = event->button.x;
+       select_start_y = event->button.y;
+       select_end_x = event->button.x;
+       select_end_y = event->button.y;
+       draw_selection = true;
+     }
+  }
+  
+  if(event->type == SDL_FINGERUP) {
+    draw_selection = false;
+  }
+
+
   if((event->type != SDL_MOUSEMOTION) && (event->type != SDL_MOUSEBUTTONUP) && (event->type != SDL_MOUSEBUTTONDOWN)) return;
 
   int mouse_x = event->motion.x;
   int mouse_y = event->motion.y;
-  
+
   if(event->button.button == SDL_BUTTON_WHEELUP) {
     printf("wheel up\n");
     scroll_offset++;
@@ -761,7 +813,7 @@ void sdl_read_thread(SDL_Event *event) {
  // for(;;) {
     // sending bytes from SDL to pts
     
-    //process_mouse_event(&event);
+    process_mouse_event(event);
     
     // SDL_GetKeyState not present in SDL 1.3
     //#ifndef IPHONE_BUILD
