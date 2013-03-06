@@ -34,7 +34,7 @@
 #include "local.h"
 #include "inlinedata.h"
 #include "ngui.h"
-
+#include "iphone_pasteboard.h"
 
 
 #define CONNECTION_LOCAL 1
@@ -460,7 +460,7 @@ void redraw_selection() {
     if(text_end_y<text_start_y) {int c=text_end_y; text_end_y=text_start_y;text_start_y=c;}
 
 
-    nsdl_rectangle_wire(screen,text_start_x*(font_width+font_space),text_start_y*(font_height+font_space),
+    nsdl_rectangle_wire(renderer,text_start_x*(font_width+font_space),text_start_y*(font_height+font_space),
                                  text_end_x*(font_width+font_space),text_end_y*(font_height+font_space),0xFFFFFF);
   }
 }
@@ -636,7 +636,8 @@ uint8_t *paste_text() {
 }
 
 void copy_text(uint16_t *itext,int len) {
-  
+
+  // TODO: This needs to be updated to generate UTF8 text
   char text[20000];
   for(int i=0;i<len;i++) {
     text[i] = itext[i];
@@ -644,6 +645,9 @@ void copy_text(uint16_t *itext,int len) {
   }
   printf("copy text: %s\n",text);
 
+  iphone_copy(text);
+
+/*
   FILE *w1 = popen("xclip -selection c","w");
   if(w1!=NULL) {
     fprintf(w1,"%s",text);
@@ -654,7 +658,8 @@ void copy_text(uint16_t *itext,int len) {
   if(w2==NULL) return;
   fprintf(w2,"%s",text);
   pclose(w2);
-  
+*/
+ 
   // execute these two commands on Linux/XWindows by default
   //echo "test" | xclip -selection c
   //echo "test" | xclip -i 

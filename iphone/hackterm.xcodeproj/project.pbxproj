@@ -11,6 +11,7 @@
 		D51E1AA316D954540005E06C /* sslaunch.m in Sources */ = {isa = PBXBuildFile; fileRef = D51E1AA216D954540005E06C /* sslaunch.m */; };
 		D51E1AA616D96A850005E06C /* ServerSelectUIView.m in Sources */ = {isa = PBXBuildFile; fileRef = D51E1AA516D96A850005E06C /* ServerSelectUIView.m */; };
 		D51E1AA916DABC9F0005E06C /* RecentItemsDataSource.m in Sources */ = {isa = PBXBuildFile; fileRef = D51E1AA816DABC9F0005E06C /* RecentItemsDataSource.m */; };
+		D52AC64D16E6B87F00016D01 /* iphone_pasteboard.m in Sources */ = {isa = PBXBuildFile; fileRef = D52AC64C16E6B87F00016D01 /* iphone_pasteboard.m */; };
 		D550D13916C01036000D4D6A /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D550D13216C00DBF000D4D6A /* libSDL2.a */; };
 		D5B5C90416C9529700DD079C /* hterm.png in Resources */ = {isa = PBXBuildFile; fileRef = D5B5C90316C9529700DD079C /* hterm.png */; };
 		D5B5C90616C952DF00DD079C /* hterm57.png in Resources */ = {isa = PBXBuildFile; fileRef = D5B5C90516C952DF00DD079C /* hterm57.png */; };
@@ -122,6 +123,8 @@
 		D51E1AA516D96A850005E06C /* ServerSelectUIView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ServerSelectUIView.m; path = ../ServerSelectUIView.m; sourceTree = "<group>"; };
 		D51E1AA716DABC9F0005E06C /* RecentItemsDataSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RecentItemsDataSource.h; path = ../RecentItemsDataSource.h; sourceTree = "<group>"; };
 		D51E1AA816DABC9F0005E06C /* RecentItemsDataSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RecentItemsDataSource.m; path = ../RecentItemsDataSource.m; sourceTree = "<group>"; };
+		D52AC64B16E6B87F00016D01 /* iphone_pasteboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = iphone_pasteboard.h; path = ../iphone_pasteboard.h; sourceTree = "<group>"; };
+		D52AC64C16E6B87F00016D01 /* iphone_pasteboard.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = iphone_pasteboard.m; path = ../iphone_pasteboard.m; sourceTree = "<group>"; };
 		D550D12716C00DBE000D4D6A /* SDL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SDL.xcodeproj; path = "SDL/Xcode-iOS/SDL/SDL.xcodeproj"; sourceTree = "<group>"; };
 		D5B5C90316C9529700DD079C /* hterm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hterm.png; sourceTree = "<group>"; };
 		D5B5C90516C952DF00DD079C /* hterm57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hterm57.png; sourceTree = "<group>"; };
@@ -450,6 +453,8 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				D52AC64B16E6B87F00016D01 /* iphone_pasteboard.h */,
+				D52AC64C16E6B87F00016D01 /* iphone_pasteboard.m */,
 				D51E1AA716DABC9F0005E06C /* RecentItemsDataSource.h */,
 				D51E1AA816DABC9F0005E06C /* RecentItemsDataSource.m */,
 				D51E1AA116D954540005E06C /* sslaunch.h */,
@@ -997,6 +1002,7 @@
 				D51E1AA316D954540005E06C /* sslaunch.m in Sources */,
 				D51E1AA616D96A850005E06C /* ServerSelectUIView.m in Sources */,
 				D51E1AA916DABC9F0005E06C /* RecentItemsDataSource.m in Sources */,
+				D52AC64D16E6B87F00016D01 /* iphone_pasteboard.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1046,6 +1052,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_THUMB_SUPPORT = NO;
 				HEADER_SEARCH_PATHS = (
+					/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/UIKit.framework/Headers/,
 					./include,
 					../libvterm/include,
 					./libpng,
@@ -1074,6 +1081,15 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_THUMB_SUPPORT = NO;
 				HEADER_SEARCH_PATHS = (
+					./include,
+					../libvterm/include,
+					./libpng,
+					../libssh2/include,
+					../libssh2/src,
+					..,
+				);
+				"HEADER_SEARCH_PATHS[arch=*]" = (
+					/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/UIKit.framework/Headers/,
 					./include,
 					../libvterm/include,
 					./libpng,
