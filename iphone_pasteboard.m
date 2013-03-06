@@ -8,3 +8,13 @@ void iphone_copy(char *text) {
 
   [pb setValue:nstext forPasteboardType:@"public.plain-text"];
 }
+
+const char *iphone_paste() {
+
+  UIPasteboard *pb = [UIPasteboard generalPasteboard];
+  
+  NSString *nstext = [pb valueForPasteboardType:@"public.utf8-plain-text"];
+
+  return [nstext cStringUsingEncoding:NSUTF8StringEncoding];
+
+}

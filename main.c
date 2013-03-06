@@ -35,6 +35,7 @@
 #include "inlinedata.h"
 #include "ngui.h"
 #include "iphone_pasteboard.h"
+#include "utf8proc.h"
 
 
 #define CONNECTION_LOCAL 1
@@ -130,11 +131,21 @@ void mouse_to_select_box(int   sx,int   sy,int so,
                          int   ex,int   ey,int eo,
                          int *stx,int *sty,int *etx,int *ety) {
     
+    if(sx > ex) {int t=ex;ex=sx;sx=t;}
+    if(sy > ey) {int t=ey;ey=sy;sy=t;}
+    
     *stx=floor(((float)sx/(font_width +font_space)));
     *etx=ceil( ((float)ex/(font_width +font_space)));
     *sty=floor(((float)sy/(font_height+font_space)))-so;
     *ety=ceil( ((float)ey/(font_height+font_space)))-eo;
     
+    if(*stx==0) {
+      printf("is 0\n");
+    }
+
+    if(*stx==1) {
+      printf("is 1\n");
+    }
 }
 
 VTermScreenCell *grab_row(int trow,bool *dont_free) {
@@ -616,6 +627,9 @@ void console_read_thread() {
 
 uint8_t *paste_text() {
 
+  return iphone_paste();
+
+/*
   uint8_t *paste_data = malloc(sizeof(uint8_t)*10240);
 
   FILE *r1 = popen("xclip -o","r");
@@ -633,18 +647,23 @@ uint8_t *paste_text() {
   }
 
   return paste_data;
+*/
 }
 
 void copy_text(uint16_t *itext,int len) {
 
   // TODO: This needs to be updated to generate UTF8 text
+  
+  size_t pos=0;
   char text[20000];
-  for(int i=0;i<len;i++) {
-    text[i] = itext[i];
-    text[i+1] = 0;
+  for(int n=0;n<len;n++) {
+  
+    size_t s = utf8proc_encode_char(itext[n],text+pos);
+    pos+=s;
+  
   }
+  
   printf("copy text: %s\n",text);
-
   iphone_copy(text);
 
 /*
@@ -672,13 +691,13 @@ void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_e
   for(int y=text_start_y;y<text_end_y;y++) {
     bool dont_free=false;
     VTermScreenCell *row_data = grab_row(y,&dont_free);
+    
     if(row_data == 0) { text[0]=0; }
     else {
       for(int x=text_start_x;x<text_end_x;x++) {
 
         text[len] = row_data[x].chars[0];
-        if(text[len]==0) text[len]=' ';
-        len++;
+        if(text[len]!=0 && (text[len]!=65535)) len++;
       }
     }
     if(!dont_free) free(row_data);
@@ -687,6 +706,13 @@ void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_e
     len++;
   }
   text[len]=0;
+  text[len+1]=0;
+  text[len+2]=0;
+  text[len+3]=0;
+  text[len+4]=0;
+  text[len+5]=0;
+  text[len+6]=0;
+  text[len+7]=0;
 
   *itext = text;
   *ilen  = len;
@@ -694,6 +720,7 @@ void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_e
 
 int delta_sum=0;
 
+bool select_disable=false;
 void process_mouse_event(SDL_Event *event) {
   
   if(event->type == SDL_FINGERMOTION) {
@@ -705,6 +732,7 @@ void process_mouse_event(SDL_Event *event) {
      }
 
      if(t->max_fingers == 2) {
+       select_disable=true;
     //   SDL_Finger *f = SDL_GetFinger(t,event->tfinger.fingerId);
     //   if(f == 0) return;
        int delta = event->tfinger.dy;
@@ -724,7 +752,9 @@ void process_mouse_event(SDL_Event *event) {
          printf("finger scroll down %d\n",scroll_offset);
          delta_sum+=500;
        }
+       return; // prevent select code from running.
      } else {
+       select_disable=false;
        // select text
 //       select_start_scroll_offset = scroll_offset;
 //       select_start_x = event->button.x;
@@ -739,6 +769,11 @@ void process_mouse_event(SDL_Event *event) {
 //    draw_selection = false;
   }
 
+
+  if(select_disable) {
+    draw_selection = false;
+    return;
+  }
 
   if((event->type != SDL_MOUSEMOTION) && (event->type != SDL_MOUSEBUTTONUP) && (event->type != SDL_MOUSEBUTTONDOWN)) return;
 
@@ -774,6 +809,16 @@ void process_mouse_event(SDL_Event *event) {
   if(event->type == SDL_MOUSEBUTTONUP  ) {
     draw_selection = false;
 
+    int xdelta = select_start_x-select_end_x;
+    if(xdelta < 0) xdelta = 0-xdelta;
+    int ydelta = select_start_y-select_end_y;
+    if(ydelta < 0) ydelta = 0-ydelta;
+    
+    if((xdelta < 10) && (ydelta < 10)) {
+      redraw_required();
+      return;
+    }
+  
     int text_start_x;
     int text_start_y;
     int text_end_x;
@@ -876,6 +921,7 @@ void sdl_read_thread(SDL_Event *event) {
       ngui_move_button("Ileft" ,dwidth-(16*6*3),dheight-(16*6*2));
       ngui_move_button("Iright",dwidth-(16*6*1),dheight-(16*6*2));
       
+      ngui_move_button("Ipaste",dwidth-(16*6*2),dheight-(16*6*2));
     }
     
     printf("event\n");
@@ -1108,6 +1154,16 @@ void virtual_kb_tab(char *c) {
   SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_TAB);
 }
 
+void virtual_kb_paste(char *c) {
+  printf("VIRTUAL PASTE\n");
+  // perform text paste
+  uint8_t *text = paste_text();
+  if(text != 0) {
+    c_write(text,strlen(text));
+//    free(text);
+  }
+}
+
 int main(int argc, char **argv) {
     
   do_sdl_init();
@@ -1123,6 +1179,7 @@ int main(int argc, char **argv) {
   ngui_add_button(display_width-(16*6*3),display_height-(16*6*2),"Ileft" ,virtual_kb_left );
   ngui_add_button(display_width-(16*6*1),display_height-(16*6*3),"Iright",virtual_kb_right);
 
+  ngui_add_button(display_width-(16*6*2),display_height-(16*6*2),"Ipaste",virtual_kb_paste);
     
   nunifont_load_staticmap(__fontmap_static,__widthmap_static,__fontmap_static_len,__widthmap_static_len);
 

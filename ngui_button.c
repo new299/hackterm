@@ -65,6 +65,38 @@ void ngui_move_button(char *name,int nx,int ny) {
 
 }
 
+void draw_paste_icon(int x,int y) {
+
+  SDL_Rect rect;
+  
+  rect.x = x;
+  rect.y = y;
+  rect.w = 6*16;
+  rect.h = 6*16;
+  
+  SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
+
+  SDL_RenderDrawRect(ngui_renderer,&rect);
+
+  SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
+  // P
+  SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*2),x   ,y+(16*2));
+  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*2),x   ,y+(16*4));
+  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*3),x+16,y+(16*3));
+  SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*2),x+16,y+(16*3));
+
+  // S
+  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*2),x+(16*2),y+(16*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*2),x+(16*2),y+(16*3));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*3),x+(16*3),y+(16*3));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*3),x+(16*3),y+(16*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*4),x+(16*2),y+(16*4));
+  
+  // T
+  SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*2),x+(16*4),y+(16*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*2),x+(16*5),y+(16*4)-1);
+}
+
 void draw_esc_icon(int x,int y) {
 
 
@@ -218,7 +250,7 @@ void draw_up_icon   (int x,int y){
   SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*2),x+(16*5),y+(16*4));
   SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*4),x+(16*6),y+(16*4));
   SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*4),x+(16*6),y+(16*6));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*6),x+(16*0),y+(16*6));
+  //SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*6),x+(16*0),y+(16*6));
   SDL_RenderDrawLine(ngui_renderer,x+(16*0),y+(16*6),x+(16*0),y+(16*4));
   SDL_RenderDrawLine(ngui_renderer,x+(16*0),y+(16*4),x+(16*1),y+(16*4));
   SDL_RenderDrawLine(ngui_renderer,x+(16*1),y+(16*4),x+(16*1),y+(16*2));
@@ -246,7 +278,7 @@ void draw_down_icon (int x,int y){
   SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*4),x+(16*5),y+(16*2));
   SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*2),x+(16*6),y+(16*2));
   SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*2),x+(16*6),y+(16*0));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*0),x+(16*0),y+(16*0));
+  //SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*0),x+(16*0),y+(16*0));
   SDL_RenderDrawLine(ngui_renderer,x+(16*0),y+(16*0),x+(16*0),y+(16*2));
   SDL_RenderDrawLine(ngui_renderer,x+(16*0),y+(16*2),x+(16*1),y+(16*2));
   SDL_RenderDrawLine(ngui_renderer,x+(16*1),y+(16*2),x+(16*1),y+(16*4));
@@ -273,7 +305,7 @@ void draw_right_icon (int x,int y){
   SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*5),x+(16*2),y+(16*5));
   SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*5),x+(16*2),y+(16*6));
   SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*6),x+(16*0),y+(16*6));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*0),y+(16*6),x+(16*0),y+(16*0));
+  //SDL_RenderDrawLine(ngui_renderer,x+(16*0),y+(16*6),x+(16*0),y+(16*0));
   SDL_RenderDrawLine(ngui_renderer,x+(16*0),y+(16*0),x+(16*2),y+(16*0));
   SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*0),x+(16*2),y+(16*1));
   SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*1),x+(16*4),y+(16*1));
@@ -302,7 +334,7 @@ void draw_left_icon(int x,int y){
   SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*1),x+(16*4),y+(16*1));
   SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*1),x+(16*4),y+(16*0));
   SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*0),x+(16*6),y+(16*0));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*0),x+(16*6),y+(16*6));
+  //SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*0),x+(16*6),y+(16*6));
   SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*6),x+(16*4),y+(16*6));
   SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*6),x+(16*4),y+(16*5));
   SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*5),x+(16*2),y+(16*5));
@@ -321,15 +353,16 @@ void ngui_render_button(ngui_button_data *d) {
   SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
   
   bool notext=false;
-  if(ustrcmp(text,"Iesc" )  == 0) { draw_esc_icon  (d->x,d->y); notext=true;}
-  if(ustrcmp(text,"Itab" )  == 0) { draw_tab_icon  (d->x,d->y); notext=true;}
-  if(ustrcmp(text,"Ialt" )  == 0) { draw_alt_icon  (d->x,d->y); notext=true;}
-  if(ustrcmp(text,"Ictrl")  == 0) { draw_ctrl_icon (d->x,d->y); notext=true;}
-  if(ustrcmp(text,"Iup"  )  == 0) { draw_up_icon   (d->x,d->y); notext=true;}
-  if(ustrcmp(text,"Idown")  == 0) { draw_down_icon (d->x,d->y); notext=true;}
-  if(ustrcmp(text,"Ileft")  == 0) { draw_left_icon (d->x,d->y); notext=true;}
+  if(ustrcmp(text,"Ipaste") == 0) { draw_paste_icon(d->x,d->y); notext=true;}
+  if(ustrcmp(text,"Iesc"  ) == 0) { draw_esc_icon  (d->x,d->y); notext=true;}
+  if(ustrcmp(text,"Itab"  ) == 0) { draw_tab_icon  (d->x,d->y); notext=true;}
+  if(ustrcmp(text,"Ialt"  ) == 0) { draw_alt_icon  (d->x,d->y); notext=true;}
+  if(ustrcmp(text,"Ictrl" ) == 0) { draw_ctrl_icon (d->x,d->y); notext=true;}
+  if(ustrcmp(text,"Iup"   ) == 0) { draw_up_icon   (d->x,d->y); notext=true;}
+  if(ustrcmp(text,"Idown" ) == 0) { draw_down_icon (d->x,d->y); notext=true;}
+  if(ustrcmp(text,"Ileft" ) == 0) { draw_left_icon (d->x,d->y); notext=true;}
   if(ustrcmp(text,"Iright") == 0) { draw_right_icon(d->x,d->y); notext=true;}
-  if(ustrcmp(text,"Imenu")  == 0) { draw_menu_icon (d->x,d->y); notext=true;}
+  if(ustrcmp(text,"Imenu" ) == 0) { draw_menu_icon (d->x,d->y); notext=true;}
     
 
 //  nsdl_rectangle_shade(ngui_screen,d->x-d->x_padding,d->y-d->y_padding,d->x+(strlen(d->text))*8+d->x_padding,d->y+16+d->y_padding,1000,10000);

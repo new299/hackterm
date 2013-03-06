@@ -47,7 +47,7 @@ void display_serverselect_run() {
       [[view username] setText:@""];
       [[view password] setText:@""];
     } else {
-      [[view hostname] setText:@"localhost"];
+      [[view hostname] setText:@"127.0.0.1"];
       [[view username] setText:@"root"];
       [[view password] setText:@"tastycakes"];
     }
