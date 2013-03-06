@@ -122,7 +122,12 @@ void regis_render() {
 }
 
 void inline_data_render() {                                        
-  SDL_mutexP(inline_data_mutex);                                   
+  SDL_mutexP(inline_data_mutex);
+  
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, inline_data_layer);
+    
+  SDL_RenderCopy(renderer, texture, NULL, NULL);
+  SDL_DestroyTexture(texture);
  // int res = SDL_BlitSurface(inline_data_layer,NULL,screen,NULL);
   SDL_mutexV(inline_data_mutex);                                   
 }
@@ -493,8 +498,8 @@ void redraw_screen() {
   redraw_text();
   redraw_selection();
   regis_render();
+  inline_data_render();
   ngui_render();
-  // inline_data_render();
 
   SDL_RenderPresent(renderer);
 }
@@ -554,7 +559,7 @@ void sdl_render_thread() {
   //SDL_EnableUNICODE(1);
 //  SDL_EnableKeyRepeat(500,50);
   
-////  inline_data_init(screen->w,screen->h);
+
 
   //sdl_init_complete=true;
 
@@ -1168,6 +1173,8 @@ int main(int argc, char **argv) {
     
   do_sdl_init();
   regis_init(display_width,display_height);
+  inline_data_init(display_width,display_height);
+  
   ngui_set_renderer(renderer, redraw_required);
   ngui_add_button(display_width-(16*6*3),display_height-(16*6*3),"Iesc"  ,virtual_kb_esc  );
   ngui_add_button(display_width-(16*6*3),display_height-(16*6*1),"Ialt"  ,virtual_kb_alt  );

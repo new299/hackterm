@@ -87,7 +87,7 @@ void row_callback(png_structp png_ptr, png_bytep new_row, png_uint_32 row_num, i
     int pixel = inlineget_pixel(row_pointers[row_num],pixel_depth,n);
 
     if(pixel==1) pixel = 0xFFFFFFFF;
-    nsdl_point(inline_data_layer,n,row_num,pixel);
+    nsdl_pointS(inline_data_layer,n,row_num,pixel);
 
     //if(pixel == 0) printf("0"); else printf("1");
   }
