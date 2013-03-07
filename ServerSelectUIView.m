@@ -7,6 +7,7 @@
 //
 
 #import "ServerSelectUIView.h"
+#include "recentrw.h"
 
 @implementation ServerSelectUIView
 
@@ -34,11 +35,15 @@
     return self;
 }
 
+
+
 - (IBAction)connectPressed:(id)sender {
 
   const char *chostname = [[hostname text] cStringUsingEncoding:NSUTF8StringEncoding];
   const char *cusername = [[username text] cStringUsingEncoding:NSUTF8StringEncoding];
   const char *cpassword = [[password text] cStringUsingEncoding:NSUTF8StringEncoding];
+  
+  write_connection(chostname,cusername,cpassword);
   
   printf("hostname %s\n",chostname);
   printf("username %s\n",cusername);
