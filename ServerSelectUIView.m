@@ -35,13 +35,11 @@
     return self;
 }
 
-
-
 - (IBAction)connectPressed:(id)sender {
 
-  const char *chostname = [[hostname text] cStringUsingEncoding:NSUTF8StringEncoding];
-  const char *cusername = [[username text] cStringUsingEncoding:NSUTF8StringEncoding];
-  const char *cpassword = [[password text] cStringUsingEncoding:NSUTF8StringEncoding];
+  const char *chostname = [[hostname text] cStringUsingEncoding:NSASCIIStringEncoding];
+  const char *cusername = [[username text] cStringUsingEncoding:NSASCIIStringEncoding];
+  const char *cpassword = [[password text] cStringUsingEncoding:NSASCIIStringEncoding];
   
   write_connection(chostname,cusername,cpassword);
   

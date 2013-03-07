@@ -13,7 +13,7 @@
 #include "iphone/sdl/src/video/uikit/SDL_uikitwindow.h"
 #include "iphone/sdl/src/video/uikit/SDL_uikitmodes.h"
 #import "RecentItemsDataSource.h"
-
+#include "recentrw.h"
 
 UIViewController *viewcon;
 ServerSelectUIView *view;
@@ -27,41 +27,23 @@ void display_serverselect_run() {
     [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.005]];
 
   if(source.selection != last_selection) {
-    if(source.selection == 0) {
-      [[view hostname] setText:@"41j.com"];
-      [[view username] setText:@"new"];
-      [[view password] setText:@""];
-    } else
-    if(source.selection == 1) {
-      [[view hostname] setText:@"sgenomics.org"];
-      [[view username] setText:@"new"];
-      [[view password] setText:@""];
-    } else
-    if(source.selection == 2) {
-      [[view hostname] setText:@"sdf.lonestar.org"];
-      [[view username] setText:@""];
-      [[view password] setText:@""];
-    } else
-    if(source.selection == 3) {
-      [[view hostname] setText:@"freeshells.org"];
-      [[view username] setText:@""];
-      [[view password] setText:@""];
-    } else {
-      [[view hostname] setText:@"127.0.0.1"];
-      [[view username] setText:@"root"];
-      [[view password] setText:@"tastycakes"];
-    }
+  
+    char *hostnames[RECENTCONNECTIONS];
+    char *usernames[RECENTCONNECTIONS];
+    char *passwords[RECENTCONNECTIONS];
+
+    readall_connections(hostnames,usernames,passwords);
+
+    int i = source.selection;
+    [[view hostname] setText:[NSString stringWithCString:hostnames[i] encoding:NSASCIIStringEncoding]];
+    [[view username] setText:[NSString stringWithCString:usernames[i] encoding:NSASCIIStringEncoding]];
+    [[view password] setText:[NSString stringWithCString:passwords[i] encoding:NSASCIIStringEncoding]];
+
     last_selection = source.selection;
   }
-
   
   [view setNeedsDisplay];
   [[view hostname] setNeedsDisplay];
-
-
-//  [[NSRunLoop currentRunLoop] runMode:UITrackingRunLoopMode beforeDate:[NSDate distantFuture]];
-
-
 }
 
 void display_serverselect(SDL_Window *window)
@@ -100,9 +82,9 @@ void display_serverselect(SDL_Window *window)
 BOOL display_serverselect_get(char *ohostname,char *ousername,char *opassword) {
     
   if(view == nil) return NO;
-  const char *h = [[[view hostname] text] cStringUsingEncoding:NSUTF8StringEncoding];
-  const char *u = [[[view username] text] cStringUsingEncoding:NSUTF8StringEncoding];
-  const char *p = [[[view password] text] cStringUsingEncoding:NSUTF8StringEncoding];
+  const char *h = [[[view hostname] text] cStringUsingEncoding:NSASCIIStringEncoding];
+  const char *u = [[[view username] text] cStringUsingEncoding:NSASCIIStringEncoding];
+  const char *p = [[[view password] text] cStringUsingEncoding:NSASCIIStringEncoding];
   strcpy(ohostname,h);
   strcpy(ousername,u);
   strcpy(opassword,p);

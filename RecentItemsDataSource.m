@@ -7,30 +7,52 @@
 //
 
 #import "RecentItemsDataSource.h"
+#include "recentrw.h"
 
 @implementation RecentItemsDataSource 
 
 @synthesize selection = _selection;
 
+
+//TODO: make part of class
+char *hostnames[RECENTCONNECTIONS];
+char *usernames[RECENTCONNECTIONS];
+char *passwords[RECENTCONNECTIONS];
+bool init=false;
+
 - (UITableViewCell *)tableView:view cellForRowAtIndexPath:idx {
 
+  if(init==false) {
+    readall_connections(hostnames,usernames,passwords);
+    init=true;
+  }
 
   UITableViewCell *cell = [view dequeueReusableCellWithIdentifier:@"i" forIndexPath:idx];
     
   // Cell label
   NSInteger i = [idx indexAtPosition:1];
-  if(i == 0) cell.textLabel.text = @"41j.com";          else
-  if(i == 1) cell.textLabel.text = @"sgenomics.org";    else
-  if(i == 2) cell.textLabel.text = @"sdf.lonestar.org"; else
-  if(i == 3) cell.textLabel.text = @"freeshells.org";   else
-             cell.textLabel.text = @"localhost";
+  
+  if(hostnames[i][0] != 0) {
+    cell.textLabel.text = [NSString stringWithCString:hostnames[i] encoding:NSASCIIStringEncoding];
+  }  else {
+    cell.textLabel.text = @"NONE";
+  }
 
   return cell;
 }
 
 - (NSInteger)tableView:view numberOfRowsInSection:idx {
 
-  return 20;
+  if(init==false) {
+    readall_connections(hostnames,usernames,passwords);
+    init=true;
+  }
+
+  for(int n=0;n<RECENTCONNECTIONS;n++) {
+    if(hostnames[n][0]==0) return n;
+  }
+
+  return RECENTCONNECTIONS;
 }
 
 - (void)tableView:(UITableView *)view didSelectRowAtIndexPath:(NSIndexPath *)idx {
