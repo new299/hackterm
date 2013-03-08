@@ -591,13 +591,6 @@ void console_poll() {
 bool redraw_req=true;
 void sdl_render_thread() {
   
-  //SDL_EnableUNICODE(1);
-//  SDL_EnableKeyRepeat(500,50);
-  
-
-
-  //sdl_init_complete=true;
-
   SDL_Event event;
   SDL_StartTextInput();
     
@@ -629,8 +622,6 @@ void redraw_required() {
   redraw_req=true;
   SDL_SemPost(redraw_sem);
 }
-
-
 
 
 uint8_t *paste_text() {
@@ -863,31 +854,14 @@ void process_mouse_event(SDL_Event *event) {
 void sdl_read_thread(SDL_Event *event) {
   ngui_receive_event(event);
 
-//  for(;sdl_init_complete==false;){}
-
-//#ifdef IPHONE_BUILD
-  //int i = SDL_iPhoneKeyboardShow(screen);
-  //printf("iphone kb res %d\n",i);
-//#endif
+  process_mouse_event(event);
     
- // for(;;) {
-    // sending bytes from SDL to pts
-    
-    process_mouse_event(event);
-    
-    // SDL_GetKeyState not present in SDL 1.3
-    //#ifndef IPHONE_BUILD
-    //uint8_t *keystate = SDL_GetKeyState(NULL);
-    //#else
-    //uint8_t *keystate = SDL_GetKeyboardState(NULL);// = SDL_GetKeyState(NULL); // FIXFIXFIXFIXFIXFIX SDL1.3
-    //#endif
 
    // if(event.type == SDL_QUIT) {
      // hterm_quit = true;
      // SDL_CondSignal(cond_quit);
     //  return;
    // }
-//
 
     if(
        (event->type == SDL_WINDOWEVENT) &&
@@ -1212,27 +1186,10 @@ int main(int argc, char **argv) {
   #ifdef IPHONE_BUILD
     connection_type = CONNECTION_SSH;
   #endif
-
-  //char *open_arg1 = "localhost";
-  //strcpy(open_arg1,"127.0.0.1");
-  //strcpy(open_arg2,"root");
-  //strcpy(open_arg3,"tastycakes");
   
   SDL_GetWindowSize(screen,&display_width,&display_height);
   vterm_initialisation();
   
-  //if(vt != 0) vterm_set_size(vt,rows,cols);
-    
-  // iPhone build uses sdl 2.
-  #ifdef IPHONE_BUILD
-  //SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0,0);
-  //SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0,0);
-  #else
-  //SDL_Thread *thread2 = SDL_CreateThread(sdl_render_thread  ,0);
-  //SDL_Thread *thread1 = SDL_CreateThread(sdl_read_thread    ,0);
-  #endif
-
-
   if(connection_type == CONNECTION_LOCAL) {
     c_open   = &local_open;
     c_close  = &local_close;
@@ -1246,37 +1203,10 @@ int main(int argc, char **argv) {
     c_write  = &ssh_write;
     c_read   = &ssh_read;
     c_resize = &ssh_resize;
-
-    // we now need to read connection information.
- 
-  /*  prompt_id = ngui_add_info_prompt(-1,-1,
-                                     "hostname:","username:","password:",
-                                     0,0,1,
-                                     receive_ssh_info);
-*/
-//    for(;ssh_received == false;);
-
- //   strcpy(open_arg1,ssh_hostname);
- //   strcpy(open_arg2,ssh_username);
- //   strcpy(open_arg3,ssh_password);
-
- //   printf("arg1: %s\n",open_arg1);
- //   printf("arg2: %s\n",open_arg2);
- //   printf("arg3: %s\n",open_arg3);
   }
 
-//  SDL_Thread *thread3;
-//  SDL_Thread *thread5;
   console_read_init();
-//  thread3 = SDL_CreateThread(console_read_thread,0,0);
   sdl_render_thread();
-
-  //SDL_mutexP(quit_mutex);
-
-  //  SDL_CondWait(cond_quit,quit_mutex);
-  //} else {
-  //  printf("Unable to connect\n");
-  //}
 
   SDL_Quit();
 

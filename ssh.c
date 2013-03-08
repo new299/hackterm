@@ -192,9 +192,9 @@ int ssh_read(char *bytes,int len) {
   printf("in read\n");
   int l = libssh2_channel_read(channel,bytes,len);
 
-  printf("read returning %d\n",l);
+  //printf("read returning %d\n",l);
 
-  if(l==0) return -1; // 0 means the channel is closed as the above function should block for data.
+  //if(l==0) return -1; // 0 means the channel is closed as the above function should block for data.
 
   return l;
      // libssh2_channel_read_stderr()

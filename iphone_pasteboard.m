@@ -6,7 +6,9 @@ void iphone_copy(char *text) {
 
   NSString *nstext = [NSString stringWithCString:text encoding:NSUTF8StringEncoding];
 
-  [pb setValue:nstext forPasteboardType:@"public.plain-text"];
+  if(nstext != nil) {
+    [pb setValue:nstext forPasteboardType:@"public.plain-text"];
+  }
 }
 
 const char *iphone_paste() {
