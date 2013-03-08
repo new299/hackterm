@@ -48,10 +48,6 @@ void info_callback(png_structp png_ptr, png_infop info) {
   //printf("image width  %u\n",info->width );
   //printf("pixel depth  %u\n",info->pixel_depth);
 
-  //width  = info->width;
-  //height = info->height;
-  //pixel_depth = info->pixel_depth;
-
   row_pointers = malloc(sizeof(png_bytep *) * height);
   for(size_t n=0;n<height;n++) {
     row_pointers[n] = malloc(row_bytes);
@@ -62,36 +58,55 @@ void info_callback(png_structp png_ptr, png_infop info) {
 
 int inlineget_pixel(char *row,int pixel_depth,int idx) {
 
-  int pos  = pixel_depth*idx;
+  printf("idx is: %d\n",idx);
 
-  int byte = pos/8;
-  int bit  = pos-((pos/8)*8);
+  if(pixel_depth == 1) {
+    int pos  = pixel_depth*idx;
 
-  int value = 0;
-  for(int n=0;n<pixel_depth;n++) {
-    value = value << 1;
-    if(row[byte] & (1 << (8-bit))) value |= (value + 1);
-    bit++;
-    if(bit > 8) {bit=0; byte++;}
+    int byte = pos/8;
+    int bit  = pos-((pos/8)*8);
+
+    int value = 0;
+    for(int n=0;n<pixel_depth;n++) {
+      value = value << 1;
+      if(row[byte] & (1 << (8-bit))) value |= (value + 1);
+      bit++;
+      if(bit > 8) {bit=0; byte++;}
+    }
+    return value;
   }
-  return value;
+  
+  if(pixel_depth == 8) {
+    return ((uint32_t *)row)[idx];
+  }
 }
 
 /* This function is called when each row of image data is complete */
 void row_callback(png_structp png_ptr, png_bytep new_row, png_uint_32 row_num, int pass) {
   /* If the image is interlaced, and you turned on the interlace handler, this function will be called for every row in every pass. Some of these rows will not be changed from the previous pass. When the row is not changed, the new_row variable will be NULL. The rows and passes are called in order, so you don’t really need the row_num and pass, but I’m supplying them because it may make your life easier.  For the non-NULL rows of interlaced images, you must call png_progressive_combine_row() passing in the row and the old row. You can call this function for NULL rows (it will just return) and for non-interlaced images (it just does the memcpy for you) if it will make the code easier. Thus, you can just do this for all cases: */
 
-  //printf("read line: %u: ",row_num);
+  printf("png row_callback read line: %u\n",row_num);
   png_progressive_combine_row(png_ptr, row_pointers[row_num], new_row);
   for(int n=0;n<width;n++) {
     int pixel = inlineget_pixel(row_pointers[row_num],pixel_depth,n);
+    
+    if(pixel_depth == 1) {
+      if(pixel!=0) pixel = 0xFFFFFFFF;
+    }
+    
+  /*  if(pixel_depth == 8) {
+      int r = ((pixel & (0x7 << 5)) >> 5) << 5;
+      int g = ((pixel & (0x7 << 2)) >> 2) << 5;
+      int b = ((pixel & (0x3 << 0)) >> 0) << 6;
 
-    if(pixel==1) pixel = 0xFFFFFFFF;
+      pixel = (r << 24) | (g << 16) | b;// | 0x000000FF;
+    }
+*/
+
     nsdl_pointS(inline_data_layer,n,row_num,pixel);
-
-    //if(pixel == 0) printf("0"); else printf("1");
+    
+    printf("plotted point\n");
   }
-  //printf("\n");
   /* where old_row is what was displayed for previously for the row. Note that the first pass (pass == 0, really) will completely cover the old row, so the rows do not have to be initialized. After the first pass (and only for interlaced images), you will have to pass the current row, and the function will combine the old row and the new row.  */
 }
 
@@ -133,7 +148,11 @@ int inlinepng_process_data(png_bytep buffer, png_uint_32 length) {
   //printf("\n");
 
   /* This one’s new also. Simply give it a chunk of data from the file stream (in order, of course). On machines with segmented memory models machines, don’t give it any more than 28 64K. The library seems to run fine with sizes of 4K. Although you can give it much less if necessary (I assume you can give it chunks of 1 byte, I haven’t tried less then 256 bytes yet). When this function returns, you may want to display any rows that were generated in the row callback if you don’t already do so there.  */
+  printf("png_process_data\n");
+
   png_process_data(png_ptr, info_ptr, buffer, length);
+  
+  printf("png_process_data complete\n");
   return 0;
 }
 
@@ -205,7 +224,7 @@ int inline_data_receive(char *data,int length) {
   if(processing_png == true) {
     printf("currently processing png\n");
     if(file_end==1) {processing_png=false; return 1;}
-    char decoded_buffer[4096]; // should be malloc'd based on length.
+    char decoded_buffer[10240]; // should be malloc'd based on length.
     bool failflag;
     int decoded_buffer_size = base64_decode(data,length,decoded_buffer,&failflag);
  
