@@ -559,32 +559,26 @@ void console_read_init() {
 }
 
 void console_poll() {
-    // sending bytes from pts to vterm
-    int len;
-    char buffer[10241];
-    len = c_read(buffer, sizeof(buffer)-1);
-    printf("readlen: %d\n",len);
-      
-    if(len < 0) {
- //     if(errno == EIO) {
-        hterm_quit = true;
-        SDL_CondSignal(cond_quit);
-
-        return;
- //     }
-    }
-
-    if(len > 0) {
-      inline_data_receive(buffer,len);
-      SDL_mutexP(vterm_mutex);
-      if((buffer != 0) && (len != 0)) {
-        vterm_push_bytes(vt, buffer, len);
-      }
-      SDL_mutexV(vterm_mutex);
-      redraw_required();
-    }
+  // sending bytes from pts to vterm
+  int len;
+  char buffer[10241];
+  len = c_read(buffer, sizeof(buffer)-1);
     
-//  }
+  //TODO: need some code here which asks libssh2 if the connection is closed.
+  //if(errno == EIO) {
+  //hterm_quit = true;
+  //SDL_CondSignal(cond_quit);
+  //return;
+
+  if(len > 0) {
+    inline_data_receive(buffer,len);
+    SDL_mutexP(vterm_mutex);
+    if((buffer != 0) && (len != 0)) {
+      vterm_push_bytes(vt, buffer, len);
+    }
+    SDL_mutexV(vterm_mutex);
+    redraw_required();
+  }
 }
 
 

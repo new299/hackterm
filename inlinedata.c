@@ -137,7 +137,7 @@ int inlinepng_process_data(png_bytep buffer, png_uint_32 length) {
   return 0;
 }
 
-#define BUFFERSIZE 2048
+#define BUFFERSIZE 10241
 
 unsigned char buffer[BUFFERSIZE];
 int  buffer_size=0;
@@ -173,7 +173,9 @@ int buffer_search(char *v) {
   if((buffer_size-((int)strlen(v))) < 0) return -1;
   // shameful search
   for(int n=0;n<(buffer_size-strlen(v));n++) {
-    if(strncmp(v,buffer+n,strlen(v)) == 0) return n;
+    if(strncmp(v,buffer+n,strlen(v)) == 0) {
+      return n;
+    }
   }
 
   return -1;

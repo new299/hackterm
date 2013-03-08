@@ -189,7 +189,7 @@ int ssh_write(unsigned char *bytes,int len) {
 }
 
 int ssh_read(char *bytes,int len) {
-  printf("in read\n");
+  //printf("in read\n");
   int l = libssh2_channel_read(channel,bytes,len);
 
   //printf("read returning %d\n",l);
