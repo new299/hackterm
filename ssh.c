@@ -173,7 +173,7 @@ int ssh_open(char *hostname,char *username,char *password) {
     return -1;
   }
   printf("connection successful\n");
-  libssh2_channel_set_blocking(channel,1);
+  libssh2_channel_set_blocking(channel,0);//nonblocking
   return 1;
 }
 

@@ -553,6 +553,41 @@ void do_sdl_init() {
 
 void sdl_read_thread();
 
+void console_read_init() {
+  int open_ret = c_open(open_arg1,open_arg2,open_arg3);
+  terminal_resize();
+}
+
+void console_poll() {
+    // sending bytes from pts to vterm
+    int len;
+    char buffer[10241];
+    len = c_read(buffer, sizeof(buffer)-1);
+    printf("readlen: %d\n",len);
+      
+    if(len < 0) {
+ //     if(errno == EIO) {
+        hterm_quit = true;
+        SDL_CondSignal(cond_quit);
+
+        return;
+ //     }
+    }
+
+    if(len > 0) {
+      inline_data_receive(buffer,len);
+      SDL_mutexP(vterm_mutex);
+      if((buffer != 0) && (len != 0)) {
+        vterm_push_bytes(vt, buffer, len);
+      }
+      SDL_mutexV(vterm_mutex);
+      redraw_required();
+    }
+    
+//  }
+}
+
+
 bool redraw_req=true;
 void sdl_render_thread() {
   
@@ -582,8 +617,8 @@ void sdl_render_thread() {
         sdl_read_thread(&event);
       }
     }
-
-
+    
+    console_poll();
   }
 }
 
@@ -596,39 +631,7 @@ void redraw_required() {
 }
 
 
-void console_read_thread() {
 
-  int open_ret = c_open(open_arg1,open_arg2,open_arg3);
-  terminal_resize();
-
-  for(;;) {
-    // sending bytes from pts to vterm
-    int len;
-    char buffer[10241];
-    len = c_read(buffer, sizeof(buffer)-1);
-    printf("readlen: %d\n",len);
-      
-    if(len < 0) {
- //     if(errno == EIO) {
-        hterm_quit = true;
-        SDL_CondSignal(cond_quit);
-
-        break;
- //     }
-    }
-
-    if(len > 0) {
-      inline_data_receive(buffer,len);
-      SDL_mutexP(vterm_mutex);
-      if((buffer != 0) && (len != 0)) {
-        vterm_push_bytes(vt, buffer, len);
-      }
-      SDL_mutexV(vterm_mutex);
-      redraw_required();
-    }
-    
-  }
-}
 
 uint8_t *paste_text() {
 
@@ -1262,9 +1265,10 @@ int main(int argc, char **argv) {
  //   printf("arg3: %s\n",open_arg3);
   }
 
-  SDL_Thread *thread3;
+//  SDL_Thread *thread3;
 //  SDL_Thread *thread5;
-  thread3 = SDL_CreateThread(console_read_thread,0,0);
+  console_read_init();
+//  thread3 = SDL_CreateThread(console_read_thread,0,0);
   sdl_render_thread();
 
   //SDL_mutexP(quit_mutex);
