@@ -85,6 +85,7 @@ size_t    scroll_buffer_size = 0;
 size_t    scroll_buffer_start =0;
 size_t    scroll_buffer_end   =0;
 VTermScreenCell **scroll_buffer = 0;
+uint32_t         *scroll_buffer_lens=0;
 
 SDL_cond   *cond_quit;
 SDL_mutex  *screen_mutex;
@@ -104,7 +105,7 @@ int (*c_write)(char *bytes,int len) = 0;
 int (*c_read)(char *bytes,int len) = 0;    
 int (*c_resize)(int rows,int cols) = 0;
 
-void scroll_buffer_get(size_t line_number,VTermScreenCell **line);
+void scroll_buffer_get(size_t line_number,VTermScreenCell **line,int *len);
 
 bool hterm_next_key_ctrl=false;
 
@@ -153,7 +154,7 @@ void mouse_to_select_box(int   sx,int   sy,int so,
     }
 }
 
-VTermScreenCell *grab_row(int trow,bool *dont_free) {
+VTermScreenCell *grab_row(int trow,bool *dont_free,int *len) {
 
   VTermScreenCell *rowdata = 0;
 
@@ -166,12 +167,13 @@ VTermScreenCell *grab_row(int trow,bool *dont_free) {
       vp.col = n;
       vterm_screen_get_cell(vts,vp,&(rowdata[n]));
     }
+    *len = cols;
     *dont_free =false;
   } else {
     // a scrollback row
     if((0-trow) > scroll_buffer_size) { rowdata = 0; }
     else {
-      scroll_buffer_get(0-trow,&rowdata);
+      scroll_buffer_get(0-trow,&rowdata,len);
       *dont_free=true;
     }
   }
@@ -198,7 +200,7 @@ bool cellcompare(VTermScreenCell a,VTermScreenCell b) {
   return true;
 }
 
-void draw_row(VTermScreenCell *row,int crow,int ypos) {
+void draw_row(VTermScreenCell *row,int crow,int ypos,int glen) {
 /*
     if(cdf==true) {
         for(int n=0;n<1000;n++){
@@ -212,6 +214,7 @@ void draw_row(VTermScreenCell *row,int crow,int ypos) {
   int xpos=0;
 
   for(int n=0;n<cols;n++) {
+    if(n >= glen) break;
     uint16_t rtext[1000];
 
     rtext[0] = row[n].chars[0];
@@ -244,8 +247,13 @@ void draw_row(VTermScreenCell *row,int crow,int ypos) {
 
 
 void scroll_buffer_init() {
-  scroll_buffer = malloc(sizeof(VTermScreenCell *)*scroll_buffer_initial_size);
-  for(int n=0;n<scroll_buffer_initial_size;n++) scroll_buffer[n] = 0;
+  scroll_buffer      = malloc(sizeof(VTermScreenCell *)*scroll_buffer_initial_size);
+  scroll_buffer_lens = malloc(sizeof(int32_t)*scroll_buffer_initial_size);
+  for(int n=0;n<scroll_buffer_initial_size;n++) {
+    scroll_buffer[n] = 0;
+    scroll_buffer_lens[n]=0;
+  }
+  
   scroll_buffer_size = scroll_buffer_initial_size;
   scroll_buffer_start=0;
   scroll_buffer_end  =0;
@@ -266,6 +274,7 @@ void scroll_buffer_push(VTermScreenCell *scroll_line,size_t len) {
    }
 
   scroll_buffer[scroll_buffer_end] = malloc(sizeof(VTermScreenCell)*len);
+  scroll_buffer_lens[scroll_buffer_end] = len;
 
   for(size_t n=0;n<len;n++) {
     scroll_buffer[scroll_buffer_end][n] = scroll_line[n];
@@ -274,13 +283,15 @@ void scroll_buffer_push(VTermScreenCell *scroll_line,size_t len) {
   scroll_buffer_end++;
 }
 
-void scroll_buffer_get(size_t line_number,VTermScreenCell **line) {
+void scroll_buffer_get(size_t line_number,VTermScreenCell **line,int *len) {
   int idx = scroll_buffer_end-line_number-1;
 
   if(idx < 0) idx = scroll_buffer_size+idx;
   if(idx < 0) *line = 0;
 
   *line = scroll_buffer[idx];
+  *len  = scroll_buffer_lens[idx];
+  
 }
 
 void scroll_buffer_dump() {
@@ -305,7 +316,7 @@ static int screen_prescroll(VTermRect rect, void *user)
       scrolloff[n] = c;
       len++;
     }
-    scroll_buffer_push(scrolloff,len);
+    scroll_buffer_push(scrolloff,cols);
 
   }
   redraw_required();
@@ -428,9 +439,10 @@ void redraw_text() {
     int trow = row-scroll_offset;
     bool dont_free=false;
 
-    VTermScreenCell *rowdata=grab_row(trow,&dont_free);
+    int glen=0;
+    VTermScreenCell *rowdata=grab_row(trow,&dont_free,&glen);
 
-    if(rowdata != 0) draw_row(rowdata,trow,row*(font_height+font_space));
+    if(rowdata != 0) draw_row(rowdata,trow,row*(font_height+font_space),glen);
     
     int cursorx=0;
     int cursory=0;
@@ -683,11 +695,14 @@ void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_e
   uint16_t *text = malloc(10240);
   for(int y=text_start_y;y<text_end_y;y++) {
     bool dont_free=false;
-    VTermScreenCell *row_data = grab_row(y,&dont_free);
+    
+    int glen=0;
+    VTermScreenCell *row_data = grab_row(y,&dont_free,&glen);
     
     if(row_data == 0) { text[0]=0; }
     else {
       for(int x=text_start_x;x<text_end_x;x++) {
+        if(text_end_x >= glen) break;
 
         text[len] = row_data[x].chars[0];
         if(text[len]!=0 && (text[len]!=65535)) len++;
