@@ -44,7 +44,7 @@
 
 void redraw_required();
 
-bool sdl_init_complete=false;
+//bool sdl_init_complete=false;
  
 int font_width  = 8;
 int font_height = 16;
@@ -369,11 +369,11 @@ VTermStateCallbacks cb_state = {
 int csi_handler(const char *leader, const long args[], int argcount, const char *intermed, char command, void *user) {
   if(command == 'J') {
     printf("************************* this clear\n");
-    if(sdl_init_complete) {
-      //if(!regis_recent()) regis_clear();
-      inline_data_clear();
-      redraw_required();
-    }
+    //if(sdl_init_complete) {
+    //if(!regis_recent()) regis_clear();
+    inline_data_clear();
+    redraw_required();
+   // }
   }
 
   return 0;
