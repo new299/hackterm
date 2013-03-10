@@ -283,7 +283,7 @@
   h = (int)(size.height * displaymodedata->scale)-(kb_h*displaymodedata->scale);
 
   SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MOVED, w, h);
-  NSLog(@"%@", NSStringFromCGRect(keyboardFrameBeginRect));
+  NSLog(@"KeyboardWillShow %@", NSStringFromCGRect(keyboardFrameBeginRect));
 }
  
 -(void)keyboardWillHide:(NSNotification*)notification {
