@@ -264,6 +264,7 @@
   SDL_Window *window = self->viewcontroller.window;
   SDL_WindowData *data = window->driverdata;
   SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
+  if(display == 0) return; // For some reason display is /sometimes/ not set on second call, no idea why.
   SDL_DisplayModeData *displaymodedata = (SDL_DisplayModeData *) display->current_mode.driverdata;
     
     
@@ -282,7 +283,7 @@
   w = (int)(size.width  * displaymodedata->scale);
   h = (int)(size.height * displaymodedata->scale)-(kb_h*displaymodedata->scale);
 
-  SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MOVED, w, h);
+  SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MOVED, w, h);//TODO: NW ADD NEW EVENT TYPE
   NSLog(@"KeyboardWillShow %@", NSStringFromCGRect(keyboardFrameBeginRect));
 }
  

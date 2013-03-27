@@ -44,8 +44,6 @@
 
 void redraw_required();
 
-//bool sdl_init_complete=false;
- 
 int font_width  = 8;
 int font_height = 16;
 int font_space  = 0;
@@ -578,12 +576,6 @@ void console_poll() {
   char buffer[10241];
   len = c_read(buffer, sizeof(buffer)-1);
     
-  //TODO: need some code here which asks libssh2 if the connection is closed.
-  //if(errno == EIO) {
-  //hterm_quit = true;
-  //SDL_CondSignal(cond_quit);
-  //return;
-
   if(len > 0) {
     inline_data_receive(buffer,len);
     SDL_mutexP(vterm_mutex);
@@ -593,15 +585,23 @@ void console_poll() {
     SDL_mutexV(vterm_mutex);
     redraw_required();
   }
+  
+  if(len < 0) {
+    hterm_quit = true;
+    SDL_CondSignal(cond_quit);
+    return;
+  }
 }
 
 
 bool redraw_req=true;
+bool first_render=true;
 void sdl_render_thread() {
   
   SDL_Event event;
-  SDL_StartTextInput();
-    
+  if(first_render) SDL_StartTextInput();
+  //first_render=false;
+  
   for(;;) {
     int ok = SDL_SemWaitTimeout(redraw_sem,1);
     if(ok == 0) {
@@ -620,6 +620,7 @@ void sdl_render_thread() {
     }
     
     console_poll();
+    if(hterm_quit == true) return;
   }
 }
 
@@ -861,23 +862,25 @@ void process_mouse_event(SDL_Event *event) {
   }
 }
 
+int forced_recreaterenderer=0;
 
 void sdl_read_thread(SDL_Event *event) {
   ngui_receive_event(event);
 
   process_mouse_event(event);
     
-
-   // if(event.type == SDL_QUIT) {
-     // hterm_quit = true;
-     // SDL_CondSignal(cond_quit);
-    //  return;
-   // }
-
-    if(
-       (event->type == SDL_WINDOWEVENT) &&
-       ((event->window.event == SDL_WINDOWEVENT_RESIZED) || (event->window.event == SDL_WINDOWEVENT_RESTORED))
+/*  if(event->type == SDL_QUIT) {
+    hterm_quit = true;
+    return;
+  }
+*/
+    if(forced_recreaterenderer>1) forced_recreaterenderer--;
+    
+    if((forced_recreaterenderer==1) ||
+       ((event->type == SDL_WINDOWEVENT) &&
+       ((event->window.event == SDL_WINDOWEVENT_RESIZED) || (event->window.event == SDL_WINDOWEVENT_RESTORED)))
       ) {
+        forced_recreaterenderer=0;
         SDL_GetWindowSize(screen,&display_width,&display_height);
 
         if(SDL_IsScreenKeyboardShown(screen)) {
@@ -885,7 +888,6 @@ void sdl_read_thread(SDL_Event *event) {
           display_height = display_height_last_kb;
         }
 
-        //SDL_RecreateWindow(screen,SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
         SDL_DestroyRenderer(renderer);
         renderer = SDL_CreateRenderer(screen, -1, SDL_RENDERER_ACCELERATED);
         ngui_set_renderer(renderer, redraw_required);
@@ -929,6 +931,10 @@ void sdl_read_thread(SDL_Event *event) {
         char buffer[255];
         
         strcpy(buffer, event->text.text);
+        
+        if(buffer[0] == 10) buffer[0]=13; // hack round return sending 10, which causes issues for e.g. nano.
+                                          // really this should be a full utf8 decode/reencode.
+        
         if(hterm_next_key_ctrl == true) {
           int i=buffer[0];
           if(i>=97) i = i-97+65;
@@ -938,6 +944,7 @@ void sdl_read_thread(SDL_Event *event) {
         }
         c_write(buffer,strlen(buffer));
     }
+    
     if(event->type == SDL_TEXTEDITING) {
         printf("hterm text editing\n");
     }
@@ -946,7 +953,7 @@ void sdl_read_thread(SDL_Event *event) {
         printf("hterm key down\n");
  
  //int index = keyToIndex(event.key.keysym);
- SDL_Scancode scancode = event->key.keysym.scancode;
+   SDL_Scancode scancode = event->key.keysym.scancode;
 /*        if(scancode == SDL_SCANCODE_RETURN) {
             char buf[4];
             buf[0] = 13;
@@ -1222,13 +1229,30 @@ int main(int argc, char **argv) {
     c_resize = &ssh_resize;
   }
 
-  console_read_init();
-  sdl_render_thread();
+  for(;;) {
+    console_read_init();
+    //forced_recreaterenderer=3;
+    sdl_render_thread();
+    
+    c_close();
+  
+    printf("ihere0\n");
+    display_server_select_closedlg();
+    printf("ihere1\n");
+  
+    hterm_quit=false;
+    // new server selection
+    // display_serverselect(screen);
+    SDL_StopTextInput();
+    
+    SDL_Quit();
+    do_sdl_init();
+    ngui_set_renderer(renderer, redraw_required);
+    nunifont_initcache();
+    vterm_free(vt);
+    vterm_initialisation();
+    //forced_recreaterenderer=true;
+  }
 
-  SDL_Quit();
-
-  c_close();
-  vterm_free(vt);
- 
   return 0;
 }

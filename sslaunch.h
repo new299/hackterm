@@ -17,4 +17,4 @@ extern void display_serverselect_run();
 extern void display_serverselect(SDL_Window * window);
 
 extern BOOL display_serverselect_get(char *hostname,char *username,char *password);
-
+extern void display_server_select_closedlg();

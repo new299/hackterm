@@ -14,6 +14,7 @@
 		D52AC64D16E6B87F00016D01 /* iphone_pasteboard.m in Sources */ = {isa = PBXBuildFile; fileRef = D52AC64C16E6B87F00016D01 /* iphone_pasteboard.m */; };
 		D52AC65316E7AB8400016D01 /* utf8proc_data.c in Sources */ = {isa = PBXBuildFile; fileRef = D52AC65116E7AB8400016D01 /* utf8proc_data.c */; };
 		D52AC65416E7AB8400016D01 /* utf8proc.c in Sources */ = {isa = PBXBuildFile; fileRef = D52AC65216E7AB8400016D01 /* utf8proc.c */; };
+		D5329CFC1702C7CE00122CFD /* DisconnectAlertDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D5329CFB1702C7CE00122CFD /* DisconnectAlertDelegate.m */; };
 		D550D13916C01036000D4D6A /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D550D13216C00DBF000D4D6A /* libSDL2.a */; };
 		D5B5C90416C9529700DD079C /* hterm.png in Resources */ = {isa = PBXBuildFile; fileRef = D5B5C90316C9529700DD079C /* hterm.png */; };
 		D5B5C90616C952DF00DD079C /* hterm57.png in Resources */ = {isa = PBXBuildFile; fileRef = D5B5C90516C952DF00DD079C /* hterm57.png */; };
@@ -130,6 +131,8 @@
 		D52AC64C16E6B87F00016D01 /* iphone_pasteboard.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = iphone_pasteboard.m; path = ../iphone_pasteboard.m; sourceTree = "<group>"; };
 		D52AC65116E7AB8400016D01 /* utf8proc_data.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = utf8proc_data.c; path = ../utf8proc/utf8proc_data.c; sourceTree = "<group>"; };
 		D52AC65216E7AB8400016D01 /* utf8proc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = utf8proc.c; path = ../utf8proc/utf8proc.c; sourceTree = "<group>"; };
+		D5329CFA1702C7CE00122CFD /* DisconnectAlertDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DisconnectAlertDelegate.h; path = ../DisconnectAlertDelegate.h; sourceTree = "<group>"; };
+		D5329CFB1702C7CE00122CFD /* DisconnectAlertDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DisconnectAlertDelegate.m; path = ../DisconnectAlertDelegate.m; sourceTree = "<group>"; };
 		D550D12716C00DBE000D4D6A /* SDL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SDL.xcodeproj; path = "SDL/Xcode-iOS/SDL/SDL.xcodeproj"; sourceTree = "<group>"; };
 		D5B5C90316C9529700DD079C /* hterm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hterm.png; sourceTree = "<group>"; };
 		D5B5C90516C952DF00DD079C /* hterm57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hterm57.png; sourceTree = "<group>"; };
@@ -462,6 +465,8 @@
 				D52AC64B16E6B87F00016D01 /* iphone_pasteboard.h */,
 				D52AC64C16E6B87F00016D01 /* iphone_pasteboard.m */,
 				D51E1AA716DABC9F0005E06C /* RecentItemsDataSource.h */,
+				D5329CFA1702C7CE00122CFD /* DisconnectAlertDelegate.h */,
+				D5329CFB1702C7CE00122CFD /* DisconnectAlertDelegate.m */,
 				D51E1AA816DABC9F0005E06C /* RecentItemsDataSource.m */,
 				D5D443C616E948EA001C2385 /* recentrw.c */,
 				D51E1AA116D954540005E06C /* sslaunch.h */,
@@ -1015,6 +1020,7 @@
 				D52AC65316E7AB8400016D01 /* utf8proc_data.c in Sources */,
 				D52AC65416E7AB8400016D01 /* utf8proc.c in Sources */,
 				D5D443C716E948EA001C2385 /* recentrw.c in Sources */,
+				D5329CFC1702C7CE00122CFD /* DisconnectAlertDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

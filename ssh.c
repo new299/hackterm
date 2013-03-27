@@ -189,15 +189,14 @@ int ssh_write(unsigned char *bytes,int len) {
 }
 
 int ssh_read(char *bytes,int len) {
-  //printf("in read\n");
+  
+  if(libssh2_channel_eof(channel) == 1) {
+    return -1;
+  }
+  
   int l = libssh2_channel_read(channel,bytes,len);
-
-  //printf("read returning %d\n",l);
-
-  //if(l==0) return -1; // 0 means the channel is closed as the above function should block for data.
-
+  if(l<0) l=0;
   return l;
-     // libssh2_channel_read_stderr()
 }
 
 int ssh_close() {

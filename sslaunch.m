@@ -14,6 +14,7 @@
 #include "iphone/sdl/src/video/uikit/SDL_uikitmodes.h"
 #import "RecentItemsDataSource.h"
 #include "recentrw.h"
+#include "DisconnectAlertDelegate.h"
 
 UIViewController *viewcon;
 ServerSelectUIView *view;
@@ -35,6 +36,9 @@ void display_serverselect_run() {
     readall_connections(hostnames,usernames,passwords);
 
     int i = source.selection;
+    printf("i is: %d\n",i);
+    if(i < 0) return;
+    if(i > 20) return;
     [[view hostname] setText:[NSString stringWithCString:hostnames[i] encoding:NSASCIIStringEncoding]];
     [[view username] setText:[NSString stringWithCString:usernames[i] encoding:NSASCIIStringEncoding]];
     [[view password] setText:[NSString stringWithCString:passwords[i] encoding:NSASCIIStringEncoding]];
@@ -59,7 +63,8 @@ void display_serverselect(SDL_Window *window)
     
     source = [[RecentItemsDataSource alloc] initWithStyle:UITableViewStylePlain];
     source.selection=-1;
-
+    last_selection = -1;
+    
     view = viewcon.view;
     
     [view.recentservers registerClass:[UITableViewCell class] forCellReuseIdentifier:@"i"];
@@ -82,14 +87,20 @@ void display_serverselect(SDL_Window *window)
 BOOL display_serverselect_get(char *ohostname,char *ousername,char *opassword) {
     
   if(view == nil) return NO;
-  const char *h = [[[view hostname] text] cStringUsingEncoding:NSASCIIStringEncoding];
-  const char *u = [[[view username] text] cStringUsingEncoding:NSASCIIStringEncoding];
-  const char *p = [[[view password] text] cStringUsingEncoding:NSASCIIStringEncoding];
-  strcpy(ohostname,h);
-  strcpy(ousername,u);
-  strcpy(opassword,p);
-  
+
   if([view connectComplete]) {
+  
+    printf("here0\n");
+    const char *h = [[[view hostname] text] cStringUsingEncoding:NSASCIIStringEncoding];
+    printf("here1\n");
+    const char *u = [[[view username] text] cStringUsingEncoding:NSASCIIStringEncoding];
+    printf("here2\n");
+    const char *p = [[[view password] text] cStringUsingEncoding:NSASCIIStringEncoding];
+    printf("here3\n");
+    strcpy(ohostname,h);
+    strcpy(ousername,u);
+    strcpy(opassword,p);
+
     SDL_WindowData *data = (SDL_WindowData *) win->driverdata;
     UIWindow *uiwindow = data->uiwindow;
     view = nil;
@@ -103,4 +114,26 @@ BOOL display_serverselect_get(char *ohostname,char *ousername,char *opassword) {
 
 void display_serverselect_complete() {
   [view removeFromSuperview];
+}
+
+
+void display_server_select_closedlg() {
+
+  DisconnectAlertDelegate *discon = [[DisconnectAlertDelegate alloc] init];
+
+  UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Disconnect"
+                                                message:@"Connected closed"
+                                               delegate:discon
+                                      cancelButtonTitle:@"OK"
+                                      otherButtonTitles:nil];
+  [alert show];
+  
+  for(;;) {
+    if([discon ok_pressed] != false) {
+      return;
+    }
+    
+    [[NSRunLoop currentRunLoop] runMode:UITrackingRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.005]];
+    [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.005]];
+  }
 }
