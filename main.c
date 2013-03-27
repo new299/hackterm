@@ -489,7 +489,7 @@ void redraw_selection() {
 
 
     nsdl_rectangle_wire(renderer,text_start_x*(font_width+font_space),text_start_y*(font_height+font_space),
-                                 text_end_x*(font_width+font_space),text_end_y*(font_height+font_space),0xFFFFFF);
+                                 text_end_x*(font_width+font_space),text_end_y*(font_height+font_space),255,255,255,255);
   }
 }
 

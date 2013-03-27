@@ -133,6 +133,7 @@
 		D52AC65216E7AB8400016D01 /* utf8proc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = utf8proc.c; path = ../utf8proc/utf8proc.c; sourceTree = "<group>"; };
 		D5329CFA1702C7CE00122CFD /* DisconnectAlertDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DisconnectAlertDelegate.h; path = ../DisconnectAlertDelegate.h; sourceTree = "<group>"; };
 		D5329CFB1702C7CE00122CFD /* DisconnectAlertDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DisconnectAlertDelegate.m; path = ../DisconnectAlertDelegate.m; sourceTree = "<group>"; };
+		D5329D001703B9E700122CFD /* nsdl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nsdl.h; path = ../nsdl.h; sourceTree = "<group>"; };
 		D550D12716C00DBE000D4D6A /* SDL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SDL.xcodeproj; path = "SDL/Xcode-iOS/SDL/SDL.xcodeproj"; sourceTree = "<group>"; };
 		D5B5C90316C9529700DD079C /* hterm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hterm.png; sourceTree = "<group>"; };
 		D5B5C90516C952DF00DD079C /* hterm57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hterm57.png; sourceTree = "<group>"; };
@@ -531,6 +532,7 @@
 				D5ED0DFB16A594BE003F887B /* ngui_textlabel.c */,
 				D5ED0DFC16A594BE003F887B /* ngui.c */,
 				D5ED0DFD16A594BE003F887B /* nsdl.c */,
+				D5329D001703B9E700122CFD /* nsdl.h */,
 				D5ED0DFE16A594BE003F887B /* nunifont.c */,
 				D5ED0DFF16A594BE003F887B /* regis.c */,
 				D5ED0E0016A594BE003F887B /* ssh.c */,

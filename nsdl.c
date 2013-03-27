@@ -5,6 +5,7 @@
 // require initialisation function
 void nsdl_init() {}
 
+/*
 void nsdl_point(void *screen,int x,int y,uint32_t value) {
 
   SDL_Rect rect;
@@ -27,6 +28,7 @@ void nsdl_point(void *screen,int x,int y,uint32_t value) {
 
 //  *(uint32_t *) p = value;
 }
+*/
 
 void nsdl_pointS(SDL_Surface *screen,int x,int y,uint32_t value) {
 
@@ -50,6 +52,7 @@ void nsdl_pointS(SDL_Surface *screen,int x,int y,uint32_t value) {
 
   *(uint32_t *) p = value;
 }
+/*
 
 uint32_t nsdl_getpoint(void *screen,int x,int y) {
 
@@ -64,7 +67,9 @@ uint32_t nsdl_getpoint(void *screen,int x,int y) {
 
 ////  return (*(uint32_t *)p);
 }
+*/
 
+/*
 void nsdl_rectangle_hashed(void *screen,int sx,int sy,int ex,int ey,uint32_t value) {
 
   int n=0;
@@ -81,6 +86,7 @@ void nsdl_rectangle_hashed(void *screen,int sx,int sy,int ex,int ey,uint32_t val
   }
 
 }
+*/
 
 void nsdl_rectangle_shade(void *screen,int sx,int sy,int ex,int ey,uint32_t value_start,uint32_t value_end) {
   
@@ -108,20 +114,19 @@ void nsdl_rectangle_softalph(void *screen,int sx,int sy,int ex,int ey,uint32_t v
   }
 }
 
-void nsdl_rectangle_wire(void *screen,int sx,int sy,int ex,int ey,uint32_t value) {
+void nsdl_rectangle_wire(void *screen,int sx,int sy,int ex,int ey,uint8_t r,uint8_t g,uint8_t b,uint8_t a) {
 
-  for(int x=sx;x<ex;x++) {
-    nsdl_point(screen,x,sy,value);
-    nsdl_point(screen,x,ey-1,value);
-  }
-
-  for(int y=sy;y<ey;y++) {
-    nsdl_point(screen,sx,y,value);
-    nsdl_point(screen,ex-1,y,value);
-  }
+  SDL_SetRenderDrawColor(screen, r, g, b,a);
+  SDL_RenderDrawLine(screen,sx,sy,sx,ey);
+  SDL_RenderDrawLine(screen,sx,sy,ex,sy);
+  SDL_RenderDrawLine(screen,ex,ey,sx,ey);
+  SDL_RenderDrawLine(screen,ex,ey,ex,sy);
 }
 
 void nsdl_line(void *screen,int start_x,int start_y,int end_x,int end_y,int color) {
+
+  //SDL_SetRenderDrawColor(screen, rand()%233, rand()%232, rand()%232, 255);
+  //SDL_RenderDrawLine(screen,start_x,start_y,end_x,end_y);
 
   // Bresenham's
   int cx = start_x;
@@ -144,4 +149,5 @@ void nsdl_line(void *screen,int start_x,int start_y,int end_x,int end_y,int colo
     if(e2 > (0-dy)) { err = err - dy; cx = cx + sx; }
     if(e2 < dx    ) { err = err + dx; cy = cy + sy; }
   }
+
 }
