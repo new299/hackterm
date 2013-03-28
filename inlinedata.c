@@ -22,7 +22,7 @@ char *inline_magic = "HTERMFILEXFER";
 void inline_data_init(int width,int height) {
 
   base64_init();
-  inline_data_layer = SDL_CreateRGBSurface(SDL_SWSURFACE,width,height,32,0x000000FF,0x0000FF00,0x00FF0000,0xFF000000);
+  inline_data_layer = SDL_CreateRGBSurface(SDL_SWSURFACE,width,height,32,0xFF000000,0x00FF0000,0x0000FF00,0x000000FF);
 }
 
 
@@ -34,6 +34,10 @@ png_infop   info_ptr=0;
 png_bytep  *row_pointers=0;
 bool processing_png=false;
 int file_end=0;
+png_byte channels=0;
+png_byte color_type=0;
+png_colorp palette;
+int num_palette;
 
 /* This function is called (as set by png_set_progressive_read_fn() above) when enough data has been supplied so all of the header has been read.  */
 void info_callback(png_structp png_ptr, png_infop info) {
@@ -43,7 +47,35 @@ void info_callback(png_structp png_ptr, png_infop info) {
   width = png_get_image_width(png_ptr,info);
   height = png_get_image_height(png_ptr,info);
   pixel_depth = png_get_bit_depth(png_ptr,info);
-  int row_bytes   = png_get_rowbytes(png_ptr,info);
+  
+  channels = png_get_channels(png_ptr,info);
+  printf("png num channels: %u\n",channels);
+  
+  color_type = png_get_color_type(png_ptr,info);
+  printf("png color: %u\n",color_type);
+  if(color_type == PNG_COLOR_TYPE_GRAY)      {printf("png color: grey\n");}
+  if(color_type == PNG_COLOR_TYPE_GRAY_ALPHA){printf("png color: greyA\n");}
+  if(color_type == PNG_COLOR_TYPE_RGB)       {printf("png color: RGB\n");}
+  if(color_type == PNG_COLOR_TYPE_RGB_ALPHA) {printf("png color: RGBA\n");}
+  if(color_type == PNG_COLOR_TYPE_PALETTE )  {
+    printf("png color: PALETTE\n");
+
+    int r = png_get_PLTE(png_ptr,info,&palette,&num_palette);
+    if(r == 0) {
+      printf("FAILED TO FETCH PALETTE\n");
+    }
+    
+    png_uint_16p histogram = NULL;
+
+    png_get_hIST(png_ptr, info, &histogram);
+
+//    png_set_quantize(png_ptr, palette, num_palette,
+//                        255, histogram, 0);
+    png_set_expand(png_ptr); png_set_scale_16(png_ptr);
+  }
+
+  
+  int row_bytes = png_get_rowbytes(png_ptr,info);
   //printf("image height %u\n",info->height);
   //printf("image width  %u\n",info->width );
   //printf("pixel depth  %u\n",info->pixel_depth);
@@ -58,7 +90,7 @@ void info_callback(png_structp png_ptr, png_infop info) {
 
 int inlineget_pixel(char *row,int pixel_depth,int idx) {
 
-  printf("idx is: %d\n",idx);
+  //printf("idx is: %d\n",idx);
 
   if(pixel_depth == 1) {
     int pos  = pixel_depth*idx;
@@ -103,9 +135,13 @@ void row_callback(png_structp png_ptr, png_bytep new_row, png_uint_32 row_num, i
     }
 */
 
+//    if(color_type == PNG_COLOR_TYPE_PALETTE)  {
+//       pixel = palette[pixel];
+//    }
+
     nsdl_pointS(inline_data_layer,n,row_num,pixel);
     
-    printf("plotted point\n");
+   // printf("plotted point\n");
   }
   /* where old_row is what was displayed for previously for the row. Note that the first pass (pass == 0, really) will completely cover the old row, so the rows do not have to be initialized. After the first pass (and only for interlaced images), you will have to pass the current row, and the function will combine the old row and the new row.  */
 }
