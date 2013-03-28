@@ -178,6 +178,7 @@ void draw_character(void *screen,int x,int y,int w,uint32_t cin,uint32_t bg,uint
     HASH_FIND( hh, display_cache, &chr, char_render_t_keylen, mchr);
     
     if(!mchr) {
+      printf("adding character: %u\n",cin);
       uint32_t Rmask, Gmask, Bmask, Amask;      /* masks for desired format */
    
       Rmask = 0xff000000;
@@ -206,33 +207,25 @@ void draw_character(void *screen,int x,int y,int w,uint32_t cin,uint32_t bg,uint
                      &access,
                      &ww,
                      &hh);
-    printf("rgba8 %u\n",SDL_PIXELFORMAT_ABGR8888);
-    printf("rgb565 %u\n",SDL_PIXELFORMAT_BGRA8888);
-    printf("bgra %u\n",SDL_PIXELFORMAT_BGR24);
-    printf("rgb8 %u\n",SDL_PIXELFORMAT_RGB24);
-    printf("argb8 %u\n",SDL_PIXELFORMAT_BGR565);
-    printf("last8 %u\n",SDL_PIXELFORMAT_RGB565);
     
-        
+    SDL_FreeSurface(converted);
 
-    
-      SDL_FreeSurface(converted);
-
-      mchr = malloc(sizeof(char_render_t));
-      mchr->c = cin;
-      mchr->fg = fg;
-      mchr->bg = bg;
-      mchr->bold = bold;
-      mchr->underline = underline;
-      mchr->italic = italic;
-      mchr->strike = strike;
-      mchr->texture = texture;
+    mchr = malloc(sizeof(char_render_t));
+    mchr->c = cin;
+    mchr->fg = fg;
+    mchr->bg = bg;
+    mchr->bold = bold;
+    mchr->underline = underline;
+    mchr->italic = italic;
+    mchr->strike = strike;
+    mchr->texture = texture;
         
-      HASH_ADD( hh, display_cache, c, char_render_t_keylen, mchr);
-    }
+    HASH_ADD( hh, display_cache, c, char_render_t_keylen, mchr);
+    printf("added character: %u\n",cin);
+  }
     
-    SDL_Rect dstRect = { x, y, w, 16 };
-    SDL_RenderCopy(screen, mchr->texture, NULL, &dstRect);
+  SDL_Rect dstRect = { x, y, w, 16 };
+  SDL_RenderCopy(screen, mchr->texture, NULL, &dstRect);
 }
 
 void draw_space_surface(void *screen,int x,int y,int w,uint32_t bg,uint32_t fg) {

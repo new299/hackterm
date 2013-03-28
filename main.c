@@ -87,11 +87,11 @@ size_t    scroll_buffer_end   =0;
 VTermScreenCell **scroll_buffer = 0;
 uint32_t         *scroll_buffer_lens=0;
 
-SDL_cond   *cond_quit;
-SDL_mutex  *screen_mutex;
-SDL_mutex  *vterm_mutex;
-SDL_sem    *redraw_sem;
-SDL_mutex  *quit_mutex;
+//SDL_cond   *cond_quit;
+//SDL_mutex  *screen_mutex;
+//SDL_mutex  *vterm_mutex;
+//SDL_sem    *redraw_sem;
+//SDL_mutex  *quit_mutex;
 VTermState *vs;
 
 char open_arg1[100];
@@ -110,7 +110,7 @@ void scroll_buffer_get(size_t line_number,VTermScreenCell **line,int *len);
 bool hterm_next_key_ctrl=false;
 
 void regis_render() {
-  SDL_mutexP(regis_mutex);
+  //SDL_mutexP(regis_mutex);
 
   if(!regis_cleared()) {
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, regis_layer);
@@ -119,18 +119,19 @@ void regis_render() {
     SDL_DestroyTexture(texture);
   }
 //  int res = SDL_BlitSurface(regis_layer,NULL,screen,NULL);
-  SDL_mutexV(regis_mutex);
+  //SDL_mutexV(regis_mutex);
 }
 
 void inline_data_render() {                                        
-  SDL_mutexP(inline_data_mutex);
-  
-  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, inline_data_layer);
+
+  if(inline_data_layer != 0) {
+    printf("inline blit\n");
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, inline_data_layer);
     
-  SDL_RenderCopy(renderer, texture, NULL, NULL);
-  SDL_DestroyTexture(texture);
- // int res = SDL_BlitSurface(inline_data_layer,NULL,screen,NULL);
-  SDL_mutexV(inline_data_mutex);                                   
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
+    SDL_DestroyTexture(texture);
+    printf("inline blit'd\n");
+  }
 }
 
 void mouse_to_select_box(int   sx,int   sy,int so,
@@ -420,9 +421,9 @@ void terminal_resize() {
 
   if(c_resize != NULL) (*c_resize)(cols,rows);
 
-  SDL_mutexP(vterm_mutex);
+  //SDL_mutexP(vterm_mutex);
   if(vt != 0) vterm_set_size(vt,rows,cols);
-  SDL_mutexV(vterm_mutex);
+  //SDL_mutexV(vterm_mutex);
 }
 
 void cursor_position(int *cursorx,int *cursory) {
@@ -451,8 +452,6 @@ void redraw_text() {
       int width=font_width+font_space;
       if((cursorx < cols) && (cursory < rows) && (rowdata != 0)) {
         if(rowdata[cursorx].width == 2) width+=(font_width+font_space);
- //       nsdl_rectangle_softalph(screen,cursorx*(font_width+font_space),row*(font_height+font_space),(cursorx*(font_width+font_space))+width,(row*(font_height+font_space))+(font_height+font_space),0xFF);
- //       nsdl_rectangle_wire    (screen,cursorx*(font_width+font_space),row*(font_height+font_space),(cursorx*(font_width+font_space))+width,(row*(font_height+font_space))+(font_height+font_space),UINT_MAX);
 
          SDL_SetRenderDrawColor(renderer,0xEF,0xEF,0xEF,0xA0);
          SDL_Rect r;
@@ -494,14 +493,6 @@ void redraw_selection() {
 }
 
 void redraw_screen() {
-    
-  //if(new_screen_size) {
-  //  printf("SCREEN RESIZE DETECTED\n");
-   //// screen = SDL_SetVideoMode(new_screen_size_x, new_screen_size_y, 32, SDL_RESIZABLE | SDL_DOUBLEBUF);
-    //terminal_resize(screen,vt,&cols,&rows);
-    //new_screen_size = false;
-//  }
-
   SDL_SetRenderDrawColor(renderer,0x00,0x00,0x00,0xff);
   SDL_RenderClear(renderer);
     
@@ -511,6 +502,7 @@ void redraw_screen() {
   redraw_selection();
   regis_render();
   inline_data_render();
+  
   ngui_render();
 
   SDL_RenderPresent(renderer);
@@ -578,17 +570,17 @@ void console_poll() {
     
   if(len > 0) {
     inline_data_receive(buffer,len);
-    SDL_mutexP(vterm_mutex);
+    //SDL_mutexP(vterm_mutex);
     if((buffer != 0) && (len != 0)) {
       vterm_push_bytes(vt, buffer, len);
     }
-    SDL_mutexV(vterm_mutex);
+    //SDL_mutexV(vterm_mutex);
     redraw_required();
   }
   
   if(len < 0) {
     hterm_quit = true;
-    SDL_CondSignal(cond_quit);
+    //SDL_CondSignal(cond_quit);
     return;
   }
 }
@@ -603,9 +595,12 @@ void sdl_render_thread() {
   //first_render=false;
   
   for(;;) {
-    int ok = SDL_SemWaitTimeout(redraw_sem,1);
-    if(ok == 0) {
+    //int ok = SDL_SemWaitTimeout(redraw_sem,1);
+    if(redraw_req) {
       redraw_screen();
+      redraw_req=false;
+    } else {
+      SDL_Delay(100);
     }
 
     SDL_Event event;
@@ -625,11 +620,11 @@ void sdl_render_thread() {
 }
 
 void redraw_required() {
-  uint32_t v =  SDL_SemValue(redraw_sem);
-  if(v > 5) return;
+//  uint32_t v =  SDL_SemValue(redraw_sem);
+//  if(v > 5) return;
 
   redraw_req=true;
-  SDL_SemPost(redraw_sem);
+//  SDL_SemPost(redraw_sem);
 }
 
 
@@ -1191,13 +1186,13 @@ int main(int argc, char **argv) {
     
   nunifont_load_staticmap(__fontmap_static,__widthmap_static,__fontmap_static_len,__widthmap_static_len);
 
-  regis_mutex  = SDL_CreateMutex();
-  screen_mutex = SDL_CreateMutex();
-  vterm_mutex  = SDL_CreateMutex();
-  quit_mutex   = SDL_CreateMutex();
-  redraw_sem   = SDL_CreateSemaphore(1);
-  inline_data_mutex = SDL_CreateMutex();
-  cond_quit = SDL_CreateCond();
+  //regis_mutex  = SDL_CreateMutex();
+  //screen_mutex = SDL_CreateMutex();
+  //vterm_mutex  = SDL_CreateMutex();
+  //quit_mutex   = SDL_CreateMutex();
+  //redraw_sem   = SDL_CreateSemaphore(1);
+  
+  //cond_quit = SDL_CreateCond();
 
   int connection_type = CONNECTION_LOCAL; // replace with commandline lookup
   if(argc > 1) {
