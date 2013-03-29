@@ -916,6 +916,10 @@ void sdl_read_thread(SDL_Event *event) {
       ngui_move_button("Iright",dwidth-(16*6*1),dheight-(16*6*2));
       
       ngui_move_button("Ipaste",dwidth-(16*6*2),dheight-(16*6*2));
+      
+      ngui_move_button("Iclose" ,display_width-(16*6*1)     ,0);
+      ngui_move_button("Ikbshow",display_width-(16*6)-(16*7),0);
+
     }
     
     printf("event\n");
@@ -1165,6 +1169,7 @@ void virtual_kb_paste(char *c) {
 
 void virtual_kb_kbshow(char *c) {
   printf("VIRTUAL KBSHOW\n");
+  SDL_StartTextInput();
 }
 
 void virtual_kb_close(char *c) {
@@ -1192,8 +1197,8 @@ int main(int argc, char **argv) {
 
   ngui_add_button(display_width-(16*6*2),display_height-(16*6*2),"Ipaste",virtual_kb_paste);
 
-  ngui_add_button(display_width-(16*6*1),0,"Iclose",virtual_kb_close);
-  ngui_add_button(display_width-(16*6*2),0,"Ikb"   ,virtual_kb_kbshow);
+  ngui_add_button(display_width-(16*6*1)     ,0,"Iclose" ,virtual_kb_close);
+  ngui_add_button(display_width-(16*6)-(16*7),0,"Ikbshow",virtual_kb_kbshow);
 
     
   nunifont_load_staticmap(__fontmap_static,__widthmap_static,__fontmap_static_len,__widthmap_static_len);

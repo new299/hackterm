@@ -71,8 +71,8 @@ void draw_kbshow_icon(int x,int y) {
   
   rect.x = x;
   rect.y = y;
-  rect.w = 6*16;
-  rect.h = 6*16;
+  rect.w = 7*16;
+  rect.h = 5*16;
   
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
 
@@ -80,20 +80,21 @@ void draw_kbshow_icon(int x,int y) {
 
   SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
 
-  // K
-  SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*2),x   ,y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*2),x   ,y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*3),x+16,y+(16*3));
-  //SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*2),x+16,y+(16*3));
+  rect.x = x; rect.y = y; rect.w = 16; rect.h = 16;
+  SDL_RenderDrawRect(ngui_renderer,&rect);
+  rect.x = x+(16*2); rect.y = y; rect.w = 16; rect.h = 16;
+  SDL_RenderDrawRect(ngui_renderer,&rect);
+  rect.x = x+(16*4); rect.y = y; rect.w = 16; rect.h = 16;
+  SDL_RenderDrawRect(ngui_renderer,&rect);
+  rect.x = x+(16*6); rect.y = y; rect.w = 16; rect.h = 16;
+  SDL_RenderDrawRect(ngui_renderer,&rect);
 
-  // B
-  SDL_RenderDrawLine(ngui_renderer,x+(16*6)-2,y+(16*4),x+(16*5),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*4),x+(16*5),y+(16*6)-1);
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*6)-1,x+(16*6)-2,y+(16*6)-1);
-  
-  SDL_RenderDrawLine(ngui_renderer,x+(16*6)-1,y+(16*6)-1,x+(16*6)-1,y+(16*5)+2);
-  SDL_RenderDrawLine(ngui_renderer,x+(16*6)-1,y+(16*5)-2,x+(16*6)-1,y+(16*4)+1);
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*5),x+(16*6)-2,y+(16*5));
+  rect.x = x+(16*1); rect.y = y+(16*2); rect.w = 16; rect.h = 16;
+  SDL_RenderDrawRect(ngui_renderer,&rect);
+  rect.x = x+(16*3); rect.y = y+(16*2); rect.w = 16; rect.h = 16;
+  SDL_RenderDrawRect(ngui_renderer,&rect);
+  rect.x = x+(16*5); rect.y = y+(16*2); rect.w = 16; rect.h = 16;
+  SDL_RenderDrawRect(ngui_renderer,&rect);
 }
 
 void draw_close_icon(int x,int y) {
