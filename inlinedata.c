@@ -72,6 +72,7 @@ void info_callback(png_structp png_ptr, png_infop info) {
     //png_set_scale_16(png_ptr);
    // png_set_tRNS_to_alpha(png_ptr);
     png_read_update_info(png_ptr, info);
+    pixel_depth = 8;
   }
 
   
@@ -163,6 +164,11 @@ int initialize_png_reader() {
 
 /* A code fragment that you call as you receive blocks of data */
 int inlinepng_process_data(png_bytep buffer, png_uint_32 length) {
+  if(Gpng_ptr == 0) {
+    png_cleanup();
+    return 0;
+  };
+  
   if (setjmp(png_jmpbuf(Gpng_ptr))) {
     png_destroy_read_struct(&Gpng_ptr, &Ginfo_ptr, (png_infopp)NULL);
     return 1;
@@ -232,13 +238,7 @@ void buffer_dump() {
 
 int inline_data_receive(char *data,int length) {
 
-  printf("buf received: ");
-  for(int n=0;n<length;n++) {
-    printf("%c,",data[n]);
-  }
-  printf("\n");
-
-  //printf("inline data received data\n");
+  printf("inline data received data\n");
 
   if(processing_png == true) {
     printf("currently processing png\n");
@@ -268,8 +268,10 @@ int inline_data_receive(char *data,int length) {
   printf("buffer located magic: %d\n",pos);
   if(pos < 0) return 0;
 
+
   processing_png=true;
 
+  base64_init();
   initialize_png_reader();
   char decoded_buffer[4096]; // should be malloc'd based on length.
   bool failflag;

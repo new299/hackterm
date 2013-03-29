@@ -161,6 +161,18 @@ void regis_processor(const char *cmd,int cmdlen) {
     #ifndef IPHONE_BUILD
     clock_gettime(CLOCK_MONOTONIC,&regis_last_render);
     #endif
+    
+    #ifdef IPHONE_BUILD
+    #if _POSIX_TIMERS > 0
+    clock_gettime(CLOCK_REALTIME, &tp);
+    #else
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    regis_last_render.tv_sec = tv.tv_sec;
+    regis_last_render.tv_nsec = tv.tv_usec*1000;
+    #endif
+    #endif
+
 
     int clen = cmdlen-(command-cmd);
     if(clen<2) return;
@@ -171,11 +183,25 @@ void regis_processor(const char *cmd,int cmdlen) {
 }
  
 
+
+
 bool regis_recent() {
  
   struct timespec current_time;
+  
   #ifndef IPHONE_BUILD
   clock_gettime(CLOCK_MONOTONIC,&current_time);
+  #endif
+  
+  #ifdef IPHONE_BUILD
+  #if _POSIX_TIMERS > 0
+  clock_gettime(CLOCK_REALTIME, &tp);
+  #else
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  current_time.tv_sec = tv.tv_sec;
+  current_time.tv_nsec = tv.tv_usec*1000;
+  #endif
   #endif
 
   struct timespec delta_time;
