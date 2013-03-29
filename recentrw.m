@@ -1,6 +1,6 @@
 #include "recentrw.h"
 #include <stdio.h>
-
+#import <Foundation/Foundation.h>
 
 char *fgetstr(char *dest,int len,FILE *f) {
 
@@ -21,7 +21,14 @@ char *fgetstr(char *dest,int len,FILE *f) {
 
 void readall_connections(char **hostnames,char **usernames,char **passwords) {
 
-  FILE *recentf = fopen("recentservers.txt","rw");
+  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+  NSString *fpath = [paths objectAtIndex:0];
+
+  fpath = [fpath stringByAppendingString:@"/recentservers.txt"];
+
+  printf("read file path: %s\n",[fpath cStringUsingEncoding:NSUTF8StringEncoding]);
+
+  FILE *recentf = fopen([fpath cStringUsingEncoding:NSUTF8StringEncoding],"r");
 
   for(int n=0;n<RECENTCONNECTIONS;n++) {
     hostnames[n] = malloc(100);
@@ -41,9 +48,7 @@ void readall_connections(char **hostnames,char **usernames,char **passwords) {
     if(feof(recentf)) {
       hostnames[n][0]=0;
     } else {
-//      char mystring [100];
       char *r = fgetstr(hostnames[n],99,recentf);
-//      strcpy(hostnames[n],mystring);
     }
     if(feof(recentf)) usernames[n][0]=0; else fgetstr(usernames[n],99,recentf);
     if(feof(recentf)) passwords[n][0]=0; else fgetstr(passwords[n],99,recentf);
@@ -53,11 +58,20 @@ void readall_connections(char **hostnames,char **usernames,char **passwords) {
 
 void writeall_connections(char **hostnames,char **usernames,char **passwords) {
 
-  FILE *recentf = fopen("recentservers.txt","w");
+  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+  NSString *fpath = [paths objectAtIndex:0];
+
+  fpath = [fpath stringByAppendingString:@"/recentservers.txt"];
+
+  printf("write file path: %s\n",[fpath cStringUsingEncoding:NSUTF8StringEncoding]);
+
+  FILE *recentf = fopen([fpath cStringUsingEncoding:NSUTF8StringEncoding],"w");
+  if(recentf==0) return;
   for(int n=0;n<RECENTCONNECTIONS;n++) {
     fprintf(recentf,"%s %s %s\n",hostnames[n],usernames[n],passwords[n]);
   }
   fclose(recentf);
+
 }
 
 void write_connection(const char* hostname,const char *username,const char *password) {

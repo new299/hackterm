@@ -11,20 +11,19 @@
 
 @implementation RecentItemsDataSource 
 
-@synthesize selection = _selection;
+  @synthesize selection = _selection;
+  @synthesize initialised = _initialised;
 
+  char *hostnames[RECENTCONNECTIONS];
+  char *usernames[RECENTCONNECTIONS];
+  char *passwords[RECENTCONNECTIONS];
 
-//TODO: make part of class
-char *hostnames[RECENTCONNECTIONS];
-char *usernames[RECENTCONNECTIONS];
-char *passwords[RECENTCONNECTIONS];
-bool init=false;
 
 - (UITableViewCell *)tableView:view cellForRowAtIndexPath:idx {
 
-  if(init==false) {
+  if(_initialised==false) {
     readall_connections(hostnames,usernames,passwords);
-    init=true;
+    _initialised=true;
   }
 
   UITableViewCell *cell = [view dequeueReusableCellWithIdentifier:@"i" forIndexPath:idx];
@@ -43,9 +42,9 @@ bool init=false;
 
 - (NSInteger)tableView:view numberOfRowsInSection:idx {
 
-  if(init==false) {
+  if(_initialised==false) {
     readall_connections(hostnames,usernames,passwords);
-    init=true;
+    _initialised=true;
   }
 
   for(int n=0;n<RECENTCONNECTIONS;n++) {

@@ -62,6 +62,7 @@ void display_serverselect(SDL_Window *window)
     viewcon = [[[NSBundle mainBundle] loadNibNamed:@"ServerSelect" owner:nil options:nil] objectAtIndex:0];
     
     source = [[RecentItemsDataSource alloc] initWithStyle:UITableViewStylePlain];
+    source.initialised=false;
     source.selection=-1;
     last_selection = -1;
     
@@ -122,7 +123,7 @@ void display_server_select_closedlg() {
   DisconnectAlertDelegate *discon = [[DisconnectAlertDelegate alloc] init];
 
   UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Disconnect"
-                                                message:@"Connected closed"
+                                                message:@"Connection closed"
                                                delegate:discon
                                       cancelButtonTitle:@"OK"
                                       otherButtonTitles:nil];
