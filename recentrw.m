@@ -76,16 +76,47 @@ void writeall_connections(char **hostnames,char **usernames,char **passwords) {
 
 void write_connection(const char* hostname,const char *username,const char *password) {
 
+  if(hostname[0]==0) return;
+
   char *hostnames[RECENTCONNECTIONS];
   char *usernames[RECENTCONNECTIONS];
   char *passwords[RECENTCONNECTIONS];
 
   readall_connections(&hostnames,&usernames,&passwords);
+  
 
   for(int n=(RECENTCONNECTIONS-1);n>=1;n--) {
     strcpy(hostnames[n],hostnames[n-1]);
     strcpy(usernames[n],usernames[n-1]);
     strcpy(passwords[n],passwords[n-1]);
+  }
+
+  int lastitem=RECENTCONNECTIONS-1;
+  for(int n=0;n<RECENTCONNECTIONS;n++) {
+    if(hostnames[n][0] == 0) {lastitem=n; break;}
+  }
+
+
+  // check if already present
+  for(int n=1;n<RECENTCONNECTIONS;n++) {
+    if(
+    (strcmp(hostname,hostnames[n])==0) &&
+    (strcmp(username,usernames[n])==0) &&
+    (strcmp(password,passwords[n])==0)
+    ) {
+      strcpy(hostnames[0],hostname);
+      strcpy(usernames[0],username);
+      strcpy(passwords[0],password);
+      
+      for(int i=n;i<(RECENTCONNECTIONS-1);i++) {
+        strcpy(hostnames[n],hostnames[n+1]);
+        strcpy(usernames[n],usernames[n+1]);
+        strcpy(passwords[n],passwords[n+1]);
+      }
+      hostnames[lastitem][0]=0;
+      usernames[lastitem][0]=0;
+      passwords[lastitem][0]=0;
+    }
   }
   
   strcpy(hostnames[0],hostname);

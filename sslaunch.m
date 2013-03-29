@@ -117,7 +117,6 @@ void display_serverselect_complete() {
   [view removeFromSuperview];
 }
 
-
 void display_server_select_closedlg() {
 
   DisconnectAlertDelegate *discon = [[DisconnectAlertDelegate alloc] init];
