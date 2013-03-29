@@ -110,7 +110,7 @@ int ssh_open(char *hostname,char *username,char *password) {
   fingerprint = libssh2_hostkey_hash(session, LIBSSH2_HOSTKEY_HASH_SHA1);
   fprintf(stderr, "Fingerprint: ");
   for(i = 0; i < 20; i++) {
-      fprintf(stderr, "%02X ", (unsigned char)fingerprint[i]);
+      fprintf(stderr, "%02X", (unsigned char)fingerprint[i]);
   }
   fprintf(stderr, "\n");
   /* check what authentication methods are available */
@@ -178,6 +178,8 @@ int ssh_open(char *hostname,char *username,char *password) {
 }
 
 int ssh_write(unsigned char *bytes,int len) {
+  if(channel == 0) return -1;
+
   libssh2_channel_write(channel,bytes,len);
      // libssh2_channel_write_stderr()
      
@@ -189,6 +191,7 @@ int ssh_write(unsigned char *bytes,int len) {
 }
 
 int ssh_read(char *bytes,int len) {
+  if(channel == 0) return -1;
   
   if(libssh2_channel_eof(channel) == 1) {
     return -1;
@@ -200,33 +203,33 @@ int ssh_read(char *bytes,int len) {
 }
 
 int ssh_close() {
+  if(session == 0) return 1;
 
-    if (channel) {
-        libssh2_channel_free(channel);
-        channel = NULL;
-    }
+  if (channel) {
+    libssh2_channel_free(channel);
+    channel  = NULL;
+  }
 
-    /* Other channel types are supported via:
-     * libssh2_scp_send()
-     * libssh2_scp_recv()
-     * libssh2_channel_direct_tcpip()
-     */
+  libssh2_session_disconnect(session, "Sesson closed");
+  libssh2_session_free(session);
 
-    libssh2_session_disconnect(session, "Sesson closed");
-    libssh2_session_free(session);
 
 #ifdef WIN32
-    closesocket(sock);
+  closesocket(sock);
 #else
-    close(sock);
+  close(sock);
 #endif
-    fprintf(stderr, "all done!\n");
+  fprintf(stderr, "all done!\n");
 
-    libssh2_exit();
+  session = 0;
+  channel = 0;
+  libssh2_exit();
+  return 0;
 }
 
 int ssh_resize(int cols,int rows){
 
+  if(channel == 0) return 1;
   libssh2_channel_request_pty_size(channel,cols,rows);
 
 }

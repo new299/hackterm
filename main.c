@@ -1163,6 +1163,16 @@ void virtual_kb_paste(char *c) {
   }
 }
 
+void virtual_kb_kbshow(char *c) {
+  printf("VIRTUAL KBSHOW\n");
+}
+
+void virtual_kb_close(char *c) {
+  printf("VIRTUAL CLOSE\n");
+  c_close();
+}
+
+
 int main(int argc, char **argv) {
     
   do_sdl_init();
@@ -1181,6 +1191,10 @@ int main(int argc, char **argv) {
   ngui_add_button(display_width-(16*6*1),display_height-(16*6*3),"Iright",virtual_kb_right);
 
   ngui_add_button(display_width-(16*6*2),display_height-(16*6*2),"Ipaste",virtual_kb_paste);
+
+  ngui_add_button(display_width-(16*6*1),0,"Iclose",virtual_kb_close);
+  ngui_add_button(display_width-(16*6*2),0,"Ikb"   ,virtual_kb_kbshow);
+
     
   nunifont_load_staticmap(__fontmap_static,__widthmap_static,__fontmap_static_len,__widthmap_static_len);
 
