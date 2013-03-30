@@ -93,7 +93,7 @@ void write_connection(const char* hostname,const char *username,const char *pass
 
   int lastitem=RECENTCONNECTIONS-1;
   for(int n=0;n<RECENTCONNECTIONS;n++) {
-    if(hostnames[n][0] == 0) {lastitem=n; break;}
+    if(hostnames[n][0] == 0) {lastitem=n-1; break;}
   }
 
 
@@ -116,6 +116,7 @@ void write_connection(const char* hostname,const char *username,const char *pass
       hostnames[lastitem][0]=0;
       usernames[lastitem][0]=0;
       passwords[lastitem][0]=0;
+      break;
     }
   }
   
