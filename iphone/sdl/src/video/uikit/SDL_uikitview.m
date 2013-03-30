@@ -255,8 +255,84 @@
   //  NSLog([[notification object]text]);
 }
 
--(void)keyboardWillShow:(NSNotification*)notification {
+-(void)keyboardDidShow:(NSNotification*)notification {
+  NSDictionary* keyboardInfo = [notification userInfo];
+  NSValue* keyboardFrameEnd = [keyboardInfo valueForKey:UIKeyboardFrameEndUserInfoKey];
+  CGRect keyboardFrameEndRect = [keyboardFrameEnd CGRectValue];
+  
+  SDL_Window *window = self->viewcontroller.window;
+  SDL_WindowData *data = window->driverdata;
+  SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
+  if(display == 0) return; // For some reason display is /sometimes/ not set on second call, no idea why.
+  SDL_DisplayModeData *displaymodedata = (SDL_DisplayModeData *) display->current_mode.driverdata;
+    
+    
+  const CGSize size = data->view.bounds.size;
+  
+  int kb_h = keyboardFrameEndRect.size.height;
+  int kb_w = keyboardFrameEndRect.size.width;
+  int kb_x = keyboardFrameEndRect.origin.x;
+  int kb_y = keyboardFrameEndRect.origin.y;
 
+  CGFloat deviceHeight = [UIScreen mainScreen].bounds.size.height;
+  CGFloat deviceWidth  = [UIScreen mainScreen].bounds.size.width;
+
+  CGFloat newKeyboardHeight;
+
+  printf("deviceheight: %f\n",deviceHeight);
+  printf("devicewidth: %f\n",deviceWidth);
+
+  UIDeviceOrientation *interfaceOrientation = [[UIDevice currentDevice] orientation];
+  
+  keyboardVisible = YES;
+
+  // iOS is sometimes sending supurious DidShow notifications when a bluetooth keyboard is connected.
+  // this is my (vain) attempt to detect some of them, but they often look /exactly/ like real events.
+  if (interfaceOrientation == UIInterfaceOrientationPortrait) {
+      printf("orientation: portrait\n");
+  }
+  else if (interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown) {
+      printf("orientation: upsidedown\n");
+  }
+  else if (interfaceOrientation == UIInterfaceOrientationLandscapeLeft) {
+      printf("orientation: landscapeleft\n");
+      if(kb_w > kb_h) keyboardVisible=NO;
+      if(kb_x == 0  ) keyboardVisible=NO;
+  }
+  else if (interfaceOrientation == UIInterfaceOrientationLandscapeRight){
+      printf("orientation: landscaperight\n");
+      if(kb_w > kb_h) keyboardVisible=NO;
+  }
+  else {
+      printf("other orientation?\n");
+  }
+
+  if(keyboardVisible == NO) {
+    kb_w=0;
+    kb_h=0;
+  }
+  
+
+  int nkb_h;
+  if(kb_h > kb_w) {
+    nkb_h = kb_w;
+  } else {
+    nkb_h = kb_h;
+  }
+
+  
+  NSLog(@"keyboardvis: %u",keyboardVisible);
+  int w, h;
+  w = (int)(size.width  * displaymodedata->scale);
+  h = (int)(size.height * displaymodedata->scale)-(nkb_h*displaymodedata->scale);
+
+  SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MOVED, w, h);//TODO: NW ADD NEW EVENT TYPE
+  NSLog(@"KeyboardDidShow %@", NSStringFromCGRect(keyboardFrameEndRect));
+
+}
+
+-(void)keyboardWillShow:(NSNotification*)notification {
+/*
   NSDictionary* keyboardInfo = [notification userInfo];
   NSValue* keyboardFrameBegin = [keyboardInfo valueForKey:UIKeyboardFrameBeginUserInfoKey];
   CGRect keyboardFrameBeginRect = [keyboardFrameBegin CGRectValue];
@@ -272,6 +348,8 @@
   
   int kb_h = keyboardFrameBeginRect.size.height;
   int kb_w = keyboardFrameBeginRect.size.width;
+  int kb_x = keyboardFrameBeginRect.origin.x;
+  int kb_y = keyboardFrameBeginRect.origin.y;
 
   if(kb_h > kb_w) {
     int t = kb_h;
@@ -279,19 +357,87 @@
     kb_w = t;
   }
 
+
+  CGFloat deviceHeight = [UIScreen mainScreen].bounds.size.height;
+  CGFloat deviceWidth  = [UIScreen mainScreen].bounds.size.width;
+
+  CGFloat newKeyboardHeight;
+
+  printf("deviceheight: %f\n",deviceHeight);
+  printf("devicewidth: %f\n",deviceWidth);
+
+  UIDeviceOrientation *interfaceOrientation = [[UIDevice currentDevice] orientation];
+  
+  if (interfaceOrientation == UIInterfaceOrientationPortrait) {
+      printf("orientation: portrait\n");
+      newKeyboardHeight = deviceHeight - keyboardFrameBeginRect.origin.y;
+  }
+  else if (interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown) {
+      printf("orientation: upsidedown\n");
+      newKeyboardHeight = keyboardFrameBeginRect.size.height + keyboardFrameBeginRect.origin.y;
+  }
+  else if (interfaceOrientation == UIInterfaceOrientationLandscapeLeft) {
+      printf("orientation: landscapeleft\n");
+      newKeyboardHeight = deviceHeight - keyboardFrameBeginRect.origin.x;
+  }
+  else if (interfaceOrientation == UIInterfaceOrientationLandscapeRight){
+      printf("orientation: landscaperight\n");
+      newKeyboardHeight = keyboardFrameBeginRect.size.width - keyboardFrameBeginRect.origin.x;
+  }
+  else {
+      printf("other orientation?\n");
+  }
+
+  //if(newKeyboardHeight != 0) keyboardVisible=YES;
+  //else keyboardVisible=NO;
+
+  if(keyboardVisible == NO) {
+    kb_w=0;
+    kb_h=0;
+  }
+  NSLog(@"keyboardvis: %u",keyboardVisible);
   int w, h;
   w = (int)(size.width  * displaymodedata->scale);
   h = (int)(size.height * displaymodedata->scale)-(kb_h*displaymodedata->scale);
 
   SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MOVED, w, h);//TODO: NW ADD NEW EVENT TYPE
   NSLog(@"KeyboardWillShow %@", NSStringFromCGRect(keyboardFrameBeginRect));
+*/
 }
- 
+
+
+- (void)fullsize_window
+{
+  SDL_Window *window = self->viewcontroller.window;
+  SDL_WindowData *data = window->driverdata;
+
+  SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
+  if(display == 0) return; // For some reason display is /sometimes/ not set on second call, no idea why.
+  SDL_DisplayModeData *displaymodedata = (SDL_DisplayModeData *) display->current_mode.driverdata;
+  
+  const CGSize size = data->view.bounds.size;
+
+  int w, h;
+  w = (int)(size.width  * displaymodedata->scale);
+  h = (int)(size.height * displaymodedata->scale);
+  SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MOVED, w, h);//TODO: NW ADD NEW EVENT TYPE
+}
+
 -(void)keyboardWillHide:(NSNotification*)notification {
   // Animate the current view back to its original position
-  NSLog(@"KeyboardHiding");
+  NSLog(@"KeyboardHiding\n");
+  [self fullsize_window];
   keyboardVisible = NO;
 }
+
+
+-(void)keyboardDidHide:(NSNotification*)notification {
+  // Animate the current view back to its original position
+  [self fullsize_window];
+  NSLog(@"KeyboardHide\n");
+  keyboardVisible = NO;
+}
+
 
 /* Set ourselves up as a UITextFieldDelegate */
 - (void)initializeKeyboard
@@ -299,7 +445,6 @@
   textInput = [[SDLTextView alloc] init];
 
   [textInput reloadInputViews];
-  keyboardVisible = YES;
   [self addSubview: textInput];
   [textInput becomeFirstResponder];
   [[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(keyPressed:) name: nil object: nil];
@@ -308,10 +453,18 @@
                                            selector:@selector(keyboardWillShow:)
                                                name:UIKeyboardWillShowNotification
                                              object:nil];
+    
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
+
 
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(keyboardWillHide:)
                                                name:UIKeyboardWillHideNotification
+                                             object:nil];
+
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(keyboardDidHide:)
+                                               name:UIKeyboardDidHideNotification
                                              object:nil];
 
 }
@@ -320,13 +473,14 @@
 /* reveal onscreen virtual keyboard */
 - (void)showKeyboard
 {
-    keyboardVisible = YES;
+    //keyboardVisible = YES;
     [textInput becomeFirstResponder];
 }
 
 /* hide onscreen virtual keyboard */
 - (void)hideKeyboard
 {
+    printf("Hide keyboard called\n");
     keyboardVisible = NO;
 ////////////////    [textInput resignFirstResponder];
 }

@@ -288,8 +288,12 @@ static int erase_internal(VTermRect rect, void *user)
   for(int row = rect.start_row; row < rect.end_row; row++)
     for(int col = rect.start_col; col < rect.end_col; col++) {
       ScreenCell *cell = getcell(screen, row, col);
-      cell->chars[0] = 0;
-      cell->pen = screen->pen;
+      
+      // my code can sometimes trigger this state
+      if(cell != 0) {
+        cell->chars[0] = 0;
+        cell->pen = screen->pen;
+      }
     }
 
   return 1;

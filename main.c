@@ -911,7 +911,10 @@ void sdl_read_thread(SDL_Event *event) {
        ((event->window.event == SDL_WINDOWEVENT_RESIZED) || (event->window.event == SDL_WINDOWEVENT_RESTORED)))
       ) {
         forced_recreaterenderer=0;
-        SDL_GetWindowSize(screen,&display_width,&display_height);
+//        SDL_GetWindowSize(screen,&display_width,&display_height);
+
+        display_width  = event->window.data1;
+        display_height = event->window.data2;
 
         if(SDL_IsScreenKeyboardShown(screen)) {
           display_width  = display_width_last_kb;
@@ -928,16 +931,17 @@ void sdl_read_thread(SDL_Event *event) {
 
         terminal_resize();
         SDL_RaiseWindow(screen);
+        reposition_buttons();
         redraw_required();
     }
     
     if((event->type == SDL_WINDOWEVENT) && (event->window.event == SDL_WINDOWEVENT_MOVED)) {
       int w = event->window.data1;
       int h = event->window.data2;
-      
+
       display_width  = w;
       display_height = h;
-      
+
       display_width_last_kb  = w;
       display_height_last_kb = h;
       terminal_resize();
@@ -1216,7 +1220,7 @@ int main(int argc, char **argv) {
   ngui_add_button(display_width-(16*6*2),display_height-(16*6*3),"Iup"   ,virtual_kb_up   );
   ngui_add_button(display_width-(16*6*2),display_height-(16*6*1),"Idown" ,virtual_kb_down );
   ngui_add_button(display_width-(16*6*3),display_height-(16*6*2),"Ileft" ,virtual_kb_left );
-  ngui_add_button(display_width-(16*6*1),display_height-(16*6*3),"Iright",virtual_kb_right);
+  ngui_add_button(display_width-(16*6*1),display_height-(16*6*2),"Iright",virtual_kb_right);
 
   ngui_add_button(display_width-(16*6*2),display_height-(16*6*2),"Ipaste",virtual_kb_paste);
 
@@ -1276,11 +1280,9 @@ int main(int argc, char **argv) {
     printf("ihere1\n");
   
     hterm_quit=false;
-    // new server selection
-    // display_serverselect(screen);
     SDL_StopTextInput();
     
-    SDL_Quit();
+    SDL_Quit(); // need this to allow me to draw server selection screen.
     do_sdl_init();
     ngui_set_renderer(renderer, redraw_required);
     nunifont_initcache();

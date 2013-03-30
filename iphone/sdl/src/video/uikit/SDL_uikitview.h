@@ -63,6 +63,7 @@
 - (void)showKeyboard;
 - (void)hideKeyboard;
 - (void)initializeKeyboard;
+- (void)fullsize_window;
 @property (readonly) BOOL keyboardVisible;
 
 SDL_bool UIKit_HasScreenKeyboardSupport(_THIS);
