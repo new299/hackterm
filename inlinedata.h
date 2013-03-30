@@ -6,6 +6,8 @@
 extern SDL_Surface *inline_data_layer;
 extern SDL_mutex   *inline_data_mutex;
 
-void inline_data_init   (int width ,int height);
+void inline_data_init   (int width,int height);
+void inline_data_resize (int width,int height);
 int  inline_data_receive(char *data,int length);
 void inline_data_clear();
+

@@ -24,6 +24,10 @@ void inline_data_init(int width,int height) {
   inline_data_layer = SDL_CreateRGBSurface(SDL_HWSURFACE,width,height,32,0x000000FF,0x0000FF00,0x00FF0000,0xFF000000);
 }
 
+void inline_data_resize(int width,int height) {
+  SDL_FreeSurface(inline_data_layer);
+  inline_data_layer = SDL_CreateRGBSurface(SDL_SWSURFACE,width,height,32,0x000000FF,0x0000FF00,0x00FF0000,0xFF000000);
+}
 
 int width, height;
 int pixel_depth;

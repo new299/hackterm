@@ -289,6 +289,8 @@
  
 -(void)keyboardWillHide:(NSNotification*)notification {
   // Animate the current view back to its original position
+  NSLog(@"KeyboardHiding");
+  keyboardVisible = NO;
 }
 
 /* Set ourselves up as a UITextFieldDelegate */

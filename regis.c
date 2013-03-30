@@ -95,10 +95,21 @@ char *regis_process_cmd_position(char *cmd) {
 }
 
 
-
 void regis_init(int width,int height) {
   printf("regis init: %d %d\n",width,height);
   regis_layer = SDL_CreateRGBSurface(SDL_SWSURFACE,width,height,32,0x000000FF,0x0000FF00,0x00FF0000,0xFF000000);
+  printf("regis layer: %u\n",regis_layer);
+}
+
+// This may not appear to work, because actually the screen gets cleared on rotation anyway, because the
+// screen size changes, and the terminal sends a signal. For this reason, resize currently doesn't try to
+// copy data.
+void regis_resize(int width,int height) {
+  printf("regis resize: %d %d\n",width,height);
+
+  SDL_Surface *old_regis_layer=regis_layer;
+  regis_layer = SDL_CreateRGBSurface(SDL_SWSURFACE,width,height,32,0x000000FF,0x0000FF00,0x00FF0000,0xFF000000);
+  SDL_FreeSurface(old_regis_layer);
   printf("regis layer: %u\n",regis_layer);
 }
 

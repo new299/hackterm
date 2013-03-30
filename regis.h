@@ -20,6 +20,7 @@ char *regis_process_cmd_text(char *cmd);
 char *regis_process_cmd_w(char *cmd);
 char *regis_process_cmd_position(char *cmd);
 void regis_init(int width,int height);
+void regis_resize(int width,int height);
 char *regis_process_cmd_vector(char *cmd);
 char *regis_process_command(char *cmd);
 void regis_processor(const char *cmd,int cmdlen);

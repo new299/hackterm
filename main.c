@@ -110,7 +110,6 @@ void scroll_buffer_get(size_t line_number,VTermScreenCell **line,int *len);
 bool hterm_next_key_ctrl=false;
 
 void regis_render() {
-  //SDL_mutexP(regis_mutex);
 
   if(!regis_cleared()) {
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, regis_layer);
@@ -118,8 +117,6 @@ void regis_render() {
     SDL_RenderCopy(renderer, texture, NULL, NULL);
     SDL_DestroyTexture(texture);
   }
-//  int res = SDL_BlitSurface(regis_layer,NULL,screen,NULL);
-  //SDL_mutexV(regis_mutex);
 }
 
 void inline_data_render() {                                        
@@ -583,9 +580,30 @@ void console_poll() {
   }
 }
 
+void reposition_buttons() {
+  int dwidth  = display_width -(display_width %16);
+  int dheight = display_height-(display_height%16);
+  ngui_move_button("Iesc"  ,dwidth-(16*6*3),dheight-(16*6*3));
+  ngui_move_button("Ialt"  ,dwidth-(16*6*3),dheight-(16*6*1));
+  ngui_move_button("Ictrl" ,dwidth-(16*6*1),dheight-(16*6*3));
+  ngui_move_button("Itab"  ,dwidth-(16*6*1),dheight-(16*6*1));
+      
+  ngui_move_button("Iup"   ,dwidth-(16*6*2),dheight-(16*6*3));
+  ngui_move_button("Idown" ,dwidth-(16*6*2),dheight-(16*6*1));
+  ngui_move_button("Ileft" ,dwidth-(16*6*3),dheight-(16*6*2));
+  ngui_move_button("Iright",dwidth-(16*6*1),dheight-(16*6*2));
+      
+  ngui_move_button("Ipaste",dwidth-(16*6*2),dheight-(16*6*2));
+      
+  ngui_move_button("Iclose" ,display_width-(16*6*1)     ,0);
+  ngui_move_button("Ikbshow",display_width-(16*6)-(16*7),0);
+}
 
 bool redraw_req=true;
 bool first_render=true;
+int forced_recreaterenderer=0;
+int last_kb_shown=-2;
+
 void sdl_render_thread() {
   
   SDL_Event event;
@@ -611,18 +629,31 @@ void sdl_render_thread() {
         sdl_read_thread(&event);
       }
     }
-    
+      
     console_poll();
     if(hterm_quit == true) return;
+
+    if((SDL_IsScreenKeyboardShown(screen) != last_kb_shown) &&
+       (last_kb_shown != -2)) {
+      SDL_GetWindowSize(screen,&display_width,&display_height);
+
+      //regis_resize(display_width,display_height);
+      //inline_data_resize(display_width,display_height);
+      
+      if(SDL_IsScreenKeyboardShown(screen)) {
+        display_width  = display_width_last_kb;
+        display_height = display_height_last_kb;
+      }
+
+      reposition_buttons();
+      redraw_required();
+    }
+    last_kb_shown = SDL_IsScreenKeyboardShown(screen);
   }
 }
 
 void redraw_required() {
-//  uint32_t v =  SDL_SemValue(redraw_sem);
-//  if(v > 5) return;
-
   redraw_req=true;
-//  SDL_SemPost(redraw_sem);
 }
 
 
@@ -855,7 +886,7 @@ void process_mouse_event(SDL_Event *event) {
   }
 }
 
-int forced_recreaterenderer=0;
+
 
 void sdl_read_thread(SDL_Event *event) {
   ngui_receive_event(event);
@@ -880,6 +911,8 @@ void sdl_read_thread(SDL_Event *event) {
           display_width  = display_width_last_kb;
           display_height = display_height_last_kb;
         }
+        regis_resize(display_width,display_height);
+        inline_data_resize(display_width,display_height);
 
         SDL_DestroyRenderer(renderer);
         renderer = SDL_CreateRenderer(screen, -1, SDL_RENDERER_ACCELERATED);
@@ -903,23 +936,7 @@ void sdl_read_thread(SDL_Event *event) {
       display_height_last_kb = h;
       terminal_resize();
       
-      int dwidth  = display_width -(display_width %16);
-      int dheight = display_height-(display_height%16);
-      ngui_move_button("Iesc"  ,dwidth-(16*6*3),dheight-(16*6*3));
-      ngui_move_button("Ialt"  ,dwidth-(16*6*3),dheight-(16*6*1));
-      ngui_move_button("Ictrl" ,dwidth-(16*6*1),dheight-(16*6*3));
-      ngui_move_button("Itab"  ,dwidth-(16*6*1),dheight-(16*6*1));
-      
-      ngui_move_button("Iup"   ,dwidth-(16*6*2),dheight-(16*6*3));
-      ngui_move_button("Idown" ,dwidth-(16*6*2),dheight-(16*6*1));
-      ngui_move_button("Ileft" ,dwidth-(16*6*3),dheight-(16*6*2));
-      ngui_move_button("Iright",dwidth-(16*6*1),dheight-(16*6*2));
-      
-      ngui_move_button("Ipaste",dwidth-(16*6*2),dheight-(16*6*2));
-      
-      ngui_move_button("Iclose" ,display_width-(16*6*1)     ,0);
-      ngui_move_button("Ikbshow",display_width-(16*6)-(16*7),0);
-
+      reposition_buttons();
     }
     
     printf("event\n");
