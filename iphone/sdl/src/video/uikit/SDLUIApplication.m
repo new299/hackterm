@@ -118,10 +118,33 @@ void check_code(int keymod,int keymask,int *key) {
             if ((eventType == GSEVENT_TYPE_KEYUP  ) && (keycode == 3 )) {
                 SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_MODE);
             } else
-            {
+            if ((eventType == GSEVENT_TYPE_KEYDOWN  ) && (keycode == 82 )) {
+              SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_UP);
+            } else
+            if ((eventType == GSEVENT_TYPE_KEYUP  ) && (keycode == 82 )) {
+              SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_UP);
+            } else 
+            if ((eventType == GSEVENT_TYPE_KEYDOWN  ) && (keycode == 81 )) {
+              SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_DOWN);
+            } else
+            if ((eventType == GSEVENT_TYPE_KEYUP  ) && (keycode == 81 )) {
+              SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_DOWN);
+            } else 
+            if ((eventType == GSEVENT_TYPE_KEYDOWN  ) && (keycode == 80 )) {
+              SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_LEFT);
+            } else
+            if ((eventType == GSEVENT_TYPE_KEYUP  ) && (keycode == 80 )) {
+              SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_LEFT);
+            } else 
+            if ((eventType == GSEVENT_TYPE_KEYDOWN  ) && (keycode == 79 )) {
+              SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_RIGHT);
+            } else
+            if ((eventType == GSEVENT_TYPE_KEYUP  ) && (keycode == 79 )) {
+              SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_RIGHT);
+            } else {
                 printf("keycode %u\n",keycode);
-//                printf("keymod1 %u\n",keymod1);
-//                printf("keymod2 %u\n",keymod2);
+                printf("keymod1 %u\n",keymod1);
+                printf("keymod2 %u\n",keymod2);
             }
         }
     }

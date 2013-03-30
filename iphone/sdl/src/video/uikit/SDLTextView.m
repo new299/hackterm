@@ -97,6 +97,9 @@ int c=10;
     return i;
 }
 
+
+//TODO: The code here is currently disabled, because this method isn't /always/ called
+//      see: http://stackoverflow.com/questions/14921030/ios-understanding-positionfrompositionindirectionoffset
 - (void)setSelectedTextRange:(UITextRange *)range
 {
     
@@ -111,19 +114,19 @@ int c=10;
     // and this is why you shouldn't code at 4am.
     int j=c-1;
     int next = ((j-6)%9)+6;
-    if(s==next) { printf("left\n"); SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_LEFT); SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_LEFT);}
+    //if(s==next) { printf("left\n"); SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_LEFT); SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_LEFT);}
 
     j=c+1;
     next = ((j-6)%9)+6;
-    if(s==next) { printf("right\n"); SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_RIGHT); SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_RIGHT);}
+    //if(s==next) { printf("right\n"); SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_RIGHT); SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_RIGHT);}
     
     j=c+3;
     next = ((j-6)%9)+6;
-    if(s==next) { printf("dwm\n"); SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_DOWN); SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_DOWN);}
+    //if(s==next) { printf("dwm\n"); SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_DOWN); SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_DOWN);}
     
     j=c-3;
     if(j<6) next=15-(6-j); else next=j;
-    if(s==next) { printf("up\n"); SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_UP);   SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_UP);}
+    //if(s==next) { printf("up\n"); SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_UP);   SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_UP);}
     
     c=s;
 }
