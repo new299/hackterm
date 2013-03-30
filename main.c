@@ -66,7 +66,6 @@ int display_height_last_kb=0;
 
 SDL_Window  *screen=1;
 SDL_Renderer *renderer=1;
-// NONIPHONE1.2 SDL_Surface *screen=0;
 
 bool draw_selection = false;
 int select_start_x=0;
@@ -376,22 +375,32 @@ int csi_handler(const char *leader, const long args[], int argcount, const char 
 }
 
 int dcs_handler(const char *command,size_t cmdlen,void *user) {
-  printf("command is: ");
-  for(int n=0;n<cmdlen;n++) {
-    printf("%u,",command[n]);
-  }
+//  printf("command is: ");
+//  for(int n=0;n<cmdlen;n++) {
+//    printf("%u,",command[n]);
+//  }
   if(cmdlen < 3) return 0;
 
   regis_processor(command+2,cmdlen);
   printf("\n");
 }
 
+int osc_handler(const char *command,size_t cmdlen,void *user) {
+}
+
+int text_handler(const char *bytes, size_t len, void *user) {
+  inline_data_receive(bytes,len);
+}
+
+int esc_handler(const char *bytes, size_t len, void *user) {
+}
+
 VTermParserCallbacks cb_parser = {
-  .text    = 0,
+  .text    = text_handler,
   .control = 0,
-  .escape  = 0,
+  .escape  = esc_handler,
   .csi     = csi_handler,
-  .osc     = 0,
+  .osc     = osc_handler,
   .dcs     = dcs_handler,
   .resize  = 0  //&parser_resize,
 //  int (*text)(const char *bytes, size_t len, void *user);
@@ -416,9 +425,7 @@ void terminal_resize() {
 
   if(c_resize != NULL) (*c_resize)(cols,rows);
 
-  //SDL_mutexP(vterm_mutex);
   if(vt != 0) vterm_set_size(vt,rows,cols);
-  //SDL_mutexV(vterm_mutex);
 }
 
 void cursor_position(int *cursorx,int *cursory) {
@@ -562,20 +569,24 @@ void console_poll() {
   int len;
   char buffer[10241];
   len = c_read(buffer, sizeof(buffer)-1);
-    
+
   if(len > 0) {
-    inline_data_receive(buffer,len);
-    //SDL_mutexP(vterm_mutex);
+    //inline_data_receive(buffer,len);
+    printf("processing buf: %s\n",buffer);
+    printf("numeric       :");
+    for(int n=0; n<len;n++) {
+      printf("%03u ",buffer[n]);
+    }
+    printf("\n");
+
     if((buffer != 0) && (len != 0)) {
       vterm_push_bytes(vt, buffer, len);
     }
-    //SDL_mutexV(vterm_mutex);
     redraw_required();
   }
   
   if(len < 0) {
     hterm_quit = true;
-    //SDL_CondSignal(cond_quit);
     return;
   }
 }
@@ -600,15 +611,13 @@ void reposition_buttons() {
 }
 
 bool redraw_req=true;
-bool first_render=true;
 int forced_recreaterenderer=0;
 int last_kb_shown=-2;
 
 void sdl_render_thread() {
   
   SDL_Event event;
-  if(first_render) SDL_StartTextInput();
-  //first_render=false;
+  SDL_StartTextInput();
   
   for(;;) {
     //int ok = SDL_SemWaitTimeout(redraw_sem,1);
@@ -636,9 +645,6 @@ void sdl_render_thread() {
     if((SDL_IsScreenKeyboardShown(screen) != last_kb_shown) &&
        (last_kb_shown != -2)) {
       SDL_GetWindowSize(screen,&display_width,&display_height);
-
-      //regis_resize(display_width,display_height);
-      //inline_data_resize(display_width,display_height);
       
       if(SDL_IsScreenKeyboardShown(screen)) {
         display_width  = display_width_last_kb;

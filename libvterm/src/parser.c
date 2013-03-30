@@ -143,10 +143,20 @@ static size_t do_string(VTerm *vt, const char *str_frag, size_t len)
 
   switch(vt->parser_state) {
   case NORMAL:
+
+
     if(vt->parser_callbacks && vt->parser_callbacks->text) {
-      if((eaten = (*vt->parser_callbacks->text)(str_frag, len, vt->cbdata)))
+      if((eaten = (*vt->parser_callbacks->text)(str_frag, len, vt->cbdata))) {
+
+        // This is /REALLY/ inconsistant
+        if(vt->parser_backup_callbacks && vt->parser_backup_callbacks->text) {
+          (*vt->parser_backup_callbacks->text)(str_frag, eaten, vt->cbdata);
+        }
+
         return eaten;
+      }
     }
+
 
     fprintf(stderr, "libvterm: Unhandled text (%zu chars)\n", len);
     return 0;
@@ -158,6 +168,9 @@ static size_t do_string(VTerm *vt, const char *str_frag, size_t len)
       do_control(vt, str_frag[0] + 0x40);
       return 0;
     }
+    
+    if(vt->parser_backup_callbacks && vt->parser_backup_callbacks->escape)
+      (*vt->parser_backup_callbacks->escape)(str_frag, len, vt->cbdata);
 
     if(vt->parser_callbacks && vt->parser_callbacks->escape)
       if((*vt->parser_callbacks->escape)(str_frag, len, vt->cbdata))
@@ -171,6 +184,9 @@ static size_t do_string(VTerm *vt, const char *str_frag, size_t len)
     return 0;
 
   case OSC:
+    if(vt->parser_backup_callbacks && vt->parser_backup_callbacks->osc)
+      (*vt->parser_backup_callbacks->osc)(str_frag, len, vt->cbdata);
+
     if(vt->parser_callbacks && vt->parser_callbacks->osc)
       if((*vt->parser_callbacks->osc)(str_frag, len, vt->cbdata))
         return 0;
