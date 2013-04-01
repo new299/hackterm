@@ -81,6 +81,10 @@ int ssh_open(char *hostname,char *username,char *password) {
 
   sock = socket(AF_INET, SOCK_STREAM, 0);
   printf("socket: %d\n",sock);
+  int set=1;
+  
+  //If you don't set this you'll get a sigpipe on lock on iOS.
+  setsockopt(sock,SOL_SOCKET,SO_NOSIGPIPE,(void *)&set,sizeof(int));
 
   //sin.sin_family = AF_INET;
   sin.sin_port = htons(22);
@@ -179,8 +183,9 @@ int ssh_open(char *hostname,char *username,char *password) {
 
 int ssh_write(unsigned char *bytes,int len) {
   if(channel == 0) return -1;
+  if(libssh2_channel_eof(channel) != 0) {return -1;}
 
-  libssh2_channel_write(channel,bytes,len);
+  int l = libssh2_channel_write(channel,bytes,len);
      // libssh2_channel_write_stderr()
      
      // Blocking mode may be (en|dis)abled with: libssh2_channel_set_blocking()
@@ -193,13 +198,19 @@ int ssh_write(unsigned char *bytes,int len) {
 int ssh_read(char *bytes,int len) {
   if(channel == 0) return -1;
   
-  if(libssh2_channel_eof(channel) == 1) {
-    return -1;
-  }
+  if(libssh2_channel_eof(channel) != 0) {return -1;}
   
   int l = libssh2_channel_read(channel,bytes,len);
-  if(l<0) l=0;
+  
+  if(l == LIBSSH2_ERROR_EAGAIN) return 0;
+  if(l < 0) ssh_close();
+
   return l;
+}
+
+int is_closed() {
+  if(channel == 0) return 0;
+  return 1;
 }
 
 int ssh_close() {
@@ -230,6 +241,7 @@ int ssh_close() {
 int ssh_resize(int cols,int rows){
 
   if(channel == 0) return 1;
+  if(libssh2_channel_eof(channel)!=0) {return -1;}
   libssh2_channel_request_pty_size(channel,cols,rows);
 
 }

@@ -571,7 +571,6 @@ void console_poll() {
   len = c_read(buffer, sizeof(buffer)-1);
 
   if(len > 0) {
-    //inline_data_receive(buffer,len);
     printf("processing buf: %s\n",buffer);
     printf("numeric       :");
     for(int n=0; n<len;n++) {
@@ -620,7 +619,6 @@ void sdl_render_thread() {
   SDL_StartTextInput();
   
   for(;;) {
-    //int ok = SDL_SemWaitTimeout(redraw_sem,1);
     if(redraw_req) {
       redraw_screen();
       redraw_req=false;
@@ -1230,14 +1228,6 @@ int main(int argc, char **argv) {
     
   nunifont_load_staticmap(__fontmap_static,__widthmap_static,__fontmap_static_len,__widthmap_static_len);
 
-  //regis_mutex  = SDL_CreateMutex();
-  //screen_mutex = SDL_CreateMutex();
-  //vterm_mutex  = SDL_CreateMutex();
-  //quit_mutex   = SDL_CreateMutex();
-  //redraw_sem   = SDL_CreateSemaphore(1);
-  
-  //cond_quit = SDL_CreateCond();
-
   int connection_type = CONNECTION_LOCAL; // replace with commandline lookup
   if(argc > 1) {
     if(strcmp(argv[1],"ssh") == 0) {
@@ -1268,9 +1258,9 @@ int main(int argc, char **argv) {
     c_resize = &ssh_resize;
   }
 
+  begin_background_task();
   for(;;) {
     console_read_init();
-    //forced_recreaterenderer=3;
     sdl_render_thread();
     
     c_close();
@@ -1288,7 +1278,6 @@ int main(int argc, char **argv) {
     nunifont_initcache();
     vterm_free(vt);
     vterm_initialisation();
-    //forced_recreaterenderer=true;
   }
 
   return 0;

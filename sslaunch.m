@@ -137,3 +137,20 @@ void display_server_select_closedlg() {
     [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.005]];
   }
 }
+
+void begin_background_task() {
+
+  [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
+  
+    [[UIApplication sharedApplication] cancelAllLocalNotifications];
+    UILocalNotification *localNotification = [[UILocalNotification alloc] init];
+    NSDate *now = [NSDate date];
+    NSDate *dateToFire = [now dateByAddingTimeInterval:5];
+    localNotification.alertBody = @"HTerm connections terminating";
+    localNotification.soundName = UILocalNotificationDefaultSoundName;
+    localNotification.applicationIconBadgeNumber=1;
+    [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];
+  
+  }];
+
+}

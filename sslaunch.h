@@ -18,3 +18,4 @@ extern void display_serverselect(SDL_Window * window);
 
 extern BOOL display_serverselect_get(char *hostname,char *username,char *password);
 extern void display_server_select_closedlg();
+extern void begin_background_task();
