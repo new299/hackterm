@@ -257,6 +257,7 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 {
     //NSLog(@"%@", NSStringFromSelector(_cmd));
 
+    [[UIApplication sharedApplication] cancelAllLocalNotifications];
     // Send every window on every screen a RESTORED event.
     SDL_VideoDevice *_this = SDL_GetVideoDevice();
     if (!_this) {

@@ -145,7 +145,7 @@ void begin_background_task() {
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
     UILocalNotification *localNotification = [[UILocalNotification alloc] init];
     NSDate *now = [NSDate date];
-    NSDate *dateToFire = [now dateByAddingTimeInterval:5];
+    NSDate *dateToFire = [now dateByAddingTimeInterval:0.01];
     localNotification.alertBody = @"HTerm connections terminating";
     localNotification.soundName = UILocalNotificationDefaultSoundName;
     localNotification.applicationIconBadgeNumber=1;
