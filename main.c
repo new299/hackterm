@@ -86,11 +86,6 @@ size_t    scroll_buffer_end   =0;
 VTermScreenCell **scroll_buffer = 0;
 uint32_t         *scroll_buffer_lens=0;
 
-//SDL_cond   *cond_quit;
-//SDL_mutex  *screen_mutex;
-//SDL_mutex  *vterm_mutex;
-//SDL_sem    *redraw_sem;
-//SDL_mutex  *quit_mutex;
 VTermState *vs;
 
 char open_arg1[100];
@@ -130,26 +125,6 @@ void inline_data_render() {
   }
 }
 
-void mouse_to_select_box(int   sx,int   sy,int so,
-                         int   ex,int   ey,int eo,
-                         int *stx,int *sty,int *etx,int *ety) {
-    
-    if(sx > ex) {int t=ex;ex=sx;sx=t;}
-    if(sy > ey) {int t=ey;ey=sy;sy=t;}
-    
-    *stx=floor(((float)sx/(font_width +font_space)));
-    *etx=ceil( ((float)ex/(font_width +font_space)));
-    *sty=floor(((float)sy/(font_height+font_space)))-so;
-    *ety=ceil( ((float)ey/(font_height+font_space)))-eo;
-    
-    if(*stx==0) {
-      printf("is 0\n");
-    }
-
-    if(*stx==1) {
-      printf("is 1\n");
-    }
-}
 
 VTermScreenCell *grab_row(int trow,bool *dont_free,int *len) {
 
@@ -240,8 +215,6 @@ void draw_row(VTermScreenCell *row,int crow,int ypos,int glen) {
   }
 
 }
-
-
 
 void scroll_buffer_init() {
   scroll_buffer      = malloc(sizeof(VTermScreenCell *)*scroll_buffer_initial_size);
@@ -375,10 +348,7 @@ int csi_handler(const char *leader, const long args[], int argcount, const char 
 }
 
 int dcs_handler(const char *command,size_t cmdlen,void *user) {
-//  printf("command is: ");
-//  for(int n=0;n<cmdlen;n++) {
-//    printf("%u,",command[n]);
-//  }
+
   if(cmdlen < 3) return 0;
 
   regis_processor(command+2,cmdlen);
@@ -470,6 +440,93 @@ void redraw_text() {
   }
 }
 
+void mouse_to_select_box(int   sx,int   sy,int so,
+                         int   ex,int   ey,int eo,
+                         int *stx,int *sty,int *etx,int *ety) {
+    
+  //  if(sx > ex) {int t=ex;ex=sx;sx=t;}
+  //  if(sy > ey) {int t=ey;ey=sy;sy=t;}
+    
+    *stx=floor(((float)sx/(font_width +font_space)));
+    *etx=ceil( ((float)ex/(font_width +font_space)));
+    *sty=floor(((float)sy/(font_height+font_space)))-so;
+    *ety=ceil( ((float)ey/(font_height+font_space)))-eo;
+    
+    if(*stx==0) {
+      printf("is 0\n");
+    }
+
+    if(*stx==1) {
+      printf("is 1\n");
+    }
+}
+
+void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_end_y,uint16_t **itext,int *ilen) {
+
+  if(text_start_y > text_end_y) {
+    int t = text_start_y;
+    text_start_y = text_end_y;
+    text_end_y = t;
+  }
+
+  int len=0;
+  uint16_t *text = malloc(10240);
+  for(int y=text_start_y;y<=text_end_y;y++) {
+    bool dont_free=false;
+    
+    int glen=0;
+    VTermScreenCell *row_data = grab_row(y,&dont_free,&glen);
+    
+    if(row_data == 0) { text[0]=0; }
+    else {
+    
+      //cliping for first and last lines.
+      int start_x;
+      if(y == text_start_y) {
+        start_x = text_start_x;
+      } else {
+        start_x = 0;
+      }
+      int end_x;
+      if(y==text_end_y) {
+        end_x = text_end_x;
+      } else {
+        end_x = cols;
+      }
+      
+      //find last non-whitespace, clip to here too.
+      for(int n=cols;n>=0;n--) {
+        if(row_data[n].chars[0] != ' ') {
+          if(n < end_x) end_x = n;
+          break;
+        }
+      }
+      
+      for(int x=start_x;x<end_x;x++) {
+        if(text_end_x >= glen) break;
+
+        text[len] = row_data[x].chars[0];
+        if(text[len]!=0 && (text[len]!=65535)) len++;
+      }
+    }
+    if(!dont_free) free(row_data);
+
+    text[len] = '\n';
+    len++;
+  }
+  text[len]=0;
+  text[len+1]=0;
+  text[len+2]=0;
+  text[len+3]=0;
+  text[len+4]=0;
+  text[len+5]=0;
+  text[len+6]=0;
+  text[len+7]=0;
+
+  *itext = text;
+  *ilen  = len;
+}
+
 void redraw_selection() {
   if(draw_selection) {
 
@@ -485,12 +542,42 @@ void redraw_selection() {
     text_end_y   += scroll_offset;
     text_start_y += scroll_offset;
 
-    if(text_end_x<text_start_x) {int c=text_end_x; text_end_x=text_start_x;text_start_x=c;}
-    if(text_end_y<text_start_y) {int c=text_end_y; text_end_y=text_start_y;text_start_y=c;}
+   // if(text_end_x<text_start_x) {int c=text_end_x; text_end_x=text_start_x;text_start_x=c;}
+   // if(text_end_y<text_start_y) {int c=text_end_y; text_end_y=text_start_y;text_start_y=c;}
 
+   int sx=text_start_x*(font_width+font_space);
+   int sy=text_start_y*(font_height+font_space);
+   int ex=text_end_x*(font_width+font_space);
+   int ey=text_end_y*(font_height+font_space)-1;
 
+   SDL_SetRenderDrawColor(renderer, 255, 255, 255,255);
+   
+   // start line
+   SDL_RenderDrawLine(renderer,0,sy+(font_height+font_space),sx,sy+(font_height+font_space));
+   SDL_RenderDrawLine(renderer,sx,sy,display_width-1,sy);
+   SDL_RenderDrawLine(renderer,sx,sy,sx,sy+(font_height+font_space));
+   
+   // end line
+   SDL_RenderDrawLine(renderer,ex,ey,display_width-1,ey);
+   SDL_RenderDrawLine(renderer,ex,ey+(font_height+font_space),0,ey+(font_height+font_space));
+   SDL_RenderDrawLine(renderer,ex,ey+(font_height+font_space),ex,ey);
+
+   // central block
+   SDL_RenderDrawLine(renderer,0              ,sy+(font_height+font_space),0,ey+(font_height+font_space));
+   SDL_RenderDrawLine(renderer,display_width-1,sy,display_width-1,ey);
+
+/*    // start line
     nsdl_rectangle_wire(renderer,text_start_x*(font_width+font_space),text_start_y*(font_height+font_space),
-                                 text_end_x*(font_width+font_space),text_end_y*(font_height+font_space),255,255,255,255);
+                                 display_width-1,(text_start_y+1)*(font_height+font_space),255,255,255,255);
+
+    //non-selection line box
+    nsdl_rectangle_wire(renderer,1,(text_start_y+1)*(font_height+font_space),
+                                 display_width-1,text_end_y*(font_height+font_space)-1,255,255,255,255);
+    
+    //end line
+    nsdl_rectangle_wire(renderer,1,text_end_y*(font_height+font_space),
+                                 text_end_x*(font_width+font_space),(text_end_y+1)*(font_height+font_space),255,255,255,255);
+  */    
   }
 }
 
@@ -718,43 +805,6 @@ void copy_text(uint16_t *itext,int len) {
   // execute these two commands on Linux/XWindows by default
   //echo "test" | xclip -selection c
   //echo "test" | xclip -i 
-}
-
-void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_end_y,uint16_t **itext,int *ilen) {
-
-  int len=0;
-  uint16_t *text = malloc(10240);
-  for(int y=text_start_y;y<text_end_y;y++) {
-    bool dont_free=false;
-    
-    int glen=0;
-    VTermScreenCell *row_data = grab_row(y,&dont_free,&glen);
-    
-    if(row_data == 0) { text[0]=0; }
-    else {
-      for(int x=text_start_x;x<text_end_x;x++) {
-        if(text_end_x >= glen) break;
-
-        text[len] = row_data[x].chars[0];
-        if(text[len]!=0 && (text[len]!=65535)) len++;
-      }
-    }
-    if(!dont_free) free(row_data);
-
-    text[len] = '\n';
-    len++;
-  }
-  text[len]=0;
-  text[len+1]=0;
-  text[len+2]=0;
-  text[len+3]=0;
-  text[len+4]=0;
-  text[len+5]=0;
-  text[len+6]=0;
-  text[len+7]=0;
-
-  *itext = text;
-  *ilen  = len;
 }
 
 int delta_sum=0;
