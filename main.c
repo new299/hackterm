@@ -68,6 +68,7 @@ SDL_Window  *screen=1;
 SDL_Renderer *renderer=1;
 
 bool draw_selection = false;
+int draw_fade_selection=0;
 int select_start_x=0;
 int select_start_y=0;
 int select_end_x  =0;
@@ -91,6 +92,11 @@ VTermState *vs;
 char open_arg1[100];
 char open_arg2[100];
 char open_arg3[100];
+
+int select_text_start_x=-1;
+int select_text_start_y=-1;
+int select_text_end_x=-1;
+int select_text_end_y=-1;
 
 // Funtions used to communicate with host
 int (*c_open)(char *hostname,char *username, char *password) = 0;
@@ -387,7 +393,6 @@ void terminal_resize() {
 
   printf("terminal resize, size: %d %d\n",display_width,display_height);
 
-  //TODO: Width and Height are not swapped with rotation, so we will need some code to detection rotation and act appropriately
   rows = display_height/16;
   cols = display_width/8;
     
@@ -503,7 +508,7 @@ void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_e
       }
       
       for(int x=start_x;x<end_x;x++) {
-        if(text_end_x >= glen) break;
+        if(text_end_x >= glen) {text_end_x=glen-1;}
 
         text[len] = row_data[x].chars[0];
         if(text[len]!=0 && (text[len]!=65535)) len++;
@@ -511,8 +516,10 @@ void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_e
     }
     if(!dont_free) free(row_data);
 
-    text[len] = '\n';
-    len++;
+    if(y!=text_end_y) {
+      text[len] = '\n';
+      len++;
+    }
   }
   text[len]=0;
   text[len+1]=0;
@@ -528,56 +535,53 @@ void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_e
 }
 
 void redraw_selection() {
-  if(draw_selection) {
+  if(draw_selection || (draw_fade_selection>0)) {
+  
+    int color=255;
+    if(draw_fade_selection>0) {
+      color=draw_fade_selection*5;
+      draw_fade_selection--;
+      redraw_required();
+    } else {
+      color=255;
+    }
 
-    int text_start_x;
-    int text_start_y;
-    int text_end_x;
-    int text_end_y;
     select_end_scroll_offset = scroll_offset;
-    mouse_to_select_box(select_start_x,select_start_y,select_start_scroll_offset,
-                          select_end_x,  select_end_y,  select_end_scroll_offset,
-                         &text_start_x, &text_start_y, &text_end_x, &text_end_y);
 
-    text_end_y   += scroll_offset;
-    text_start_y += scroll_offset;
+    int sselect_text_end_y   = select_text_end_y   + scroll_offset;
+    int sselect_text_start_y = select_text_start_y + scroll_offset;
 
-   // if(text_end_x<text_start_x) {int c=text_end_x; text_end_x=text_start_x;text_start_x=c;}
-   // if(text_end_y<text_start_y) {int c=text_end_y; text_end_y=text_start_y;text_start_y=c;}
+    int sx=select_text_start_x*(font_width+font_space);
+    int sy=sselect_text_start_y*(font_height+font_space);
+    int ex=select_text_end_x*(font_width+font_space);
+    int ey=sselect_text_end_y*(font_height+font_space)-1;
 
-   int sx=text_start_x*(font_width+font_space);
-   int sy=text_start_y*(font_height+font_space);
-   int ex=text_end_x*(font_width+font_space);
-   int ey=text_end_y*(font_height+font_space)-1;
-
-   SDL_SetRenderDrawColor(renderer, 255, 255, 255,255);
+    SDL_SetRenderDrawColor(renderer, color, color, color,color);
    
-   // start line
-   SDL_RenderDrawLine(renderer,0,sy+(font_height+font_space),sx,sy+(font_height+font_space));
-   SDL_RenderDrawLine(renderer,sx,sy,display_width-1,sy);
-   SDL_RenderDrawLine(renderer,sx,sy,sx,sy+(font_height+font_space));
-   
-   // end line
-   SDL_RenderDrawLine(renderer,ex,ey,display_width-1,ey);
-   SDL_RenderDrawLine(renderer,ex,ey+(font_height+font_space),0,ey+(font_height+font_space));
-   SDL_RenderDrawLine(renderer,ex,ey+(font_height+font_space),ex,ey);
-
-   // central block
-   SDL_RenderDrawLine(renderer,0              ,sy+(font_height+font_space),0,ey+(font_height+font_space));
-   SDL_RenderDrawLine(renderer,display_width-1,sy,display_width-1,ey);
-
-/*    // start line
-    nsdl_rectangle_wire(renderer,text_start_x*(font_width+font_space),text_start_y*(font_height+font_space),
-                                 display_width-1,(text_start_y+1)*(font_height+font_space),255,255,255,255);
-
-    //non-selection line box
-    nsdl_rectangle_wire(renderer,1,(text_start_y+1)*(font_height+font_space),
-                                 display_width-1,text_end_y*(font_height+font_space)-1,255,255,255,255);
+    // start line
+    if(select_text_start_y!=select_text_end_y) { // only draw central block bound for non-central lines.
+      SDL_RenderDrawLine(renderer,0,sy+(font_height+font_space),sx,sy+(font_height+font_space));
+      SDL_RenderDrawLine(renderer,sx,sy,display_width-1,sy);
+    } else {
+      SDL_RenderDrawLine(renderer,sx,sy,ex,sy);
+    }
+    SDL_RenderDrawLine(renderer,sx,sy,sx,sy+(font_height+font_space));
     
-    //end line
-    nsdl_rectangle_wire(renderer,1,text_end_y*(font_height+font_space),
-                                 text_end_x*(font_width+font_space),(text_end_y+1)*(font_height+font_space),255,255,255,255);
-  */    
+    // end line
+    if(select_text_start_y!=select_text_end_y) { // only draw central block bound for non-central lines.
+      SDL_RenderDrawLine(renderer,ex,ey,display_width-1,ey);
+      SDL_RenderDrawLine(renderer,ex,ey+(font_height+font_space),0,ey+(font_height+font_space));
+    } else {
+      SDL_RenderDrawLine(renderer,sx,ey+(font_height+font_space),ex,ey+(font_height+font_space));
+    }
+    SDL_RenderDrawLine(renderer,ex,ey+(font_height+font_space),ex,ey);
+
+    // only draw block for non-single lines.
+    if(select_text_start_y!=select_text_end_y) {
+      // central block
+      SDL_RenderDrawLine(renderer,0              ,sy+(font_height+font_space),0,ey+(font_height+font_space));
+      SDL_RenderDrawLine(renderer,display_width-1,sy,display_width-1,ey);
+    }
   }
 }
 
@@ -707,8 +711,8 @@ void sdl_render_thread() {
   
   for(;;) {
     if(redraw_req) {
+      redraw_req=false; // should go first as draw can itself trigger a redraw.
       redraw_screen();
-      redraw_req=false;
     } else {
       SDL_Delay(100);
     }
@@ -783,7 +787,11 @@ void copy_text(uint16_t *itext,int len) {
   
     size_t s = utf8proc_encode_char(itext[n],text+pos);
     pos+=s;
-  
+    text[pos  ]=0;
+    text[pos+1]=0;
+    text[pos+2]=0;
+    text[pos+3]=0;
+    text[pos+4]=0;
   }
   
   printf("copy text: %s\n",text);
@@ -810,6 +818,9 @@ void copy_text(uint16_t *itext,int len) {
 int delta_sum=0;
 
 bool select_disable=false;
+
+int last_text_point_x = -1;
+int last_text_point_y = -1;
 void process_mouse_event(SDL_Event *event) {
   
   if(event->type == SDL_FINGERMOTION) {
@@ -890,6 +901,11 @@ void process_mouse_event(SDL_Event *event) {
       //if(event->button.y <= 0            ) scroll_offset++;
       //if(event->button.y >= (screen->h-1)) {if(scroll_offset != 0) scroll_offset--;}
 
+      select_end_scroll_offset = scroll_offset;
+      mouse_to_select_box(select_start_x,select_start_y,select_start_scroll_offset,
+                            select_end_x  ,select_end_y,select_end_scroll_offset,
+                           &select_text_start_x, &select_text_start_y, &select_text_end_x, &select_text_end_y);
+
       select_end_x = event->button.x;
       select_end_y = event->button.y;
       redraw_required();
@@ -903,8 +919,78 @@ void process_mouse_event(SDL_Event *event) {
     int ydelta = select_start_y-select_end_y;
     if(ydelta < 0) ydelta = 0-ydelta;
     
-    if((xdelta < 10) && (ydelta < 10)) {
+    if((xdelta < 15) && (ydelta < 15)) {
+    
+      // this was a selection less than a single character in size
+      // in these cases we don't actually process a selection.
+      
+      // we note the time, if there was another selection recently then this is a word selection
+      // from this point we flood out left and right and select this text.
+      
+      // we also need to briefly display that this was selected.
+    
+      int text_start_x;
+      int text_start_y;
+      int text_end_x;
+      int text_end_y;
+      select_end_scroll_offset = scroll_offset;
+      mouse_to_select_box(select_start_x,select_start_y,select_start_scroll_offset,
+                            select_end_x, select_end_y ,select_end_scroll_offset,
+                           &text_start_x, &text_start_y, &text_end_x, &text_end_y);
+    
+      if((last_text_point_x == text_start_x) &&
+         (last_text_point_y == text_start_y)) {
+         
+         int word_start_x=-1;
+         int word_end_x  =-1;
+         
+         // grab text for this line
+         uint16_t *text=0;
+         int len=0;
+         get_text_region(0,text_start_y,cols,text_start_y,&text,&len);
+         
+         printf("text %d: ",len);
+         for(int n=0;n<len;n++) {
+           printf("%c",text[n]);
+         }
+         printf("\n");
+         
+         // find left bound
+         for(int n=text_start_x;n>=0;n--) {
+           if((text[n] == ' ') || (text[n] == '\n')) {
+             word_start_x=n+1;
+             break;
+           }
+         }
+         
+         // find right bound
+         for(int n=text_start_x;(n<cols) && (n<len);n++) {
+           if((text[n] == ' ') || (text[n] == '\n')) {
+             word_end_x=n-1;
+             break;
+           }
+         }
+         if(word_end_x==-1) {word_end_x=len-1;}
+         
+         // copy single word
+         printf("copy: %d %d %d %d\n",word_start_x,text_start_y,word_end_x,text_start_y);
+
+         if(len != 0) copy_text(text+word_start_x,word_end_x-word_start_x+1);
+         if(text != 0) free(text);
+         
+         select_text_start_x=word_start_x;
+         select_text_end_x  =word_end_x+1;
+         select_text_start_y=text_start_y;
+         select_text_end_y  =text_start_y;
+         draw_fade_selection=50;         
+      } else {
+        draw_selection=false;
+        draw_fade_selection=0;
+      }
+      
       redraw_required();
+      last_text_point_x = text_start_x;
+      last_text_point_y = text_start_y;
       return;
     }
   
@@ -916,6 +1002,11 @@ void process_mouse_event(SDL_Event *event) {
     mouse_to_select_box(select_start_x,select_start_y,select_start_scroll_offset,
                           select_end_x  ,select_end_y,select_end_scroll_offset,
                          &text_start_x, &text_start_y, &text_end_x, &text_end_y);
+
+    select_text_start_x=text_start_x;
+    select_text_start_y=text_start_y;
+    select_text_end_x=text_end_x;
+    select_text_end_y=text_end_y;
 
     uint16_t *text=0;
     int      len=0;
@@ -929,6 +1020,9 @@ void process_mouse_event(SDL_Event *event) {
     if(len != 0) copy_text(text,len);
     if(text != 0) free(text);
     redraw_required();
+    
+    draw_fade_selection=50;
+      
   } else
   if(event->type == SDL_MOUSEBUTTONDOWN) {
     select_start_scroll_offset = scroll_offset;
@@ -936,11 +1030,15 @@ void process_mouse_event(SDL_Event *event) {
     select_start_y = event->button.y;
     select_end_x = event->button.x;
     select_end_y = event->button.y;
+    select_text_start_x=-1;
+    select_text_end_x=-1;
+    select_text_start_y=-1;
+    select_text_end_y=-1;
+    
     draw_selection = true;
+    draw_fade_selection=0;
   }
 }
-
-
 
 void sdl_read_thread(SDL_Event *event) {
   ngui_receive_event(event);
