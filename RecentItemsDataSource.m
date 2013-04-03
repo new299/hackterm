@@ -17,12 +17,13 @@
   char *hostnames[RECENTCONNECTIONS];
   char *usernames[RECENTCONNECTIONS];
   char *passwords[RECENTCONNECTIONS];
+  char *fingerprintstrs[RECENTCONNECTIONS];
 
 
 - (UITableViewCell *)tableView:view cellForRowAtIndexPath:idx {
 
   if(_initialised==false) {
-    readall_connections(hostnames,usernames,passwords);
+    readall_connections(hostnames,usernames,passwords,fingerprintstrs);
     _initialised=true;
   }
 
@@ -43,7 +44,7 @@
 - (NSInteger)tableView:view numberOfRowsInSection:idx {
 
   if(_initialised==false) {
-    readall_connections(hostnames,usernames,passwords);
+    readall_connections(hostnames,usernames,passwords,fingerprintstrs);
     _initialised=true;
   }
 

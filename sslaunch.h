@@ -13,9 +13,11 @@
 #include "iphone/sdl/src/video/uikit/SDL_uikitwindow.h"
 #include "iphone/sdl/src/video/uikit/SDL_uikitmodes.h"
 
-extern void display_serverselect_run();
-extern void display_serverselect(SDL_Window * window);
+void display_serverselect_run();
+void display_serverselect(SDL_Window * window);
 
-extern BOOL display_serverselect_get(char *hostname,char *username,char *password);
-extern void display_server_select_closedlg();
-extern void begin_background_task();
+BOOL display_serverselect_get(char *hostname,char *username,char *password,char *fingerprintstr);
+void display_server_select_closedlg();
+void begin_background_task();
+void display_serverselect_keyfailure();
+void display_serverselect_firstkey(char *fingerprintstr);

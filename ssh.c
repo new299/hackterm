@@ -40,8 +40,9 @@ WSADATA wsadata;
 int rc, sock, i, auth_pw = 0;
 LIBSSH2_SESSION *session;
 LIBSSH2_CHANNEL *channel;
+char fingerprintstr[100];
 
-int ssh_open(char *hostname,char *username,char *password) {
+int ssh_open(char *hostname,char *username,char *password,char *fingerprintstrin) {
   #ifdef WIN32
   WSAStartup(MAKEWORD(2,0), &wsadata);
   #endif
@@ -113,9 +114,26 @@ int ssh_open(char *hostname,char *username,char *password) {
   const char *fingerprint;
   fingerprint = libssh2_hostkey_hash(session, LIBSSH2_HOSTKEY_HASH_SHA1);
   fprintf(stderr, "Fingerprint: ");
+  
+  char *fingerpos=fingerprintstr;
   for(i = 0; i < 20; i++) {
-      fprintf(stderr, "%02X", (unsigned char)fingerprint[i]);
+      sprintf(fingerpos, "%02X", (unsigned char)fingerprint[i]);
+      fingerpos+=2;
+      if(i!=19) {
+        fingerpos[0]=':';
+        fingerpos++;
+        fingerpos[0]=0;
+      }
   }
+  
+  if((fingerprintstrin != 0) && (fingerprintstrin[0] != 0)) {
+    //finger print was not valid.
+    if(strcmp(fingerprintstr,fingerprintstrin) != 0) {
+      return -5;
+    }
+  }
+  
+  fprintf(stderr,fingerprintstr);
   fprintf(stderr, "\n");
   /* check what authentication methods are available */
   char *userauthlist = libssh2_userauth_list(session, username, strlen(username));
@@ -178,7 +196,11 @@ int ssh_open(char *hostname,char *username,char *password) {
   }
   printf("connection successful\n");
   libssh2_channel_set_blocking(channel,0);//nonblocking
-  return 1;
+  return 0;
+}
+
+char *ssh_fingerprintstr() {
+  return fingerprintstr;
 }
 
 int ssh_write(unsigned char *bytes,int len) {

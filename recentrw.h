@@ -3,8 +3,8 @@
 
 #define RECENTCONNECTIONS 10
 
-void readall_connections(char **hostnames,char **usernames,char **passwords);
-void writeall_connections(char **hostnames,char **usernames,char **passwords);
-void write_connection(const char* hostname,const char *username,const char *password);
+void readall_connections(char **hostnames,char **usernames,char **passwords,char **fingerprintstrs);
+void writeall_connections(char **hostnames,char **usernames,char **passwords,char **fingerprintstrs);
+void write_connection(const char* hostname,const char *username,const char *password,const char *fingerprintstr);
 
 #endif

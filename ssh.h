@@ -6,5 +6,6 @@ int ssh_close();
 int ssh_write(char *bytes,int len);
 int ssh_read(char *bytes,int len);
 int ssh_resize(int cols,int rows);
+char *ssh_fingerprintstr();
 
 #endif

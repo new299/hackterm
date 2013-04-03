@@ -75,6 +75,7 @@ int select_end_x  =0;
 int select_end_y  =0;
 int select_start_scroll_offset;
 int select_end_scroll_offset;
+int connection_type=0;
 
 bool hterm_quit = false;
 
@@ -89,9 +90,10 @@ uint32_t         *scroll_buffer_lens=0;
 
 VTermState *vs;
 
-char open_arg1[100];
+char open_arg1[100] = "";
 char open_arg2[100];
 char open_arg3[100];
+char open_arg4[100];
 
 int select_text_start_x=-1;
 int select_text_start_y=-1;
@@ -99,7 +101,7 @@ int select_text_end_x=-1;
 int select_text_end_y=-1;
 
 // Funtions used to communicate with host
-int (*c_open)(char *hostname,char *username, char *password) = 0;
+int (*c_open)(char *hostname,char *username, char *password,char *fingerprintstr) = 0;
 int (*c_close)() = 0;
 int (*c_write)(char *bytes,int len) = 0;       
 int (*c_read)(char *bytes,int len) = 0;    
@@ -624,7 +626,7 @@ void do_sdl_init() {
     for(;;) {
       display_serverselect_run();
 
-      bool c = display_serverselect_get(open_arg1,open_arg2,open_arg3);
+      bool c = display_serverselect_get(open_arg1,open_arg2,open_arg3,open_arg4);
       if(c) {
         display_serverselect_complete();
         break;
@@ -651,7 +653,22 @@ void do_sdl_init() {
 void sdl_read_thread();
 
 void console_read_init() {
-  int open_ret = c_open(open_arg1,open_arg2,open_arg3);
+  int open_ret = c_open(open_arg1,open_arg2,open_arg3,open_arg4);
+
+  if(open_ret == -5) {
+    display_serverselect_keyfailure();
+  }
+
+  if(connection_type == CONNECTION_SSH) {
+    if(open_ret == 0) {
+      char *fingerprintstr = ssh_fingerprintstr();
+      if(open_arg4[0]==0) {
+        display_serverselect_firstkey(fingerprintstr);
+      }
+      write_connection(open_arg1,open_arg2,open_arg3,fingerprintstr);
+    }
+  }
+  
   terminal_resize();
 }
 
@@ -681,6 +698,21 @@ void console_poll() {
   }
 }
 
+void disable_virtual_kb() {
+  ngui_move_button("Iesc"  ,-1000,-1000);
+  ngui_move_button("Ialt"  ,-1000,-1000);
+  ngui_move_button("Ictrl" ,-1000,-1000);
+  ngui_move_button("Itab"  ,-1000,-1000);
+      
+  ngui_move_button("Iup"   ,-1000,-1000);
+  ngui_move_button("Idown" ,-1000,-1000);
+  ngui_move_button("Ileft" ,-1000,-1000);
+  ngui_move_button("Iright",-1000,-1000);
+      
+  ngui_move_button("Ipaste",-1000,-1000);
+ 
+}
+
 void reposition_buttons() {
   int dwidth  = display_width -(display_width %16);
   int dheight = display_height-(display_height%16);
@@ -703,6 +735,8 @@ void reposition_buttons() {
 bool redraw_req=true;
 int forced_recreaterenderer=0;
 int last_kb_shown=-2;
+
+
 
 void sdl_render_thread() {
   
@@ -732,15 +766,18 @@ void sdl_render_thread() {
     if(hterm_quit == true) return;
 
     if((SDL_IsScreenKeyboardShown(screen) != last_kb_shown) &&
-       (last_kb_shown != -2)) {
+       (last_kb_shown != -3)) {
       SDL_GetWindowSize(screen,&display_width,&display_height);
       
       if(SDL_IsScreenKeyboardShown(screen)) {
         display_width  = display_width_last_kb;
         display_height = display_height_last_kb;
+        reposition_buttons();
+      } else {
+        reposition_buttons();
+        disable_virtual_kb();
       }
 
-      reposition_buttons();
       redraw_required();
     }
     last_kb_shown = SDL_IsScreenKeyboardShown(screen);
@@ -1077,7 +1114,12 @@ void sdl_read_thread(SDL_Event *event) {
 
         terminal_resize();
         SDL_RaiseWindow(screen);
-        reposition_buttons();
+        if(SDL_IsScreenKeyboardShown(screen)) {
+          reposition_buttons();
+        } else {
+          reposition_buttons();
+          disable_virtual_kb();
+        }
         redraw_required();
     }
     
@@ -1088,11 +1130,18 @@ void sdl_read_thread(SDL_Event *event) {
       display_width  = w;
       display_height = h;
 
-      display_width_last_kb  = w;
-      display_height_last_kb = h;
+      if(SDL_IsScreenKeyboardShown(screen)) {
+        display_width_last_kb  = w;
+        display_height_last_kb = h;
+      }
       terminal_resize();
       
-      reposition_buttons();
+      if(SDL_IsScreenKeyboardShown(screen)) {
+        reposition_buttons();
+      } else {
+        reposition_buttons();
+        disable_virtual_kb();
+      }
     }
     
     printf("event\n");
@@ -1376,7 +1425,7 @@ int main(int argc, char **argv) {
     
   nunifont_load_staticmap(__fontmap_static,__widthmap_static,__fontmap_static_len,__widthmap_static_len);
 
-  int connection_type = CONNECTION_LOCAL; // replace with commandline lookup
+  connection_type = CONNECTION_LOCAL; // replace with commandline lookup
   if(argc > 1) {
     if(strcmp(argv[1],"ssh") == 0) {
       connection_type = CONNECTION_SSH; // replace with commandline lookup

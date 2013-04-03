@@ -41,8 +41,6 @@
   const char *cusername = [[username text] cStringUsingEncoding:NSASCIIStringEncoding];
   const char *cpassword = [[password text] cStringUsingEncoding:NSASCIIStringEncoding];
   
-  write_connection(chostname,cusername,cpassword);
-  
   printf("hostname %s\n",chostname);
   printf("username %s\n",cusername);
   printf("password %s\n",cpassword);

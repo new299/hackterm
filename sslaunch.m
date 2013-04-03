@@ -32,8 +32,9 @@ void display_serverselect_run() {
     char *hostnames[RECENTCONNECTIONS];
     char *usernames[RECENTCONNECTIONS];
     char *passwords[RECENTCONNECTIONS];
+    char *fingerprintstrs[RECENTCONNECTIONS];
 
-    readall_connections(hostnames,usernames,passwords);
+    readall_connections(hostnames,usernames,passwords,fingerprintstrs);
 
     int i = source.selection;
     printf("i is: %d\n",i);
@@ -48,6 +49,29 @@ void display_serverselect_run() {
   
   [view setNeedsDisplay];
   [[view hostname] setNeedsDisplay];
+}
+
+void display_alert(char *str1,char *str2) {
+  DisconnectAlertDelegate *discon = [[DisconnectAlertDelegate alloc] init];
+
+  NSString *s1 = [NSString stringWithUTF8String:str1];
+  NSString *s2 = [NSString stringWithUTF8String:str2];
+
+  UIAlertView *alert = [[UIAlertView alloc] initWithTitle:s1
+                                                message:s2
+                                               delegate:discon
+                                      cancelButtonTitle:@"OK"
+                                      otherButtonTitles:nil];
+  [alert show];
+  
+  for(;;) {
+    if([discon ok_pressed] != false) {
+      return;
+    }
+    
+    [[NSRunLoop currentRunLoop] runMode:UITrackingRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.005]];
+    [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.005]];
+  }
 }
 
 void display_serverselect(SDL_Window *window)
@@ -85,7 +109,18 @@ void display_serverselect(SDL_Window *window)
     [view.recentservers reloadData];
 }
 
-BOOL display_serverselect_get(char *ohostname,char *ousername,char *opassword) {
+
+void display_serverselect_keyfailure() {
+  display_alert("Fingerprint failure","Fingerprints did not match, connection will not be opened.");
+}
+
+void display_serverselect_firstkey(char *fingerprintstr) {
+  char fstr[1000];
+  sprintf(fstr,"The server fingerprint is: %s",fingerprintstr);
+  display_alert("Fingerprint",fstr);
+}
+
+BOOL display_serverselect_get(char *ohostname,char *ousername,char *opassword,char *ofingerprintstr) {
     
   if(view == nil) return NO;
 
@@ -101,6 +136,20 @@ BOOL display_serverselect_get(char *ohostname,char *ousername,char *opassword) {
     strcpy(ohostname,h);
     strcpy(ousername,u);
     strcpy(opassword,p);
+    
+
+    char *hostnames[RECENTCONNECTIONS];
+    char *usernames[RECENTCONNECTIONS];
+    char *passwords[RECENTCONNECTIONS];
+    char *fingerprintstrs[RECENTCONNECTIONS];
+
+    readall_connections(hostnames,usernames,passwords,fingerprintstrs);
+    strcpy(ofingerprintstr,"");
+    for(int n=0;n<RECENTCONNECTIONS;n++) {
+      if(strcmp(hostnames[n],h)==0) {
+        strcpy(ofingerprintstr,fingerprintstrs[n]);
+      }
+    }
 
     SDL_WindowData *data = (SDL_WindowData *) win->driverdata;
     UIWindow *uiwindow = data->uiwindow;
@@ -117,25 +166,11 @@ void display_serverselect_complete() {
   [view removeFromSuperview];
 }
 
+
 void display_server_select_closedlg() {
 
-  DisconnectAlertDelegate *discon = [[DisconnectAlertDelegate alloc] init];
+  display_alert("Connection Closed","Disconnected");
 
-  UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Disconnect"
-                                                message:@"Connection closed"
-                                               delegate:discon
-                                      cancelButtonTitle:@"OK"
-                                      otherButtonTitles:nil];
-  [alert show];
-  
-  for(;;) {
-    if([discon ok_pressed] != false) {
-      return;
-    }
-    
-    [[NSRunLoop currentRunLoop] runMode:UITrackingRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.005]];
-    [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.005]];
-  }
 }
 
 void begin_background_task() {
