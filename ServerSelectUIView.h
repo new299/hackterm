@@ -19,5 +19,6 @@
 @property (retain, nonatomic) IBOutlet UITableView *recentservers;
 
 @property BOOL connectComplete;
+@property BOOL keyComplete;
 
 @end

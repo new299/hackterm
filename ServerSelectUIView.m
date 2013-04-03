@@ -48,6 +48,14 @@
 }
 
 - (IBAction)keyXferPressed:(id)sender {
+  const char *chostname = [[hostname text] cStringUsingEncoding:NSASCIIStringEncoding];
+  const char *cusername = [[username text] cStringUsingEncoding:NSASCIIStringEncoding];
+  const char *cpassword = [[password text] cStringUsingEncoding:NSASCIIStringEncoding];
+  
+  printf("hostname %s\n",chostname);
+  printf("username %s\n",cusername);
+  printf("password %s\n",cpassword);
+  self.keyComplete=YES;
 }
 
 - (IBAction)bookmarkPressed:(id)sender {

@@ -16,8 +16,11 @@
 void display_serverselect_run();
 void display_serverselect(SDL_Window * window);
 
-BOOL display_serverselect_get(char *hostname,char *username,char *password,char *fingerprintstr);
+int display_serverselect_get(char *ohostname,char *ousername,char *opassword,char *ofingerprintstr,char *pubkeypath,char *privkeypath);
 void display_server_select_closedlg();
 void begin_background_task();
 void display_serverselect_keyfailure();
 void display_serverselect_firstkey(char *fingerprintstr);
+
+void display_serverselect_keyxfer_ok();
+void display_serverselect_keyxfer_fail();

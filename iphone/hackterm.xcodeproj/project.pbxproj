@@ -136,6 +136,7 @@
 		D5329D001703B9E700122CFD /* nsdl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nsdl.h; path = ../nsdl.h; sourceTree = "<group>"; };
 		D550D12716C00DBE000D4D6A /* SDL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SDL.xcodeproj; path = "SDL/Xcode-iOS/SDL/SDL.xcodeproj"; sourceTree = "<group>"; };
 		D552B48A170C4FBF009CF4FB /* recentrw.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = recentrw.h; path = ../recentrw.h; sourceTree = "<group>"; };
+		D552B48E170C84CC009CF4FB /* ssh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ssh.h; path = ../ssh.h; sourceTree = "<group>"; };
 		D5B5C90316C9529700DD079C /* hterm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hterm.png; sourceTree = "<group>"; };
 		D5B5C90516C952DF00DD079C /* hterm57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hterm57.png; sourceTree = "<group>"; };
 		D5D443C616E948EA001C2385 /* recentrw.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = recentrw.m; path = ../recentrw.m; sourceTree = "<group>"; };
@@ -464,6 +465,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				D552B48E170C84CC009CF4FB /* ssh.h */,
 				D552B48A170C4FBF009CF4FB /* recentrw.h */,
 				D52AC64B16E6B87F00016D01 /* iphone_pasteboard.h */,
 				D52AC64C16E6B87F00016D01 /* iphone_pasteboard.m */,

@@ -94,6 +94,8 @@ char open_arg1[100] = "";
 char open_arg2[100];
 char open_arg3[100];
 char open_arg4[100];
+char open_arg5[100];
+char open_arg6[100];
 
 int select_text_start_x=-1;
 int select_text_start_y=-1;
@@ -101,7 +103,7 @@ int select_text_end_x=-1;
 int select_text_end_y=-1;
 
 // Funtions used to communicate with host
-int (*c_open)(char *hostname,char *username, char *password,char *fingerprintstr) = 0;
+int (*c_open)(char *hostname,char *username, char *password,char *fingerprintstr,char *key1,char *key2) = 0;
 int (*c_close)() = 0;
 int (*c_write)(char *bytes,int len) = 0;       
 int (*c_read)(char *bytes,int len) = 0;    
@@ -626,9 +628,29 @@ void do_sdl_init() {
     for(;;) {
       display_serverselect_run();
 
-      bool c = display_serverselect_get(open_arg1,open_arg2,open_arg3,open_arg4);
-      if(c) {
+      int c = display_serverselect_get(open_arg1,open_arg2,open_arg3,open_arg4,open_arg5,open_arg6);
+      
+      // key transfer
+      if(c == 1) {
+        int open_ret = ssh_open_preshell(open_arg1,open_arg2,open_arg3,open_arg4,open_arg5,open_arg6);
+        int result = ssh_getkeys(open_arg5,open_arg6);
+        if(result == 0) display_serverselect_keyxfer_ok();
+        if(result == 1) display_serverselect_keyxfer_fail();
         display_serverselect_complete();
+        c_close();
+        
+        break;
+      }
+
+      // normal connection
+      if(c == 2) {
+        display_serverselect_complete();
+        break;
+      }
+      
+      // should not happen.
+      if(c == -2) {
+        printf("-2\n");
         break;
       }
     }
@@ -653,7 +675,7 @@ void do_sdl_init() {
 void sdl_read_thread();
 
 void console_read_init() {
-  int open_ret = c_open(open_arg1,open_arg2,open_arg3,open_arg4);
+  int open_ret = c_open(open_arg1,open_arg2,open_arg3,open_arg4,open_arg5,open_arg6);
 
   if(open_ret == -5) {
     display_serverselect_keyfailure();
@@ -1402,6 +1424,32 @@ void virtual_kb_close(char *c) {
 
 int main(int argc, char **argv) {
     
+  connection_type = CONNECTION_LOCAL; // replace with commandline lookup
+  if(argc > 1) {
+    if(strcmp(argv[1],"ssh") == 0) {
+      connection_type = CONNECTION_SSH; // replace with commandline lookup
+    }
+  }
+  // iPhone version only supports ssh connections.
+  #ifdef IPHONE_BUILD
+    connection_type = CONNECTION_SSH;
+  #endif
+    
+  if(connection_type == CONNECTION_LOCAL) {
+    c_open   = &local_open;
+    c_close  = &local_close;
+    c_write  = &local_write;
+    c_read   = &local_read;
+    c_resize = &local_resize;
+  } else
+  if(connection_type == CONNECTION_SSH) {
+    c_open   = &ssh_open;
+    c_close  = &ssh_close;
+    c_write  = &ssh_write;
+    c_read   = &ssh_read;
+    c_resize = &ssh_resize;
+  }    
+    
   do_sdl_init();
   regis_init(display_width,display_height);
   inline_data_init(display_width,display_height);
@@ -1425,35 +1473,14 @@ int main(int argc, char **argv) {
     
   nunifont_load_staticmap(__fontmap_static,__widthmap_static,__fontmap_static_len,__widthmap_static_len);
 
-  connection_type = CONNECTION_LOCAL; // replace with commandline lookup
-  if(argc > 1) {
-    if(strcmp(argv[1],"ssh") == 0) {
-      connection_type = CONNECTION_SSH; // replace with commandline lookup
-    }
-  }
+
   
-  // iPhone version only supports ssh connections.
-  #ifdef IPHONE_BUILD
-    connection_type = CONNECTION_SSH;
-  #endif
+
   
   SDL_GetWindowSize(screen,&display_width,&display_height);
   vterm_initialisation();
-  
-  if(connection_type == CONNECTION_LOCAL) {
-    c_open   = &local_open;
-    c_close  = &local_close;
-    c_write  = &local_write;
-    c_read   = &local_read;
-    c_resize = &local_resize;
-  } else
-  if(connection_type == CONNECTION_SSH) {
-    c_open   = &ssh_open;
-    c_close  = &ssh_close;
-    c_write  = &ssh_write;
-    c_read   = &ssh_read;
-    c_resize = &ssh_resize;
-  }
+
+
 
   begin_background_task();
   for(;;) {

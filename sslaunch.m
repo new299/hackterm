@@ -109,6 +109,14 @@ void display_serverselect(SDL_Window *window)
     [view.recentservers reloadData];
 }
 
+void display_serverselect_keyxfer_ok() {
+  display_alert("Key transfer","Key transfer complete.");
+}
+
+void display_serverselect_keyxfer_fail() {
+  display_alert("Key transfer","Key transfer failed.");
+}
+
 
 void display_serverselect_keyfailure() {
   display_alert("Fingerprint failure","Fingerprints did not match, connection will not be opened.");
@@ -120,11 +128,13 @@ void display_serverselect_firstkey(char *fingerprintstr) {
   display_alert("Fingerprint",fstr);
 }
 
-BOOL display_serverselect_get(char *ohostname,char *ousername,char *opassword,char *ofingerprintstr) {
+int display_serverselect_get(char *ohostname,char *ousername,char *opassword,char *ofingerprintstr,char *pubkeypath,char *privkeypath) {
     
-  if(view == nil) return NO;
-
-  if([view connectComplete]) {
+  if(view == nil) return -2;
+  
+  bool connectComplete = [view connectComplete];
+  bool keyComplete     = [view keyComplete];
+  if(connectComplete || keyComplete) {
   
     printf("here0\n");
     const char *h = [[[view hostname] text] cStringUsingEncoding:NSASCIIStringEncoding];
@@ -137,6 +147,19 @@ BOOL display_serverselect_get(char *ohostname,char *ousername,char *opassword,ch
     strcpy(ousername,u);
     strcpy(opassword,p);
     
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *fpath = [paths objectAtIndex:0];
+    NSString *pubpath  = [fpath stringByAppendingString:@"/pubkey"];
+    NSString *privpath = [fpath stringByAppendingString:@"/privkey"];
+    const char *pubpathc  = [pubpath  cStringUsingEncoding:NSASCIIStringEncoding];
+    const char *privpathc = [privpath cStringUsingEncoding:NSASCIIStringEncoding];
+    strcpy(pubkeypath,pubpathc);
+    strcpy(privkeypath,privpathc);
+    
+    if((!keyComplete) && (access(pubkeypath, F_OK ) == -1)) {
+      pubkeypath [0]=0;
+      privkeypath[0]=0;
+    }
 
     char *hostnames[RECENTCONNECTIONS];
     char *usernames[RECENTCONNECTIONS];
@@ -157,9 +180,10 @@ BOOL display_serverselect_get(char *ohostname,char *ousername,char *opassword,ch
     viewcon = nil;
     uiwindow.rootViewController = nil;
      
-    return YES;
+    if(keyComplete    ) return 1;
+    if(connectComplete) return 2;
   }
-  return NO;
+  return -1;
 }
 
 void display_serverselect_complete() {
