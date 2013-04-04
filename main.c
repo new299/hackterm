@@ -63,6 +63,8 @@ int display_width;
 int display_height;
 int display_width_last_kb=0;
 int display_height_last_kb=0;
+int display_width_abs;
+int display_height_abs;
 
 SDL_Window  *screen=1;
 SDL_Renderer *renderer=1;
@@ -656,6 +658,8 @@ void do_sdl_init() {
     }
     
     SDL_GetWindowSize(screen,&display_width,&display_height);
+    display_width_abs  = display_width;
+    display_height_abs = display_height;
 
     if (screen == 0) {
         printf("Could not initialize Window");
@@ -752,6 +756,15 @@ void reposition_buttons() {
       
   ngui_move_button("Iclose" ,display_width-(16*6*1)     ,0);
   ngui_move_button("Ikbshow",display_width-(16*6)-(16*7),0);
+  
+  
+  // check if close overlaps with escape
+  if((display_height-(16*6*3)) > 80) {
+    ngui_move_button("Iclose",display_width-(16*6*1)     ,0);
+  } else {
+    ngui_move_button("Iclose",display_width-(16*6*4),display_height-(16*6*3));
+  }
+  ngui_move_button("Ikbshow",display_width-(16*6)-(16*7),display_height_abs-(5*16));
 }
 
 bool redraw_req=true;
@@ -790,6 +803,8 @@ void sdl_render_thread() {
     if((SDL_IsScreenKeyboardShown(screen) != last_kb_shown) &&
        (last_kb_shown != -3)) {
       SDL_GetWindowSize(screen,&display_width,&display_height);
+      display_width_abs = display_width;
+      display_height_abs = display_height;
       
       if(SDL_IsScreenKeyboardShown(screen)) {
         display_width  = display_width_last_kb;
@@ -1116,7 +1131,7 @@ void sdl_read_thread(SDL_Event *event) {
        ((event->window.event == SDL_WINDOWEVENT_RESIZED) || (event->window.event == SDL_WINDOWEVENT_RESTORED)))
       ) {
         forced_recreaterenderer=0;
-//        SDL_GetWindowSize(screen,&display_width,&display_height);
+        SDL_GetWindowSize(screen,&display_width_abs,&display_height_abs);
 
         display_width  = event->window.data1;
         display_height = event->window.data2;
@@ -1125,8 +1140,8 @@ void sdl_read_thread(SDL_Event *event) {
           display_width  = display_width_last_kb;
           display_height = display_height_last_kb;
         }
-        regis_resize(display_width,display_height);
-        inline_data_resize(display_width,display_height);
+        regis_resize(display_width_abs,display_height_abs);
+        inline_data_resize(display_width_abs,display_height_abs);
 
         SDL_DestroyRenderer(renderer);
         renderer = SDL_CreateRenderer(screen, -1, SDL_RENDERER_ACCELERATED);
@@ -1451,8 +1466,8 @@ int main(int argc, char **argv) {
   }    
     
   do_sdl_init();
-  regis_init(display_width,display_height);
-  inline_data_init(display_width,display_height);
+  regis_init(display_width_abs,display_height_abs);
+  inline_data_init(display_width_abs,display_height_abs);
   
   ngui_set_renderer(renderer, redraw_required);
   ngui_add_button(display_width-(16*6*3),display_height-(16*6*3),"Iesc"  ,virtual_kb_esc  );
@@ -1467,8 +1482,13 @@ int main(int argc, char **argv) {
 
   ngui_add_button(display_width-(16*6*2),display_height-(16*6*2),"Ipaste",virtual_kb_paste);
 
-  ngui_add_button(display_width-(16*6*1)     ,0,"Iclose" ,virtual_kb_close);
-  ngui_add_button(display_width-(16*6)-(16*7),0,"Ikbshow",virtual_kb_kbshow);
+  // check if close overlaps with escape
+  if((display_height-(16*6*3)) > 80) {
+    ngui_add_button(display_width-(16*6*1)     ,0,"Iclose" ,virtual_kb_close);
+  } else {
+    ngui_add_button(display_width-(16*6*4),display_height-(16*6*3),"Iclose" ,virtual_kb_close);
+  }
+  ngui_add_button(display_width-(16*6)-(16*7),display_height_abs-(5*16),"Ikbshow",virtual_kb_kbshow);
 
     
   nunifont_load_staticmap(__fontmap_static,__widthmap_static,__fontmap_static_len,__widthmap_static_len);
@@ -1478,6 +1498,9 @@ int main(int argc, char **argv) {
 
   
   SDL_GetWindowSize(screen,&display_width,&display_height);
+  display_width_abs = display_width;
+  display_height_abs = display_height;
+  
   vterm_initialisation();
 
 
