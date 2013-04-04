@@ -330,8 +330,8 @@ int ssh_getfile(char *remotepath,char *localpath) {
 
 int ssh_getkeys(char *pubkeypath,char *privkeypath) {
 
-  int r1 = ssh_getfile("/home/new/.ssh/id_rsa",privkeypath);
-  int r2 = ssh_getfile("/home/new/.ssh/id_rsa.pub" ,pubkeypath);
+  int r1 = ssh_getfile(".ssh/id_rsa"     ,privkeypath);
+  int r2 = ssh_getfile(".ssh/id_rsa.pub" ,pubkeypath);
   if((r1 == 0) && (r2 == 0)) return 0;
   return 1;
 }
