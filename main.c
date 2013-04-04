@@ -760,11 +760,11 @@ void reposition_buttons() {
   
   // check if close overlaps with escape
   if((display_height-(16*6*3)) > 80) {
-    ngui_move_button("Iclose",display_width-(16*6*1)     ,0);
+    ngui_move_button("Iclose",dwidth-(16*6*1)     ,0);
   } else {
-    ngui_move_button("Iclose",display_width-(16*6*4),display_height-(16*6*3));
+    ngui_move_button("Iclose",dwidth-(16*6*4),dheight-(16*6*3));
   }
-  ngui_move_button("Ikbshow",display_width-(16*6)-(16*7),display_height_abs-(5*16));
+  ngui_move_button("Ikbshow",display_width_abs-(16*6)-(16*7),display_height_abs-(5*16));
 }
 
 bool redraw_req=true;
@@ -1470,33 +1470,33 @@ int main(int argc, char **argv) {
   inline_data_init(display_width_abs,display_height_abs);
   
   ngui_set_renderer(renderer, redraw_required);
-  ngui_add_button(display_width-(16*6*3),display_height-(16*6*3),"Iesc"  ,virtual_kb_esc  );
-  ngui_add_button(display_width-(16*6*3),display_height-(16*6*1),"Ialt"  ,virtual_kb_alt  );
-  ngui_add_button(display_width-(16*6*1),display_height-(16*6*3),"Ictrl" ,virtual_kb_ctrl );
-  ngui_add_button(display_width-(16*6*1),display_height-(16*6*1),"Itab"  ,virtual_kb_tab  );
+  
+  // set intial button positions, these should get overwritten almost right away anyway.
+  int dwidth  = display_width -(display_width %16);
+  int dheight = display_height-(display_height%16);
+  ngui_add_button(dwidth-(16*6*3),dheight-(16*6*3),"Iesc"  ,virtual_kb_esc  );
+  ngui_add_button(dwidth-(16*6*3),dheight-(16*6*1),"Ialt"  ,virtual_kb_alt  );
+  ngui_add_button(dwidth-(16*6*1),dheight-(16*6*3),"Ictrl" ,virtual_kb_ctrl );
+  ngui_add_button(dwidth-(16*6*1),dheight-(16*6*1),"Itab"  ,virtual_kb_tab  );
 
-  ngui_add_button(display_width-(16*6*2),display_height-(16*6*3),"Iup"   ,virtual_kb_up   );
-  ngui_add_button(display_width-(16*6*2),display_height-(16*6*1),"Idown" ,virtual_kb_down );
-  ngui_add_button(display_width-(16*6*3),display_height-(16*6*2),"Ileft" ,virtual_kb_left );
-  ngui_add_button(display_width-(16*6*1),display_height-(16*6*2),"Iright",virtual_kb_right);
+  ngui_add_button(dwidth-(16*6*2),dheight-(16*6*3),"Iup"   ,virtual_kb_up   );
+  ngui_add_button(dwidth-(16*6*2),dheight-(16*6*1),"Idown" ,virtual_kb_down );
+  ngui_add_button(dwidth-(16*6*3),dheight-(16*6*2),"Ileft" ,virtual_kb_left );
+  ngui_add_button(dwidth-(16*6*1),dheight-(16*6*2),"Iright",virtual_kb_right);
 
-  ngui_add_button(display_width-(16*6*2),display_height-(16*6*2),"Ipaste",virtual_kb_paste);
+  ngui_add_button(dwidth-(16*6*2),dheight-(16*6*2),"Ipaste",virtual_kb_paste);
 
   // check if close overlaps with escape
   if((display_height-(16*6*3)) > 80) {
-    ngui_add_button(display_width-(16*6*1)     ,0,"Iclose" ,virtual_kb_close);
+    ngui_add_button(dwidth-(16*6*1),               0,"Iclose" ,virtual_kb_close);
   } else {
-    ngui_add_button(display_width-(16*6*4),display_height-(16*6*3),"Iclose" ,virtual_kb_close);
+    ngui_add_button(dwidth-(16*6*4),dheight-(16*6*3),"Iclose" ,virtual_kb_close);
   }
-  ngui_add_button(display_width-(16*6)-(16*7),display_height_abs-(5*16),"Ikbshow",virtual_kb_kbshow);
+  ngui_add_button(display_width_abs-(16*6)-(16*7),display_height_abs-(5*16),"Ikbshow",virtual_kb_kbshow);
 
     
   nunifont_load_staticmap(__fontmap_static,__widthmap_static,__fontmap_static_len,__widthmap_static_len);
 
-
-  
-
-  
   SDL_GetWindowSize(screen,&display_width,&display_height);
   display_width_abs = display_width;
   display_height_abs = display_height;
