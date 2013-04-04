@@ -42,7 +42,7 @@ void display_serverselect_run() {
     if(i > 20) return;
     [[view hostname] setText:[NSString stringWithCString:hostnames[i] encoding:NSASCIIStringEncoding]];
     [[view username] setText:[NSString stringWithCString:usernames[i] encoding:NSASCIIStringEncoding]];
-    [[view password] setText:[NSString stringWithCString:passwords[i] encoding:NSASCIIStringEncoding]];
+    [[view password] setText:[NSString stringWithCString:"" encoding:NSASCIIStringEncoding]];
 
     last_selection = source.selection;
   }
@@ -205,7 +205,7 @@ void begin_background_task() {
     UILocalNotification *localNotification = [[UILocalNotification alloc] init];
     NSDate *now = [NSDate date];
     NSDate *dateToFire = [now dateByAddingTimeInterval:0.01];
-    localNotification.alertBody = @"HTerm connections terminating";
+    localNotification.alertBody = @"Connections terminating";
     localNotification.soundName = UILocalNotificationDefaultSoundName;
     localNotification.applicationIconBadgeNumber=1;
     [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];

@@ -77,7 +77,7 @@ void writeall_connections(char **hostnames,char **usernames,char **passwords,cha
     if(usernames[n][0]==0) {usernames[n][0]='X';usernames[n][1]=0;}
     if(passwords[n][0]==0) {passwords[n][0]='X';passwords[n][1]=0;}
     if(fingerprintstrs[n][0]==0) {fingerprintstrs[n][0]='X';fingerprintstrs[n][1]=0;}
-    fprintf(recentf,"%s %s %s %s\n",hostnames[n],usernames[n],passwords[n],fingerprintstrs[n]);
+    fprintf(recentf,"%s %s X %s\n",hostnames[n],usernames[n],fingerprintstrs[n]);
   }
   fclose(recentf);
 
