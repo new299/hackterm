@@ -55,6 +55,17 @@ void nunifont_initcache() {
     //unsigned keylen;
     //char_render_t *msg, *tmp, *msgs = NULL;
     //lookup_key_t *lookup_key;
+
+    // free up display_cache
+    if(display_cache != NULL) {
+
+      char_render_t *s;
+
+      for(s=display_cache; s != NULL; s=s->hh.next) {
+        SDL_DestroyTexture(s);
+      }
+    }
+
     char_render_t_keylen = offsetof(char_render_t, strike) + 4 - offsetof(char_render_t, c);
     display_cache = NULL; // REALLY NEED TO REALLOC!
 }
@@ -198,34 +209,33 @@ void draw_character(void *screen,int x,int y,int w,uint32_t cin,uint32_t bg,uint
 
       texture = SDL_CreateTextureFromSurface(screen, converted);
     
-    uint32_t format;
-    int access;
-    int ww;
-    int hh;
-    int v = SDL_QueryTexture(texture,
-                     &format,
-                     &access,
-                     &ww,
-                     &hh);
+      uint32_t format;
+      int access;
+      int ww;
+      int hh;
+      int v = SDL_QueryTexture(texture,
+                       &format,
+                       &access,
+                       &ww,
+                       &hh);
     
-    SDL_FreeSurface(converted);
+      SDL_FreeSurface(converted);
 
-    mchr = malloc(sizeof(char_render_t));
-    mchr->c = cin;
-    mchr->fg = fg;
-    mchr->bg = bg;
-    mchr->bold = bold;
-    mchr->underline = underline;
-    mchr->italic = italic;
-    mchr->strike = strike;
-    mchr->texture = texture;
+      mchr = malloc(sizeof(char_render_t));
+      mchr->c = cin;
+      mchr->fg = fg;
+      mchr->bg = bg;
+      mchr->bold = bold;
+      mchr->underline = underline;
+      mchr->italic = italic;
+      mchr->strike = strike;
+      mchr->texture = texture;
         
-    HASH_ADD( hh, display_cache, c, char_render_t_keylen, mchr);
-    printf("added character: %u\n",cin);
-  }
+      HASH_ADD( hh, display_cache, c, char_render_t_keylen, mchr);
+    }
     
-  SDL_Rect dstRect = { x, y, w, 16 };
-  SDL_RenderCopy(screen, mchr->texture, NULL, &dstRect);
+    SDL_Rect dstRect = { x, y, w, 16 };
+    SDL_RenderCopy(screen, mchr->texture, NULL, &dstRect);
 }
 
 void draw_space_surface(void *screen,int x,int y,int w,uint32_t bg,uint32_t fg) {
