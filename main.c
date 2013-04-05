@@ -114,6 +114,7 @@ int (*c_resize)(int rows,int cols) = 0;
 void scroll_buffer_get(size_t line_number,VTermScreenCell **line,int *len);
 
 bool hterm_next_key_ctrl=false;
+bool hterm_next_key_alt =false;
 
 void regis_render() {
 
@@ -1201,6 +1202,16 @@ void sdl_read_thread(SDL_Event *event) {
           buffer[0]=i;
           hterm_next_key_ctrl = false;
         }
+
+        if(hterm_next_key_alt == true) {
+          char buf[4];
+          buf[0] = 0x1b;
+          buf[1] = 0;
+          c_write(buf,1);
+          hterm_next_key_alt = false;
+        }
+                
+        
         c_write(buffer,strlen(buffer));
     }
     
@@ -1405,8 +1416,9 @@ void virtual_kb_ctrl(char *c) {
 
 void virtual_kb_alt(char *c) {
   printf("VIRTUAL ALT\n");
-  SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_RALT);
-  SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_RALT);
+  hterm_next_key_alt=true;
+//  SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_RALT);
+//  SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_RALT);
 }
 
 void virtual_kb_tab(char *c) {
