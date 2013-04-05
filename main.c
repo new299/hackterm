@@ -355,6 +355,12 @@ int csi_handler(const char *leader, const long args[], int argcount, const char 
     inline_data_clear();
     redraw_required();
   }
+  
+  // This is an attempt to capture clears in tmux
+  if(command == 'K') {
+    inline_data_clear();
+    redraw_required();
+  }
 
   return 0;
 }
@@ -680,6 +686,7 @@ void sdl_read_thread();
 
 void console_read_init() {
   int open_ret = c_open(open_arg1,open_arg2,open_arg3,open_arg4,open_arg5,open_arg6);
+  display_server_select_setactive(true);
 
   if(open_ret == -5) {
     display_serverselect_keyfailure();
@@ -753,10 +760,6 @@ void reposition_buttons() {
   ngui_move_button("Iright",dwidth-(16*6*1),dheight-(16*6*2));
       
   ngui_move_button("Ipaste",dwidth-(16*6*2),dheight-(16*6*2));
-      
-  ngui_move_button("Iclose" ,display_width-(16*6*1)     ,0);
-  ngui_move_button("Ikbshow",display_width-(16*6)-(16*7),0);
-  
   
   // check if close overlaps with escape
   if((display_height-(16*6*3)) > 80) {
@@ -764,7 +767,7 @@ void reposition_buttons() {
   } else {
     ngui_move_button("Iclose",dwidth-(16*6*4),dheight-(16*6*3));
   }
-  ngui_move_button("Ikbshow",display_width_abs-(16*6)-(16*7),display_height_abs-(5*16));
+  ngui_move_button("Ikbshow",display_width_abs-(16*7),display_height_abs-(5*16));
 }
 
 bool redraw_req=true;
@@ -1492,7 +1495,7 @@ int main(int argc, char **argv) {
   } else {
     ngui_add_button(dwidth-(16*6*4),dheight-(16*6*3),"Iclose" ,virtual_kb_close);
   }
-  ngui_add_button(display_width_abs-(16*6)-(16*7),display_height_abs-(5*16),"Ikbshow",virtual_kb_kbshow);
+  ngui_add_button(display_width_abs-(16*7),display_height_abs-(5*16),"Ikbshow",virtual_kb_kbshow);
 
     
   nunifont_load_staticmap(__fontmap_static,__widthmap_static,__fontmap_static_len,__widthmap_static_len);
@@ -1509,7 +1512,7 @@ int main(int argc, char **argv) {
   for(;;) {
     console_read_init();
     sdl_render_thread();
-    
+    display_server_select_setactive(false);
     c_close();
   
     printf("ihere0\n");

@@ -24,3 +24,4 @@ void display_serverselect_firstkey(char *fingerprintstr);
 
 void display_serverselect_keyxfer_ok();
 void display_serverselect_keyxfer_fail();
+void display_server_select_setactive(bool active);

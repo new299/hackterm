@@ -191,6 +191,7 @@ void display_serverselect_complete() {
 }
 
 
+bool connection_active=false;
 void display_server_select_closedlg() {
 
   display_alert("Connection Closed","Disconnected");
@@ -201,15 +202,20 @@ void begin_background_task() {
 
   [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
   
-    [[UIApplication sharedApplication] cancelAllLocalNotifications];
-    UILocalNotification *localNotification = [[UILocalNotification alloc] init];
-    NSDate *now = [NSDate date];
-    NSDate *dateToFire = [now dateByAddingTimeInterval:0.01];
-    localNotification.alertBody = @"Connections terminating";
-    localNotification.soundName = UILocalNotificationDefaultSoundName;
-    localNotification.applicationIconBadgeNumber=1;
-    [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];
-  
+    if(connection_active) {
+      [[UIApplication sharedApplication] cancelAllLocalNotifications];
+      UILocalNotification *localNotification = [[UILocalNotification alloc] init];
+      NSDate *now = [NSDate date];
+      NSDate *dateToFire = [now dateByAddingTimeInterval:0.01];
+      localNotification.alertBody = @"Connections terminating";
+      localNotification.soundName = UILocalNotificationDefaultSoundName;
+      localNotification.applicationIconBadgeNumber=1;
+      [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];
+    }
   }];
 
+}
+
+void display_server_select_setactive(bool active) {
+  connection_active=active;
 }

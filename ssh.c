@@ -326,6 +326,7 @@ int ssh_getfile(char *remotepath,char *localpath) {
     fclose(fid);
 
     channel = NULL;
+    return 0;
 }
 
 int ssh_getkeys(char *pubkeypath,char *privkeypath) {
