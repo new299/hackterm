@@ -61,20 +61,11 @@ int local_write(char *buffer,int len) {
 int local_read(char *buffer,int len) {
 #ifdef LOCAL_ENABLE
   int res = read(fd,buffer,len);
-  printf("res was: %d\n",res);
-  printf("len was: %d\n",len);
 
   if((res == -1) && ((errno == EAGAIN) || (errno == EWOULDBLOCK))) {
-    printf("eagain\n");
     return 0;
   }
-  printf("read: ");
-  for(int n=0;n<res;n++) {
-    printf("%c\n",buffer[n]);
-  }
-  printf("\n");
   return res;
-
 #endif
 }
 
