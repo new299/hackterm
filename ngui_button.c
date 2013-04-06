@@ -11,6 +11,7 @@ typedef struct {
   int y;
   int x_padding;
   int y_padding;
+  int shine;
   char text[100];
   void (*callback)(char *);
 } ngui_button_data;
@@ -34,12 +35,16 @@ void ngui_receive_event_button(SDL_Event *event, ngui_button_data *d) {
       if((x > (d->x)) && (x < ((d->x)+(16*6))) &&
          (y > (d->y)) && (y < ((d->y)+(16*6)))) {
         d->callback("press");
+        d->shine=20;
+        ngui_redraw_required();
       }
     }
     
     if((x > (d->x-d->x_padding)) && (x < ((d->x)+(strlen(d->text)*8)+d->x_padding)) &&
        (y > (d->y-d->y_padding)) && (y < ((d->y)+16+d->y_padding))) {
       d->callback("press");
+      d->shine=20;
+      ngui_redraw_required();
     }
   }
 }
@@ -65,7 +70,7 @@ void ngui_move_button(char *name,int nx,int ny) {
 
 }
 
-void draw_kbshow_icon(int x,int y) {
+void draw_kbshow_icon(int x,int y,int shine) {
 
   SDL_Rect rect;
   
@@ -73,12 +78,20 @@ void draw_kbshow_icon(int x,int y) {
   rect.y = y;
   rect.w = 7*16;
   rect.h = 5*16;
-  
+ 
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
 
   SDL_RenderDrawRect(ngui_renderer,&rect);
 
-  SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
+  int col = 0xA0;
+  if(shine != 0) {
+    if(shine>10) {
+      col = ((255/10)*(shine-10));
+    } else {
+      col = (0xA0/10)*(10-shine);
+    }
+  }
+  SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
 
   rect.x = x; rect.y = y; rect.w = 16; rect.h = 16;
   SDL_RenderDrawRect(ngui_renderer,&rect);
@@ -97,7 +110,7 @@ void draw_kbshow_icon(int x,int y) {
   SDL_RenderDrawRect(ngui_renderer,&rect);
 }
 
-void draw_close_icon(int x,int y) {
+void draw_close_icon(int x,int y,int shine) {
 
   SDL_Rect rect;
   
@@ -110,7 +123,17 @@ void draw_close_icon(int x,int y) {
 
   SDL_RenderDrawRect(ngui_renderer,&rect);
 
-  SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
+
+  int col = 0xA0;
+  if(shine != 0) {
+    if(shine>10) {
+      col = ((255/10)*(shine-10));
+    } else {
+      col = (0xA0/10)*(10-shine);
+    }
+  }
+  SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
+
 
   // X
   SDL_RenderDrawLine(ngui_renderer,x+(16*1),y+(16*0),x+(16*1),y+(16*1));
@@ -134,7 +157,7 @@ void draw_close_icon(int x,int y) {
   SDL_RenderDrawLine(ngui_renderer,x+(16*1),y+(16*4),x+(16*1),y+(16*5));
 }
 
-void draw_paste_icon(int x,int y) {
+void draw_paste_icon(int x,int y,int shine) {
 
   SDL_Rect rect;
   
@@ -147,7 +170,16 @@ void draw_paste_icon(int x,int y) {
 
   SDL_RenderDrawRect(ngui_renderer,&rect);
 
-  SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
+  int col = 0xA0;
+  if(shine != 0) {
+    if(shine>10) {
+      col = ((255/10)*(shine-10));
+    } else {
+      col = (0xA0/10)*(10-shine);
+    }
+  }
+  SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
+
   // P
   SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*2),x   ,y+(16*2));
   SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*2),x   ,y+(16*4));
@@ -166,7 +198,7 @@ void draw_paste_icon(int x,int y) {
   SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*2),x+(16*5),y+(16*4)-1);
 }
 
-void draw_esc_icon(int x,int y) {
+void draw_esc_icon(int x,int y,int shine) {
 
 
   SDL_Rect rect;
@@ -180,7 +212,15 @@ void draw_esc_icon(int x,int y) {
 
   SDL_RenderDrawRect(ngui_renderer,&rect);
 
-  SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
+  int col = 0xA0;
+  if(shine != 0) {
+    if(shine>10) {
+      col = ((255/10)*(shine-10));
+    } else {
+      col = (0xA0/10)*(10-shine);
+    }
+  }
+  SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
   // E
   SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*0),x   ,y+(16*0));
   SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*0),x   ,y+(16*2));
@@ -201,7 +241,7 @@ void draw_esc_icon(int x,int y) {
 
 }
 
-void draw_tab_icon  (int x,int y){
+void draw_tab_icon  (int x,int y,int shine){
 
   SDL_Rect rect;
   
@@ -213,7 +253,15 @@ void draw_tab_icon  (int x,int y){
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
   SDL_RenderDrawRect(ngui_renderer,&rect);
 
-  SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
+  int col = 0xA0;
+  if(shine != 0) {
+    if(shine>10) {
+      col = ((255/10)*(shine-10));
+    } else {
+      col = (0xA0/10)*(10-shine);
+    }
+  }
+  SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
   // T
   SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*4),x   ,y+(16*4));  // Top line
   SDL_RenderDrawLine(ngui_renderer,x+16    ,y+(16*4),x+16,y+(16*6)-1);
@@ -234,7 +282,7 @@ void draw_tab_icon  (int x,int y){
   SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*5),x+(16*6)-2,y+(16*5));
 }
 
-void draw_alt_icon  (int x,int y) {
+void draw_alt_icon  (int x,int y,int shine) {
 
 
   SDL_Rect rect;
@@ -247,7 +295,15 @@ void draw_alt_icon  (int x,int y) {
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
   SDL_RenderDrawRect(ngui_renderer,&rect);
 
-  SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
+  int col = 0xA0;
+  if(shine != 0) {
+    if(shine>10) {
+      col = ((255/10)*(shine-10));
+    } else {
+      col = (0xA0/10)*(10-shine);
+    }
+  }
+  SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
   // A
   SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*4),x   ,y+(16*4));  // Top line
   SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*4),x   ,y+(16*6)-1);  // Down line
@@ -264,7 +320,7 @@ void draw_alt_icon  (int x,int y) {
 }
 
 
-void draw_ctrl_icon (int x,int y){
+void draw_ctrl_icon (int x,int y,int shine){
 
 
   SDL_Rect rect;
@@ -277,7 +333,15 @@ void draw_ctrl_icon (int x,int y){
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
   SDL_RenderDrawRect(ngui_renderer,&rect);
 
-  SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
+  int col = 0xA0;
+  if(shine != 0) {
+    if(shine>10) {
+      col = ((255/10)*(shine-10));
+    } else {
+      col = (0xA0/10)*(10-shine);
+    }
+  }
+  SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
   // C
   SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*0),x   ,y+(16*0));
   SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*0),x   ,y+(16*2));
@@ -293,7 +357,7 @@ void draw_ctrl_icon (int x,int y){
 
 }
 
-void draw_up_icon   (int x,int y){
+void draw_up_icon(int x,int y,int shine){
 
   SDL_Rect rect;
   
@@ -305,7 +369,16 @@ void draw_up_icon   (int x,int y){
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
   SDL_RenderDrawRect(ngui_renderer,&rect);
 
-  SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
+  int col = 0xA0;
+  if(shine != 0) {
+    if(shine>10) {
+      col = ((255/10)*(shine-10));
+    } else {
+      col = (0xA0/10)*(10-shine);
+    }
+  }
+
+  SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
   SDL_RenderDrawLine(ngui_renderer,x+(16*2),y       ,x+(16*4),y       );
   SDL_RenderDrawLine(ngui_renderer,x+(16*4),y       ,x+(16*4),y+(16*2));
   SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*2),x+(16*5),y+(16*2));
@@ -320,7 +393,7 @@ void draw_up_icon   (int x,int y){
   SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*2),x+(16*2),y+(16*0));
 }
 
-void draw_down_icon (int x,int y){
+void draw_down_icon(int x,int y,int shine){
 
 
   SDL_Rect rect;
@@ -333,7 +406,15 @@ void draw_down_icon (int x,int y){
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
   SDL_RenderDrawRect(ngui_renderer,&rect);
 
-  SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
+  int col = 0xA0;
+  if(shine != 0) {
+    if(shine>10) {
+      col = ((255/10)*(shine-10));
+    } else {
+      col = (0xA0/10)*(10-shine);
+    }
+  }
+  SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
   SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*6)-1,x+(16*4),y+(16*6)-1);
   SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*6)-1,x+(16*4),y+(16*4));
   SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*4),x+(16*5),y+(16*4));
@@ -348,7 +429,7 @@ void draw_down_icon (int x,int y){
   SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*4),x+(16*2),y+(16*6)-1);
 }
 
-void draw_right_icon (int x,int y){
+void draw_right_icon(int x,int y,int shine){
 
   SDL_Rect rect;
   
@@ -360,7 +441,15 @@ void draw_right_icon (int x,int y){
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
   SDL_RenderDrawRect(ngui_renderer,&rect);
 
-  SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
+  int col = 0xA0;
+  if(shine != 0) {
+    if(shine>10) {
+      col = ((255/10)*(shine-10));
+    } else {
+      col = (0xA0/10)*(10-shine);
+    }
+  }
+  SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
   SDL_RenderDrawLine(ngui_renderer,x+(16*6)-1,y+(16*2),x+(16*6)-1,y+(16*4));
   SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*4),x+(16*4),y+(16*4));
   SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*4),x+(16*4),y+(16*5));
@@ -375,7 +464,7 @@ void draw_right_icon (int x,int y){
 
 }
 
-void draw_left_icon(int x,int y){
+void draw_left_icon(int x,int y,int shine){
   
 
   SDL_Rect rect;
@@ -388,7 +477,15 @@ void draw_left_icon(int x,int y){
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
   SDL_RenderDrawRect(ngui_renderer,&rect);
   
-  SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
+  int col = 0xA0;
+  if(shine != 0) {
+    if(shine>10) {
+      col = ((255/10)*(shine-10));
+    } else {
+      col = (0xA0/10)*(10-shine);
+    }
+  }
+  SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
   SDL_RenderDrawLine(ngui_renderer,x+(16*0),y+(16*4),x+(16*0),y+(16*2));
   SDL_RenderDrawLine(ngui_renderer,x+(16*0),y+(16*2),x+(16*2),y+(16*2));
   SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*2),x+(16*2),y+(16*1));
@@ -404,7 +501,7 @@ void draw_left_icon(int x,int y){
   
 }
 
-void draw_menu_icon (int x,int y){}
+void draw_menu_icon (int x,int y,int shine){}
 
 void ngui_render_button(ngui_button_data *d) {
 
@@ -414,19 +511,19 @@ void ngui_render_button(ngui_button_data *d) {
   SDL_SetRenderDrawColor(ngui_renderer,0xA0,0xA0,0xA0,0xFF);
   
   bool notext=false;
-  if(ustrcmp(text,"Iclose" ) == 0) { draw_close_icon (d->x,d->y); notext=true;}
-  if(ustrcmp(text,"Ikbshow") == 0) { draw_kbshow_icon(d->x,d->y); notext=true;}
-  if(ustrcmp(text,"Ipaste" ) == 0) { draw_paste_icon (d->x,d->y); notext=true;}
-  if(ustrcmp(text,"Iesc"   ) == 0) { draw_esc_icon   (d->x,d->y); notext=true;}
-  if(ustrcmp(text,"Itab"   ) == 0) { draw_tab_icon   (d->x,d->y); notext=true;}
-  if(ustrcmp(text,"Ialt"   ) == 0) { draw_alt_icon   (d->x,d->y); notext=true;}
-  if(ustrcmp(text,"Ictrl"  ) == 0) { draw_ctrl_icon  (d->x,d->y); notext=true;}
-  if(ustrcmp(text,"Iup"    ) == 0) { draw_up_icon    (d->x,d->y); notext=true;}
-  if(ustrcmp(text,"Idown"  ) == 0) { draw_down_icon  (d->x,d->y); notext=true;}
-  if(ustrcmp(text,"Ileft"  ) == 0) { draw_left_icon  (d->x,d->y); notext=true;}
-  if(ustrcmp(text,"Iright" ) == 0) { draw_right_icon (d->x,d->y); notext=true;}
-  if(ustrcmp(text,"Imenu"  ) == 0) { draw_menu_icon  (d->x,d->y); notext=true;}
-    
+  if(ustrcmp(text,"Iclose" ) == 0) { draw_close_icon (d->x,d->y,d->shine); notext=true;}
+  if(ustrcmp(text,"Ikbshow") == 0) { draw_kbshow_icon(d->x,d->y,d->shine); notext=true;}
+  if(ustrcmp(text,"Ipaste" ) == 0) { draw_paste_icon (d->x,d->y,d->shine); notext=true;}
+  if(ustrcmp(text,"Iesc"   ) == 0) { draw_esc_icon   (d->x,d->y,d->shine); notext=true;}
+  if(ustrcmp(text,"Itab"   ) == 0) { draw_tab_icon   (d->x,d->y,d->shine); notext=true;}
+  if(ustrcmp(text,"Ialt"   ) == 0) { draw_alt_icon   (d->x,d->y,d->shine); notext=true;}
+  if(ustrcmp(text,"Ictrl"  ) == 0) { draw_ctrl_icon  (d->x,d->y,d->shine); notext=true;}
+  if(ustrcmp(text,"Iup"    ) == 0) { draw_up_icon    (d->x,d->y,d->shine); notext=true;}
+  if(ustrcmp(text,"Idown"  ) == 0) { draw_down_icon  (d->x,d->y,d->shine); notext=true;}
+  if(ustrcmp(text,"Ileft"  ) == 0) { draw_left_icon  (d->x,d->y,d->shine); notext=true;}
+  if(ustrcmp(text,"Iright" ) == 0) { draw_right_icon (d->x,d->y,d->shine); notext=true;}
+  if(ustrcmp(text,"Imenu"  ) == 0) { draw_menu_icon  (d->x,d->y,d->shine); notext=true;}
+  if(d->shine > 0) {d->shine--; ngui_redraw_required();}
 
 //  nsdl_rectangle_shade(ngui_screen,d->x-d->x_padding,d->y-d->y_padding,d->x+(strlen(d->text))*8+d->x_padding,d->y+16+d->y_padding,1000,10000);
 
@@ -456,6 +553,7 @@ int ngui_add_button(int x,int y,char *text,void *callback) {
   ngui_buttons[ngui_buttons_size].y = y;
   ngui_buttons[ngui_buttons_size].x_padding = 10;
   ngui_buttons[ngui_buttons_size].y_padding = 10;
+  ngui_buttons[ngui_buttons_size].shine = 0;
   strcpy(ngui_buttons[ngui_buttons_size].text,text);
   ngui_buttons[ngui_buttons_size].callback = callback;
 
