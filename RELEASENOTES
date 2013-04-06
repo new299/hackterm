@@ -1,0 +1,93 @@
+iOS Version 1
+-------------
+
+* remove Bookmark if not implemented.
+* remove debug output
+* virtual button fadeout on press, highlight when ctrl selected.
+* cool icon.
+* when the nunifont cache is invalidated on rotation properly delete existing textures.
+* freeing memory from Surfaces on rotation.
+* how is alt handled (basic alt support in iOS, untested)
+* Termination notification, only if active connection.
+* inline data clear in tmux? Is this possible?
+* check stderr writing, looks fine.
+* keyboard shown, landscape on iPhone, buttons overlap. (done, check with BT KB)
+  ** logic: if they keys would overlap, place the close key to the left of Esc.
+  ** place the keyboard display key under the keyboard, hide keyboard display key if bluetooth keyboard connected.
+* inline data surface appears to be incorrectly scaled sometimes, check. (should be fixed, check, looks ok, check with BT)
+** remove recent server storage of passwords
+* Termination notification, change text.
+* relative paths for key transfer.
+* ssh key support - download from server
+* fingerprint cache/check
+* hide virtual keys when bluetooth keyboard attached.
+* random selection bugs.
+* rendering and selection of a single line of text is broken.
+* single word selection.
+* selection box, slowly dims/disappears.
+* copy functionality, deal with blankspace at end of line and linefeeds better, different selection system.
+* warn on timeout of socket by iOS (verify).
+* extra enter required after Kanji entry (can't replicate?).
+* connects closed on lock, also does not report correctly, just crashes app.
+* resizing doesn't work correctly on Midori's iPad mini, virtual keys have issue with undocked virtual keyboard - though only on midori's iPad?
+  ** so iOS just appears to be generating spurious KeyboardWasShown notifications, I've tried to filter this as much as I can but some remain, why it's only on 1 iPad I don't know.
+* possible to do regis/inline png in tmux? (inline png yes, regis no, data not passed by tmux?).
+* was adding a new item to recent, every time!
+* resize on keyboard hide.
+* regis/inline update Surface size on resize (and clear?)
+* cursor keys on BT keyboard sometimes randomly stop working (up and down).
+* button to redisplay keyboard after dismissal.
+* recent servers don't add if already present, just push to top.
+* connect with no data, clears all recent.
+* recent items write causes crash on iPad2 (unjailbreaked device).
+* close connection and keyboard show buttons.
+* regis clear/png clear
+* fix png support for all image types, rendering modes.
+* copying box should be nicer colour (RiscOS style?)
+* properly disconnect, currently app crashes on disconnect.
+* issue with linefeed sending in nano, save dialog - hack is in place, but really should be full unicode decode/encode.
+* occasional bug in copying - appears to have been included in other fixes.
+* not recognizing keyboard to resize occasionally, also poll iskeyboardshown to detect keyboard state.
+* png clearing
+* artifacts in scrollback on short lines in scrollback after rotation.
+* recently used hosts, actually use recent hosts, back with text file.
+* data entry window rotates and scales, device scaling.
+* png render added back.
+* copy/paste
+  **hard to copy from the very edge of the screen, perhaps change to "normal" copy selection method.
+  **paste supporting UTF8 (actually already worked).
+  **copy supporting UTF8.
+  ** need to disable copy during scrolling.
+  ** need to disable small copies on touch events.
+* basic cut support
+* basic paste support
+* scrolling - two finger
+  ** scrolling after rotation issue.
+* connect by hostname, currently only IP address is working.
+* ssh login details data entry.
+* virtual keyboard keys with graphical icons/rendered at better location.
+* virtual tab key
+* virtual keyboard should not cover text area.
+ ** display size change depending on virtual keyboard presence.
+ ** scaling bug fix with this fixed.
+* when resuming display sometimes has an offset applied.
+  ** showing double-click menu, typing, then hiding sometimes causes renderer to get offset. Possibly best to reset render here.
+* landscape mode/rotation.
+  ** rotation from landscape to portrait causes origin to be off screen.
+  ** can also happen when reloading.
+  ** and waking up from sleep.
+* virtual esc/other keys.
+* cursor
+* blank characters are not printed with correct foreground/background.
+* fix regis text rendering
+* add back Regis.
+* BT Keyboard cursor key support.
+* texted sometimes being repeatedly entered - need to verify
+* change app name to hterm
+* japanese text entry
+* ctrl and other keys.
+* screen not always redrawing after clear etc. - add back semaphore + redraw_required calls.
+* export TERM=xterm required.
+* possible to fall off edge of screen, screen resizing.
+* virtual keyboard randomly reappearing - probably Bluetooth disconnect.
+
