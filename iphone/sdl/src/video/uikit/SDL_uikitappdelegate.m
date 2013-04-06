@@ -238,8 +238,6 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 
 - (void) applicationWillResignActive:(UIApplication*)application
 {
-    //NSLog(@"%@", NSStringFromSelector(_cmd));
-
     // Send every window on every screen a MINIMIZED event.
     SDL_VideoDevice *_this = SDL_GetVideoDevice();
     if (!_this) {
@@ -255,8 +253,6 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 
 - (void) applicationDidBecomeActive:(UIApplication*)application
 {
-    //NSLog(@"%@", NSStringFromSelector(_cmd));
-
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber: 0];
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
     // Send every window on every screen a RESTORED event.

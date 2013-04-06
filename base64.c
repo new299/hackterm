@@ -37,12 +37,6 @@ unsigned char base64_bits2byte() {
 
 int base64_decode(char *input_string,int input_length,char *output_buffer,bool *failflag) {
 
-  printf("performing decode, base64\n");
-  //for(int n=0;n<input_length;n++) {
-  //  printf("%c",input_string[n]);
-  //}
-  //printf("\n");
-
   int output_buffer_pos = 0;
 
   *failflag=false;
@@ -52,7 +46,6 @@ int base64_decode(char *input_string,int input_length,char *output_buffer,bool *
     if(input_string[n] == '\r') continue;
     if(input_string[n] == ' ' ) continue;
     if(input_string[n] == '=' ) {
-      //printf("received =, base64_bit_pos is %d\n",base64_bit_pos);
       base64_bit_pos=0;
       break;
     }
@@ -78,12 +71,6 @@ int base64_decode(char *input_string,int input_length,char *output_buffer,bool *
       }
     }
   }
-
-  //printf("decoded %d: ",output_buffer_pos);
-  //for(int n=0;n<output_buffer_pos;n++) {
-  //  printf("%x,",(unsigned char) output_buffer[n]);
-  //}
-  //printf("\n");
 
   return output_buffer_pos;
 }

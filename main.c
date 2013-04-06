@@ -129,12 +129,10 @@ void regis_render() {
 void inline_data_render() {                                        
 
   if(inline_data_layer != 0) {
-    printf("inline blit\n");
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, inline_data_layer);
     
     SDL_RenderCopy(renderer, texture, NULL, NULL);
     SDL_DestroyTexture(texture);
-    printf("inline blit'd\n");
   }
 }
 
@@ -323,7 +321,6 @@ static int screen_bell(void* d) {
 }
 
 int state_erase(VTermRect r,void *user) {
-  printf("********************************************** clear received\n");
   redraw_required();
   return 0;
 }
@@ -351,7 +348,6 @@ VTermStateCallbacks cb_state = {
 
 int csi_handler(const char *leader, const long args[], int argcount, const char *intermed, char command, void *user) {
   if(command == 'J') {
-    printf("************************* this clear\n");
     if(!regis_recent()) regis_clear();
     inline_data_clear();
     redraw_required();
@@ -371,7 +367,6 @@ int dcs_handler(const char *command,size_t cmdlen,void *user) {
   if(cmdlen < 3) return 0;
 
   regis_processor(command+2,cmdlen);
-  printf("\n");
 }
 
 int osc_handler(const char *command,size_t cmdlen,void *user) {
@@ -404,13 +399,9 @@ VTermParserCallbacks cb_parser = {
 
 void terminal_resize() {
 
-  printf("terminal resize, size: %d %d\n",display_width,display_height);
-
   rows = display_height/16;
   cols = display_width/8;
     
-  printf("resized: %d %d\n",cols,rows);
-
   if(c_resize != NULL) (*c_resize)(cols,rows);
 
   if(vt != 0) vterm_set_size(vt,rows,cols);
@@ -471,11 +462,9 @@ void mouse_to_select_box(int   sx,int   sy,int so,
     *ety=ceil( ((float)ey/(font_height+font_space)))-eo;
     
     if(*stx==0) {
-      printf("is 0\n");
     }
 
     if(*stx==1) {
-      printf("is 1\n");
     }
 }
 
@@ -618,7 +607,6 @@ void redraw_screen() {
 
 void do_sdl_init() {
     if(SDL_Init(SDL_INIT_VIDEO)<0) {
-        printf("Initialisation failed");
         return;
     }
     
@@ -659,7 +647,6 @@ void do_sdl_init() {
       
       // should not happen.
       if(c == -2) {
-        printf("-2\n");
         break;
       }
     }
@@ -669,7 +656,7 @@ void do_sdl_init() {
     display_height_abs = display_height;
 
     if (screen == 0) {
-        printf("Could not initialize Window");
+      printf("Could not initialize Window");
     }
     
     renderer = SDL_CreateRenderer(screen, -1, SDL_RENDERER_ACCELERATED);
@@ -713,13 +700,6 @@ void console_poll() {
   len = c_read(buffer, sizeof(buffer)-1);
 
   if(len > 0) {
-    printf("processing buf: %s\n",buffer);
-    printf("numeric       :");
-    for(int n=0; n<len;n++) {
-      printf("%03u ",buffer[n]);
-    }
-    printf("\n");
-
     if((buffer != 0) && (len != 0)) {
       vterm_push_bytes(vt, buffer, len);
     }
@@ -872,7 +852,6 @@ void copy_text(uint16_t *itext,int len) {
     text[pos+4]=0;
   }
   
-  printf("copy text: %s\n",text);
   iphone_copy(text);
 
 /*
@@ -906,28 +885,21 @@ void process_mouse_event(SDL_Event *event) {
      SDL_Touch *t = SDL_GetTouch(event->tfinger.touchId);
 
      if(t->num_fingers != 0) {
-       printf("fingers");
      }
 
      if(t->max_fingers == 2) {
        select_disable=true;
-    //   SDL_Finger *f = SDL_GetFinger(t,event->tfinger.fingerId);
-    //   if(f == 0) return;
        int delta = event->tfinger.dy;
        delta_sum += delta;
-       printf("delta: %d\n",delta);
-       printf("delta_sum: %d\n",delta_sum);
        if(delta_sum > 500) {
          scroll_offset++;
          redraw_required();
-         printf("finger scroll up %d\n",scroll_offset);
          delta_sum-=500;
        }
        if(delta_sum < -500) {
          scroll_offset--;
          if(scroll_offset < 0) scroll_offset = 0;
          redraw_required();
-         printf("finger scroll down %d\n",scroll_offset);
          delta_sum+=500;
        }
        return; // prevent select code from running.
@@ -959,23 +931,18 @@ void process_mouse_event(SDL_Event *event) {
   int mouse_y = event->motion.y;
 
   if(event->button.button == SDL_BUTTON_WHEELUP) {
-    printf("wheel up\n");
     scroll_offset++;
     redraw_required();
-    printf("scroll offset %d\n",scroll_offset);
   } else
   if(event->button.button == SDL_BUTTON_WHEELDOWN) {
-    printf("wheel down\n");
     scroll_offset--;
     if(scroll_offset < 0) scroll_offset = 0;
     redraw_required();
-    printf("scroll offset %d\n",scroll_offset);
   } else
   if(event->type == SDL_MOUSEMOTION    ) {
 
     if(draw_selection == true) {
 
-      printf("motion: %d %d\n",event->button.x,event->button.y);
       //if(event->button.y <= 0            ) scroll_offset++;
       //if(event->button.y >= (screen->h-1)) {if(scroll_offset != 0) scroll_offset--;}
 
@@ -1027,12 +994,6 @@ void process_mouse_event(SDL_Event *event) {
          int len=0;
          get_text_region(0,text_start_y,cols,text_start_y,&text,&len);
          
-         printf("text %d: ",len);
-         for(int n=0;n<len;n++) {
-           printf("%c",text[n]);
-         }
-         printf("\n");
-         
          // find left bound
          for(int n=text_start_x;n>=0;n--) {
            if((text[n] == ' ') || (text[n] == '\n')) {
@@ -1051,8 +1012,6 @@ void process_mouse_event(SDL_Event *event) {
          if(word_end_x==-1) {word_end_x=len-1;}
          
          // copy single word
-         printf("copy: %d %d %d %d\n",word_start_x,text_start_y,word_end_x,text_start_y);
-
          if(len != 0) copy_text(text+word_start_x,word_end_x-word_start_x+1);
          if(text != 0) free(text);
          
@@ -1092,7 +1051,6 @@ void process_mouse_event(SDL_Event *event) {
     if(text_end_x<text_start_x) {int c=text_end_x; text_end_x=text_start_x;text_start_x=c;}
     if(text_end_y<text_start_y) {int c=text_end_y; text_end_y=text_start_y;text_start_y=c;}
 
-    printf("copy: %d %d %d %d\n",text_start_x,text_start_y,text_end_x,text_end_y);
     get_text_region(text_start_x,text_start_y,text_end_x,text_end_y,&text,&len);
 
     if(len != 0) copy_text(text,len);
@@ -1185,9 +1143,7 @@ void sdl_read_thread(SDL_Event *event) {
       }
     }
     
-    printf("event\n");
     if(event->type == SDL_TEXTINPUT) {
-        printf("herm text input: %s\n",event->text.text);
         char buffer[255];
         
         strcpy(buffer, event->text.text);
@@ -1216,11 +1172,9 @@ void sdl_read_thread(SDL_Event *event) {
     }
     
     if(event->type == SDL_TEXTEDITING) {
-        printf("hterm text editing\n");
     }
 
     if(event->type == SDL_KEYDOWN) {
-        printf("hterm key down\n");
  
  //int index = keyToIndex(event.key.keysym);
    SDL_Scancode scancode = event->key.keysym.scancode;
@@ -1300,7 +1254,6 @@ void sdl_read_thread(SDL_Event *event) {
 
 /*
     if(event->type == SDL_VIDEORESIZE) {
-      printf("resize detected A\n");
       new_screen_size_x = event->resize.w;
       new_screen_size_y = event->resize.h;
       new_screen_size   = true;
@@ -1335,7 +1288,6 @@ void vterm_initialisation() {
   rows = display_height/16;
   cols = display_width/8;
 
-  printf("init rows: %d cols: %d\n",rows,cols);
   vt = vterm_new(rows, cols);
 
   vts = vterm_obtain_screen(vt);
@@ -1375,31 +1327,26 @@ void receive_ssh_info(char *o1,char *o2,char *o3) {
 }
 
 void virtual_kb_up(char *c) {
-  printf("VIRTUAL UP\n");
   SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_UP);
   SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_UP);
 }
 
 void virtual_kb_down(char *c) {
-  printf("VIRTUAL DOWN\n");
   SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_DOWN);
   SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_DOWN);
 }
 
 void virtual_kb_left(char *c) {
-  printf("VIRTUAL DOWN\n");
   SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_LEFT);
   SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_LEFT);
 }
 
 void virtual_kb_right(char *c) {
-  printf("VIRTUAL DOWN\n");
   SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_RIGHT);
   SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_RIGHT);
 }
 
 void virtual_kb_esc(char *c) {
-  printf("VIRTUAL ESC\n");
   char text[5];
   text[0] = 27;
   text[1] = 0;
@@ -1409,20 +1356,17 @@ void virtual_kb_esc(char *c) {
 }
 
 void virtual_kb_ctrl(char *c) {
-  printf("VIRTUAL CTRL\n");
   hterm_next_key_ctrl=true;
 //  SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_CTRL);
 }
 
 void virtual_kb_alt(char *c) {
-  printf("VIRTUAL ALT\n");
   hterm_next_key_alt=true;
 //  SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_RALT);
 //  SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_RALT);
 }
 
 void virtual_kb_tab(char *c) {
-  printf("VIRTUAL TAB\n");
   char text[5];
   text[0] = '\t';
   text[1] = 0;
@@ -1432,7 +1376,6 @@ void virtual_kb_tab(char *c) {
 }
 
 void virtual_kb_paste(char *c) {
-  printf("VIRTUAL PASTE\n");
   // perform text paste
   uint8_t *text = paste_text();
   if(text != 0) {
@@ -1442,12 +1385,10 @@ void virtual_kb_paste(char *c) {
 }
 
 void virtual_kb_kbshow(char *c) {
-  printf("VIRTUAL KBSHOW\n");
   SDL_StartTextInput();
 }
 
 void virtual_kb_close(char *c) {
-  printf("VIRTUAL CLOSE\n");
   c_close();
 }
 
@@ -1527,9 +1468,7 @@ int main(int argc, char **argv) {
     display_server_select_setactive(false);
     c_close();
   
-    printf("ihere0\n");
     display_server_select_closedlg();
-    printf("ihere1\n");
   
     hterm_quit=false;
     SDL_StopTextInput();

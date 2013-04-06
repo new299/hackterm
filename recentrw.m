@@ -26,8 +26,6 @@ void readall_connections(char **hostnames,char **usernames,char **passwords,char
 
   fpath = [fpath stringByAppendingString:@"/recentservers.txt"];
 
-  printf("read file path: %s\n",[fpath cStringUsingEncoding:NSUTF8StringEncoding]);
-
   FILE *recentf = fopen([fpath cStringUsingEncoding:NSUTF8StringEncoding],"r");
 
   for(int n=0;n<RECENTCONNECTIONS;n++) {
@@ -68,8 +66,6 @@ void writeall_connections(char **hostnames,char **usernames,char **passwords,cha
   NSString *fpath = [paths objectAtIndex:0];
 
   fpath = [fpath stringByAppendingString:@"/recentservers.txt"];
-
-  printf("write file path: %s\n",[fpath cStringUsingEncoding:NSUTF8StringEncoding]);
 
   FILE *recentf = fopen([fpath cStringUsingEncoding:NSUTF8StringEncoding],"w");
   if(recentf==0) return;

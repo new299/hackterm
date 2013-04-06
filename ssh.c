@@ -73,7 +73,6 @@ int ssh_open_preshell(char *hostname,char *username,char *password,char *fingerp
     }
 
     if (*hostname != '\0') {
-      printf("hostname: %s\n", hostname);
       sin = *((struct sockaddr_in *) (res->ai_addr));
       break;
     }
@@ -82,7 +81,6 @@ int ssh_open_preshell(char *hostname,char *username,char *password,char *fingerp
   freeaddrinfo(result);
 
   sock = socket(AF_INET, SOCK_STREAM, 0);
-  printf("socket: %d\n",sock);
   int set=1;
   
   //If you don't set this you'll get a sigpipe on lock on iOS.
@@ -93,8 +91,6 @@ int ssh_open_preshell(char *hostname,char *username,char *password,char *fingerp
   //sin.sin_addr.s_addr = hostaddr;
   if (connect(sock, (struct sockaddr*)(&sin),
               sizeof(struct sockaddr_in)) != 0) {
-      fprintf(stderr, "failed to connect to: %s error: %d\n",hostname,errno);
-
       return -1;
   }
 
@@ -103,7 +99,6 @@ int ssh_open_preshell(char *hostname,char *username,char *password,char *fingerp
    */
   session = libssh2_session_init();
   if (libssh2_session_handshake(session, sock)) {
-      fprintf(stderr, "Failure establishing SSH session\n");
       return -1;
   }
 
@@ -114,7 +109,6 @@ int ssh_open_preshell(char *hostname,char *username,char *password,char *fingerp
    */
   const char *fingerprint;
   fingerprint = libssh2_hostkey_hash(session, LIBSSH2_HOSTKEY_HASH_SHA1);
-  fprintf(stderr, "Fingerprint: ");
   
   char *fingerpos=fingerprintstr;
   for(i = 0; i < 20; i++) {
@@ -134,11 +128,8 @@ int ssh_open_preshell(char *hostname,char *username,char *password,char *fingerp
     }
   }
   
-  fprintf(stderr,fingerprintstr);
-  fprintf(stderr, "\n");
   /* check what authentication methods are available */
   char *userauthlist = libssh2_userauth_list(session, username, strlen(username));
-  fprintf(stderr, "Authentication methods: %s\n", userauthlist);
   if(userauthlist == 0) return -6;
   if (strstr(userauthlist, "password") != NULL) {
       auth_pw |= 1;
@@ -152,20 +143,19 @@ int ssh_open_preshell(char *hostname,char *username,char *password,char *fingerp
 
   /* We could authenticate via password */
   if (libssh2_userauth_password(session, username, password)) {
-    fprintf(stderr, "\tAuthentication by password failed!\n");
+    //fprintf(stderr, "\tAuthentication by password failed!\n");
     //return -2;
   } else {
-    fprintf(stderr, "\tAuthentication by password succeeded.\n");
+    //fprintf(stderr, "\tAuthentication by password succeeded.\n");
     return 0;
   }
       ///* Or by public key */
   if (libssh2_userauth_publickey_fromfile(session, username, pubkeypath,
                                           privkeypath, 0)) {
-      fprintf(stderr, "\tAuthentication by public key failed!\n");
+      //fprintf(stderr, "\tAuthentication by public key failed!\n");
       return -1;
-  //    goto shutdown;
   } else {
-      fprintf(stderr, "\tAuthentication by public key succeeded.\n");
+      //fprintf(stderr, "\tAuthentication by public key succeeded.\n");
       return 0;
   }
   return 0;
@@ -175,7 +165,6 @@ int ssh_openshell() {
   int error;
   /* Request a shell */ 
   if (!(channel = libssh2_channel_open_session(session))) {
-    fprintf(stderr, "Unable to open a session\n");
     return -4;
   }
 
@@ -186,21 +175,18 @@ int ssh_openshell() {
    */
   error=0;
   if (error = libssh2_channel_request_pty(channel, "xterm")) {
-    fprintf(stderr, "Failed requesting pty: %d\n",error);
-    if(error == LIBSSH2_ERROR_ALLOC) printf("alloc error\n");
-    if(error == LIBSSH2_ERROR_SOCKET_SEND) printf("eror socket\n");
-    if(error == LIBSSH2_ERROR_CHANNEL_REQUEST_DENIED) printf("ddeeenied\n");
-    if(error == LIBSSH2_ERROR_EAGAIN) printf("eagain\n");
+    if(error == LIBSSH2_ERROR_ALLOC) return -3;
+    if(error == LIBSSH2_ERROR_SOCKET_SEND) return -4;
+    if(error == LIBSSH2_ERROR_CHANNEL_REQUEST_DENIED) return -5;
+    if(error == LIBSSH2_ERROR_EAGAIN) return -6;
 
     return -3;
   }
 
   /* Open a SHELL on that pty */
   if (libssh2_channel_shell(channel)) {
-    fprintf(stderr, "Unable to request shell on allocated pty\n");
-    return -1;
+    return -7;
   }
-  printf("connection successful\n");
   libssh2_channel_set_blocking(channel,0);//nonblocking
   return 0;
 }
@@ -264,7 +250,6 @@ int ssh_close() {
 #else
   close(sock);
 #endif
-  fprintf(stderr, "all done!\n");
 
   session = 0;
   channel = 0;
@@ -285,13 +270,6 @@ int ssh_getfile(char *remotepath,char *localpath) {
     channel = libssh2_scp_recv(session, remotepath, &fileinfo);
  
     if (!channel) {
-        fprintf(stderr, "Unable to open a session: %d\n",
-                libssh2_session_last_errno(session));
-        
-        char *errstr1 = malloc(1000);
-        int errlen;
-        libssh2_session_last_error(session,&errstr1,&errlen,0);
-        fprintf(stderr,"errstr: %s\n",errstr1);
         return -1;
     }
     
@@ -315,7 +293,6 @@ int ssh_getfile(char *remotepath,char *localpath) {
             //write(fid, mem, rc);
         }
         else if(rc < 0) {
-            fprintf(stderr, "libssh2_channel_read() failed: %d\n", rc);
             return -2;
             break;
         }

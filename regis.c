@@ -31,8 +31,6 @@ void regis_clear() {
 }
 
 char *regis_process_cmd_screen(char *cmd) {
-  printf("processing screen\n");
-
   char *buffer;
   char *code = strtok_r(cmd+2,")",&buffer);
   if(code == 0) return (cmd+1);
@@ -66,7 +64,6 @@ char *regis_process_cmd_text(char *cmd) {
 }
 
 char *regis_process_cmd_w(char *cmd) {
-  printf("processing w\n");
   char *buffer;
   char *code = strtok_r(cmd+2,")",&buffer);
   if(code == 0) return (cmd+1);
@@ -75,7 +72,6 @@ char *regis_process_cmd_w(char *cmd) {
 }
 
 char *regis_process_cmd_position(char *cmd) {
-  printf("processing position\n");
 
 
   char *buffer;
@@ -86,7 +82,6 @@ char *regis_process_cmd_position(char *cmd) {
 
   int new_x = atoi(xstr);
   int new_y = atoi(ystr);
-  printf("processing position: %d %d\n",new_x,new_y);
 
   pen_x = new_x;
   pen_y = new_y;
@@ -96,21 +91,17 @@ char *regis_process_cmd_position(char *cmd) {
 
 
 void regis_init(int width,int height) {
-  printf("regis init: %d %d\n",width,height);
   regis_layer = SDL_CreateRGBSurface(SDL_SWSURFACE,width,height,32,0x000000FF,0x0000FF00,0x00FF0000,0xFF000000);
-  printf("regis layer: %u\n",regis_layer);
 }
 
 // This may not appear to work, because actually the screen gets cleared on rotation anyway, because the
 // screen size changes, and the terminal sends a signal. For this reason, resize currently doesn't try to
 // copy data.
 void regis_resize(int width,int height) {
-  printf("regis resize: %d %d\n",width,height);
 
   SDL_Surface *old_regis_layer=regis_layer;
   regis_layer = SDL_CreateRGBSurface(SDL_SWSURFACE,width,height,32,0x000000FF,0x0000FF00,0x00FF0000,0xFF000000);
   SDL_FreeSurface(old_regis_layer);
-  printf("regis layer: %u\n",regis_layer);
 }
 
 char *regis_process_cmd_vector(char *cmd) {
@@ -119,10 +110,8 @@ char *regis_process_cmd_vector(char *cmd) {
   // where 100 and 200 are the x and y positions respectively.
   // a line is drawn between the current pen position and the x,y position
 
-  printf("processing vector\n",cmd);
 
   if(strncmp(cmd,"v[]",3) == 0) {
-    printf("empry vector (dot) return\n");
     return cmd+3;
   }
   char *buffer;
@@ -133,7 +122,6 @@ char *regis_process_cmd_vector(char *cmd) {
 
   int new_x = atoi(xstr);
   int new_y = atoi(ystr);
-  printf("processed vector: %d %d\n",new_x,new_y);
 
   //regis_lines_push(pen_x,pen_y,new_x,new_y,0xFFFFFFFF);
   SDL_mutexP(regis_mutex);
@@ -154,8 +142,6 @@ char *regis_process_command(char *cmd) {
   if(cmd[0] == 'P') return regis_process_cmd_position(cmd);  else
   if(cmd[0] == 'v') return regis_process_cmd_vector(cmd);    else
   {
-    printf("bad regis, incrementing %d\n",cmd);
-    
     return cmd+1;
   }
 }

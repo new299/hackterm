@@ -24,15 +24,6 @@ int modset_rcmd  = 0;
 #define MODCODE1_LCMD  1
 #define MODCODE2_RCMD  1
 
-void dump_modkeys() {
-    printf("modkeys\n");
-    if(modset_ralt  == 1) {printf("ralt  pressed\n");}
-    if(modset_lctrl == 1) {printf("rctrl pressed\n");}
-    if(modset_lalt  == 1) {printf("lalt  pressed\n");}
-    if(modset_lcmd  == 1) {printf("lcmd  pressed\n");}
-    if(modset_rcmd  == 1) {printf("rcmd  pressed\n");}
-}
-
 bool any_modkey() {
     if(modset_ralt  == 1) return true;
     if(modset_lctrl == 1) return true;
@@ -48,14 +39,11 @@ int lookup_scancode(int code) {
 }
 
 void check_code(int keymod,int keymask,int *key) {
-//    printf("key: %d %d\n",keymod,keymask);
     if(keymod & keymask) {
-//        printf("registrying press\n");
         SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_RALT);
         *key=1;
     } else {
         if(*key == 1) {
-//            printf("registering release\n");
             SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_RALT);
             *key=0;
         }
@@ -81,7 +69,6 @@ void check_code(int keymod,int keymask,int *key) {
             check_code(keymod1,MODCODE1_LALT ,&modset_lalt);
             check_code(keymod1,MODCODE1_LCMD ,&modset_lcmd);
             check_code(keymod2,MODCODE2_RCMD ,&modset_rcmd);
-            dump_modkeys();
             
             // if any modifier key is pressed, then we need to send normal keypressed, otherwise
             // they are handled by the UITextField which takes keyboard language into account,
@@ -101,7 +88,6 @@ void check_code(int keymod,int keymask,int *key) {
                 }
             }
             
-            printf("event type is: %u\n",eventType);
             if ((eventType == GSEVENT_TYPE_KEYDOWN) && (keycode == 41)) {
                 SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_ESCAPE);
             } else
@@ -142,17 +128,12 @@ void check_code(int keymod,int keymask,int *key) {
             if ((eventType == GSEVENT_TYPE_KEYUP  ) && (keycode == 79 )) {
               SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_RIGHT);
             } else {
-                printf("keycode %u\n",keycode);
-                printf("keymod1 %u\n",keymod1);
-                printf("keymod2 %u\n",keymod2);
             }
         }
     }
 }
 
 - (BOOL)sendAction:(SEL)action to:(id)target from:(id)sender forEvent:(UIEvent *)event {
-    printf("here in sendAction");
-//    return NO;
     return [super sendAction:action to:target from:sender forEvent:event];
 }
 

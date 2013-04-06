@@ -21,12 +21,7 @@ ngui_button_data ngui_buttons[50];
 
 void ngui_receive_event_button(SDL_Event *event, ngui_button_data *d) {
 
-  printf("button received event\n");
-  printf("event type: %x\n",event->type);
   if(event->type == SDL_MOUSEBUTTONDOWN) {
-    printf("button received button down\n");
-    printf("%d\n", event->button.x);
-    printf("%d\n", event->button.y);
 
     int x = event->button.x;
     int y = event->button.y;

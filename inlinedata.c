@@ -51,30 +51,23 @@ void info_callback(png_structp png_ptr, png_infop info) {
   pixel_depth = png_get_bit_depth(png_ptr,info);
   
   channels = png_get_channels(png_ptr,info);
-  printf("png num channels: %u\n",channels);
   
   color_type = png_get_color_type(png_ptr,info);
-  printf("png color: %u\n",color_type);
-  if(color_type == PNG_COLOR_TYPE_GRAY)      {printf("png color: grey\n");}
-  if(color_type == PNG_COLOR_TYPE_GRAY_ALPHA){printf("png color: greyA\n");}
-  if(color_type == PNG_COLOR_TYPE_RGB)       {printf("png color: RGB\n");}
-  if(color_type == PNG_COLOR_TYPE_RGB_ALPHA) {printf("png color: RGBA\n");}
+  if(color_type == PNG_COLOR_TYPE_GRAY)      {}
+  if(color_type == PNG_COLOR_TYPE_GRAY_ALPHA){}
+  if(color_type == PNG_COLOR_TYPE_RGB)       {}
+  if(color_type == PNG_COLOR_TYPE_RGB_ALPHA) {}
   if(color_type == PNG_COLOR_TYPE_PALETTE )  {
-    printf("png color: PALETTE\n");
 
     int r = png_get_PLTE(png_ptr,info,&palette,&num_palette);
     if(r == 0) {
-      printf("FAILED TO FETCH PALETTE\n");
     }
     
     png_uint_16p histogram = NULL;
 
     png_get_hIST(png_ptr, info, &histogram);
-//    png_set_palette_to_rgb(png_ptr);
     png_set_expand(png_ptr);
     png_set_filler(png_ptr, 0xFF, PNG_FILLER_AFTER);
-    //png_set_scale_16(png_ptr);
-   // png_set_tRNS_to_alpha(png_ptr);
     png_read_update_info(png_ptr, info);
     pixel_depth = 8;
   }
@@ -82,8 +75,6 @@ void info_callback(png_structp png_ptr, png_infop info) {
   
   int row_bytes = png_get_rowbytes(png_ptr,info);
 
-  printf("row bytes png: %u\n",png_get_rowbytes(png_ptr,info));
-  printf("row bytes: %u\n",row_bytes);
   row_pointers = malloc(sizeof(png_bytep *) * height);
   for(size_t n=0;n<height;n++) {
     row_pointers[n] = malloc(row_bytes);
@@ -119,10 +110,9 @@ int inlineget_pixel(char *row,int pixel_depth,int idx) {
 void row_callback(png_structp png_ptr, png_bytep new_row, png_uint_32 row_num, int pass) {
 
   if(row_num >= height) {
-    printf("****** BAD ROW NUM\n");
+    // bad row number
   }
   
-  printf("png row_callback read line: %u\n",row_num);
   png_progressive_combine_row(png_ptr, row_pointers[row_num], new_row);
   for(int n=0;n<width;n++) {
     int pixel = inlineget_pixel(row_pointers[row_num],pixel_depth,n);
@@ -132,7 +122,6 @@ void row_callback(png_structp png_ptr, png_bytep new_row, png_uint_32 row_num, i
     }
     nsdl_pointS(inline_data_layer,n,row_num,pixel);
   }
-  printf("png row_callback read line: %u exit\n",row_num);
 }
 
 void png_cleanup() {
@@ -144,7 +133,6 @@ void png_cleanup() {
 }
 
 void end_callback(png_structp png_ptr, png_infop info) {
-  printf("************************************************************ png processing complete\n");
   png_cleanup();
 
 }
@@ -177,11 +165,9 @@ int inlinepng_process_data(png_bytep buffer, png_uint_32 length) {
     png_destroy_read_struct(&Gpng_ptr, &Ginfo_ptr, (png_infopp)NULL);
     return 1;
   }
-  printf("png_process_data\n");
 
   png_process_data(Gpng_ptr, Ginfo_ptr, buffer, length);
   
-  printf("png_process_data complete\n");
   return 0;
 }
 
@@ -229,23 +215,9 @@ int buffer_search(char *v) {
   return -1;
 }
 
-void buffer_dump() {
-
-  printf("current buffer: ");
-  for(int n=0;n<buffer_size;n++) {
-    int v = buffer[n];
-    printf("%x,",v);
-  }
-  printf("\n");
-
-}
-
 int inline_data_receive(char *data,int length) {
 
-  printf("inline data received data\n");
-
   if(processing_png == true) {
-    printf("currently processing png\n");
     if(file_end==1) {processing_png=false; return 1;}
     char decoded_buffer[10240]; // should be malloc'd based on length.
     bool failflag;
@@ -269,7 +241,6 @@ int inline_data_receive(char *data,int length) {
   buffer_push(data,length);
   int pos = buffer_search(inline_magic);
 
-  printf("buffer located magic: %d\n",pos);
   if(pos < 0) return 0;
 
 

@@ -251,8 +251,6 @@
 
 -(void) keyPressed: (NSNotification*) notification
 {
-    printf("something!\n\n\n");
-  //  NSLog([[notification object]text]);
 }
 
 -(void)keyboardDidShow:(NSNotification*)notification {
@@ -279,9 +277,6 @@
 
   CGFloat newKeyboardHeight;
 
-  printf("deviceheight: %f\n",deviceHeight);
-  printf("devicewidth: %f\n",deviceWidth);
-
   UIDeviceOrientation *interfaceOrientation = [[UIDevice currentDevice] orientation];
   
   keyboardVisible = YES;
@@ -289,22 +284,22 @@
   // iOS is sometimes sending supurious DidShow notifications when a bluetooth keyboard is connected.
   // this is my (vain) attempt to detect some of them, but they often look /exactly/ like real events.
   if (interfaceOrientation == UIInterfaceOrientationPortrait) {
-      printf("orientation: portrait\n");
+      //orientation: portrait
   }
   else if (interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown) {
-      printf("orientation: upsidedown\n");
+      //orientation: upsidedown
   }
   else if (interfaceOrientation == UIInterfaceOrientationLandscapeLeft) {
-      printf("orientation: landscapeleft\n");
+      //orientation: landscapeleft
       if(kb_w > kb_h) keyboardVisible=NO;
       if(kb_x == 0  ) keyboardVisible=NO;
   }
   else if (interfaceOrientation == UIInterfaceOrientationLandscapeRight){
-      printf("orientation: landscaperight\n");
+      //orientation: landscaperight
       if(kb_w > kb_h) keyboardVisible=NO;
   }
   else {
-      printf("other orientation?\n");
+      //other orientation?
   }
 
   if(keyboardVisible == NO) {
@@ -321,14 +316,11 @@
   }
 
   
-  NSLog(@"keyboardvis: %u",keyboardVisible);
   int w, h;
   w = (int)(size.width  * displaymodedata->scale);
   h = (int)(size.height * displaymodedata->scale)-(nkb_h*displaymodedata->scale);
 
   SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MOVED, w, h);//TODO: NW ADD NEW EVENT TYPE
-  NSLog(@"KeyboardDidShow %@", NSStringFromCGRect(keyboardFrameEndRect));
-
 }
 
 -(void)keyboardWillShow:(NSNotification*)notification {
@@ -363,29 +355,26 @@
 
   CGFloat newKeyboardHeight;
 
-  printf("deviceheight: %f\n",deviceHeight);
-  printf("devicewidth: %f\n",deviceWidth);
-
   UIDeviceOrientation *interfaceOrientation = [[UIDevice currentDevice] orientation];
   
   if (interfaceOrientation == UIInterfaceOrientationPortrait) {
-      printf("orientation: portrait\n");
+      //orientation: portrait
       newKeyboardHeight = deviceHeight - keyboardFrameBeginRect.origin.y;
   }
   else if (interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown) {
-      printf("orientation: upsidedown\n");
+      //orientation: upsidedown
       newKeyboardHeight = keyboardFrameBeginRect.size.height + keyboardFrameBeginRect.origin.y;
   }
   else if (interfaceOrientation == UIInterfaceOrientationLandscapeLeft) {
-      printf("orientation: landscapeleft\n");
+      //orientation: landscapeleft
       newKeyboardHeight = deviceHeight - keyboardFrameBeginRect.origin.x;
   }
   else if (interfaceOrientation == UIInterfaceOrientationLandscapeRight){
-      printf("orientation: landscaperight\n");
+      //orientation: landscaperight
       newKeyboardHeight = keyboardFrameBeginRect.size.width - keyboardFrameBeginRect.origin.x;
   }
   else {
-      printf("other orientation?\n");
+      //other orientation
   }
 
   //if(newKeyboardHeight != 0) keyboardVisible=YES;
@@ -395,13 +384,11 @@
     kb_w=0;
     kb_h=0;
   }
-  NSLog(@"keyboardvis: %u",keyboardVisible);
   int w, h;
   w = (int)(size.width  * displaymodedata->scale);
   h = (int)(size.height * displaymodedata->scale)-(kb_h*displaymodedata->scale);
 
   SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MOVED, w, h);//TODO: NW ADD NEW EVENT TYPE
-  NSLog(@"KeyboardWillShow %@", NSStringFromCGRect(keyboardFrameBeginRect));
 */
 }
 
@@ -425,7 +412,6 @@
 
 -(void)keyboardWillHide:(NSNotification*)notification {
   // Animate the current view back to its original position
-  NSLog(@"KeyboardHiding\n");
   [self fullsize_window];
   keyboardVisible = NO;
 }
@@ -434,7 +420,6 @@
 -(void)keyboardDidHide:(NSNotification*)notification {
   // Animate the current view back to its original position
   [self fullsize_window];
-  NSLog(@"KeyboardHide\n");
   keyboardVisible = NO;
 }
 
@@ -480,9 +465,7 @@
 /* hide onscreen virtual keyboard */
 - (void)hideKeyboard
 {
-    printf("Hide keyboard called\n");
     keyboardVisible = NO;
-////////////////    [textInput resignFirstResponder];
 }
 
 

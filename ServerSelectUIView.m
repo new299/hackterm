@@ -41,9 +41,6 @@
   const char *cusername = [[username text] cStringUsingEncoding:NSASCIIStringEncoding];
   const char *cpassword = [[password text] cStringUsingEncoding:NSASCIIStringEncoding];
   
-  printf("hostname %s\n",chostname);
-  printf("username %s\n",cusername);
-  printf("password %s\n",cpassword);
   self.connectComplete=YES;
 }
 
@@ -52,9 +49,6 @@
   const char *cusername = [[username text] cStringUsingEncoding:NSASCIIStringEncoding];
   const char *cpassword = [[password text] cStringUsingEncoding:NSASCIIStringEncoding];
   
-  printf("hostname %s\n",chostname);
-  printf("username %s\n",cusername);
-  printf("password %s\n",cpassword);
   self.keyComplete=YES;
 }
 

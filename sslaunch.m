@@ -37,7 +37,6 @@ void display_serverselect_run() {
     readall_connections(hostnames,usernames,passwords,fingerprintstrs);
 
     int i = source.selection;
-    printf("i is: %d\n",i);
     if(i < 0) return;
     if(i > 20) return;
     [[view hostname] setText:[NSString stringWithCString:hostnames[i] encoding:NSASCIIStringEncoding]];
@@ -136,13 +135,9 @@ int display_serverselect_get(char *ohostname,char *ousername,char *opassword,cha
   bool keyComplete     = [view keyComplete];
   if(connectComplete || keyComplete) {
   
-    printf("here0\n");
     const char *h = [[[view hostname] text] cStringUsingEncoding:NSASCIIStringEncoding];
-    printf("here1\n");
     const char *u = [[[view username] text] cStringUsingEncoding:NSASCIIStringEncoding];
-    printf("here2\n");
     const char *p = [[[view password] text] cStringUsingEncoding:NSASCIIStringEncoding];
-    printf("here3\n");
     strcpy(ohostname,h);
     strcpy(ousername,u);
     strcpy(opassword,p);

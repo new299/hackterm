@@ -189,7 +189,6 @@ void draw_character(void *screen,int x,int y,int w,uint32_t cin,uint32_t bg,uint
     HASH_FIND( hh, display_cache, &chr, char_render_t_keylen, mchr);
     
     if(!mchr) {
-      printf("adding character: %u\n",cin);
       uint32_t Rmask, Gmask, Bmask, Amask;      /* masks for desired format */
    
       Rmask = 0xff000000;
@@ -202,7 +201,7 @@ void draw_character(void *screen,int x,int y,int w,uint32_t cin,uint32_t bg,uint
       SDL_Surface *converted = SDL_CreateRGBSurface(SDL_HWSURFACE, w, 16, bpp, Rmask, Gmask, Bmask, Amask);
     
       if(converted == NULL) {
-        printf("failed %s\n",SDL_GetError());
+        // conversion failure.
       }
       
       draw_character_surface(converted,0,0,w,cin,bg,fg,bold,underline,italic,strike);

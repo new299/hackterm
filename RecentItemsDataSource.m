@@ -57,7 +57,6 @@
 
 - (void)tableView:(UITableView *)view didSelectRowAtIndexPath:(NSIndexPath *)idx {
 
-  NSLog(@"Did Select");
   _selection=[idx indexAtPosition:1];
 
 }

@@ -90,7 +90,6 @@ int c=10;
 {
     StubRange *i = [StubRange alloc];
     int j=c;
-    printf("random point: %d\n",j);
     i->_start = [StubPosition positionWithIndex:j];
     i->_end   = [StubPosition positionWithIndex:j];
     
@@ -106,27 +105,25 @@ int c=10;
     NSUInteger s = [[range start] index];
     NSUInteger e = [[range end]  index];
 
-    printf("selected range changed %d %d\n",s,e);
-
     int cur  = s;
     
     
     // and this is why you shouldn't code at 4am.
     int j=c-1;
     int next = ((j-6)%9)+6;
-    //if(s==next) { printf("left\n"); SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_LEFT); SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_LEFT);}
+    //if(s==next) { SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_LEFT); SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_LEFT);}
 
     j=c+1;
     next = ((j-6)%9)+6;
-    //if(s==next) { printf("right\n"); SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_RIGHT); SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_RIGHT);}
+    //if(s==next) { SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_RIGHT); SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_RIGHT);}
     
     j=c+3;
     next = ((j-6)%9)+6;
-    //if(s==next) { printf("dwm\n"); SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_DOWN); SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_DOWN);}
+    //if(s==next) { SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_DOWN); SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_DOWN);}
     
     j=c-3;
     if(j<6) next=15-(6-j); else next=j;
-    //if(s==next) { printf("up\n"); SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_UP);   SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_UP);}
+    //if(s==next) { SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_UP);   SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_UP);}
     
     c=s;
 }
@@ -159,7 +156,6 @@ bool skip_char=false;
 
 - (UITextRange *)textRangeFromPosition:(UITextPosition *)fromPosition toPosition:(UITextPosition *)toPosition
 {
-    printf("newrange %d %d\n",[fromPosition index],[toPosition index]);
     StubRange *s = [StubRange alloc];
     s->_start = fromPosition;
     s->_end   = toPosition;
@@ -169,8 +165,6 @@ bool skip_char=false;
 
 - (UITextPosition *)positionFromPosition:(UITextPosition *)position offset:(NSInteger)offset
 {
-//    return position;
-printf("positionfromposition %d %d\n",[position index],offset);
     return [StubPosition positionWithIndex:[position index]+offset];
 }
 
@@ -222,7 +216,6 @@ printf("positionfromposition %d %d\n",[position index],offset);
 
 - (NSComparisonResult)comparePosition:(UITextPosition *)position toPosition:(UITextPosition *)other
 {
-    printf("comparing %d %d\n",[position index],[other index]);
     if([position index] > [other index])return NSOrderedAscending;
     if([position index] < [other index])return NSOrderedDescending;
     return NSOrderedSame;
@@ -240,7 +233,6 @@ printf("positionfromposition %d %d\n",[position index],offset);
 
 - (UITextPosition *)positionWithinRange:(UITextRange *)range farthestInDirection:(UITextLayoutDirection)direction
 {
-    printf("range here: %d %d",[[range start] index],[[range end] index]);
     if(direction == UITextLayoutDirectionLeft ) return [StubPosition positionWithIndex:9];
     if(direction == UITextLayoutDirectionRight) return [StubPosition positionWithIndex:11];
     if(direction == UITextLayoutDirectionUp   ) return [StubPosition positionWithIndex:0];
@@ -352,7 +344,6 @@ bool last_skipped=false;
       int code;
       int mod;
       unichar c = [text characterAtIndex: i];
-      printf("insert c: %d",(int)c);
       if(c <= 127) {
         code = unicharToUIKeyInfoTable[c].code;
         mod  = unicharToUIKeyInfoTable[c].mod;
@@ -367,7 +358,6 @@ bool last_skipped=false;
 
 - (void)deleteBackward
 {
-  printf("Key pressing in UIKeyInput - delete\n");
   SDL_SendKeyboardKey(SDL_PRESSED , SDL_SCANCODE_DELETE);
   SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_DELETE);
 }

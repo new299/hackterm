@@ -19,8 +19,6 @@ static void do_control(VTerm *vt, unsigned char control)
 static void do_string_csi(VTerm *vt, const char *args, size_t arglen, char command)
 {
 
-  printf("************** in do_string_csi\n");
-
   int i = 0;
 
   int leaderlen = 0;
