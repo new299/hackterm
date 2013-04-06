@@ -34,13 +34,15 @@
 #include "local.h"
 #include "inlinedata.h"
 #include "ngui.h"
-#include "iphone_pasteboard.h"
 #include "utf8proc.h"
 
+#ifdef IOS_BUILD
+#include "iphone_pasteboard.h"
+#include "virtual_buttons.h"
+#endif
 
 #define CONNECTION_LOCAL 1
 #define CONNECTION_SSH   2
-
 
 void redraw_required();
 
@@ -602,8 +604,40 @@ void redraw_screen() {
 
   SDL_RenderPresent(renderer);
 }
+#ifdef IOS_BUILD
+void ios_connect() {
+  display_serverselect(screen);
+    
+  for(;;) {
+    display_serverselect_run();
 
+    int c = display_serverselect_get(open_arg1,open_arg2,open_arg3,open_arg4,open_arg5,open_arg6);
+    
+    // key transfer
+    if(c == 1) {
+      int open_ret = ssh_open_preshell(open_arg1,open_arg2,open_arg3,open_arg4,open_arg5,open_arg6);
+      int result = ssh_getkeys(open_arg5,open_arg6);
+      if(result == 0) display_serverselect_keyxfer_ok();
+      if(result == 1) display_serverselect_keyxfer_fail();
+      display_serverselect_complete();
+      c_close();
+        
+      break;
+    }
 
+    // normal connection
+    if(c == 2) {
+      display_serverselect_complete();
+      break;
+    }
+      
+    // should not happen.
+    if(c == -2) {
+      break;
+    }
+  }
+}
+#endif
 
 void do_sdl_init() {
     if(SDL_Init(SDL_INIT_VIDEO)<0) {
@@ -615,41 +649,13 @@ void do_sdl_init() {
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE , 8);
     SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
-//    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     screen=SDL_CreateWindow(NULL, 0, 0, 0, 0,SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
-    
-    display_serverselect(screen);
-    
-    for(;;) {
-      display_serverselect_run();
-
-      int c = display_serverselect_get(open_arg1,open_arg2,open_arg3,open_arg4,open_arg5,open_arg6);
-      
-      // key transfer
-      if(c == 1) {
-        int open_ret = ssh_open_preshell(open_arg1,open_arg2,open_arg3,open_arg4,open_arg5,open_arg6);
-        int result = ssh_getkeys(open_arg5,open_arg6);
-        if(result == 0) display_serverselect_keyxfer_ok();
-        if(result == 1) display_serverselect_keyxfer_fail();
-        display_serverselect_complete();
-        c_close();
-        
-        break;
-      }
-
-      // normal connection
-      if(c == 2) {
-        display_serverselect_complete();
-        break;
-      }
-      
-      // should not happen.
-      if(c == -2) {
-        break;
-      }
-    }
+ 
+    #ifdef IOS_BUILD
+      ios_connect();
+    #endif
     
     SDL_GetWindowSize(screen,&display_width,&display_height);
     display_width_abs  = display_width;
@@ -674,6 +680,8 @@ void sdl_read_thread();
 
 void console_read_init() {
   int open_ret = c_open(open_arg1,open_arg2,open_arg3,open_arg4,open_arg5,open_arg6);
+
+  #ifdef IOS_BUILD
   display_server_select_setactive(true);
 
   if(open_ret == -5) {
@@ -689,6 +697,7 @@ void console_read_init() {
       write_connection(open_arg1,open_arg2,open_arg3,fingerprintstr);
     }
   }
+  #endif
   
   terminal_resize();
 }
@@ -710,45 +719,6 @@ void console_poll() {
     hterm_quit = true;
     return;
   }
-}
-
-void disable_virtual_kb() {
-  ngui_move_button("Iesc"  ,-1000,-1000);
-  ngui_move_button("Ialt"  ,-1000,-1000);
-  ngui_move_button("Ictrl" ,-1000,-1000);
-  ngui_move_button("Itab"  ,-1000,-1000);
-      
-  ngui_move_button("Iup"   ,-1000,-1000);
-  ngui_move_button("Idown" ,-1000,-1000);
-  ngui_move_button("Ileft" ,-1000,-1000);
-  ngui_move_button("Iright",-1000,-1000);
-      
-  ngui_move_button("Ipaste",-1000,-1000);
- 
-}
-
-void reposition_buttons() {
-  int dwidth  = display_width -(display_width %16);
-  int dheight = display_height-(display_height%16);
-  ngui_move_button("Iesc"  ,dwidth-(16*6*3),dheight-(16*6*3));
-  ngui_move_button("Ialt"  ,dwidth-(16*6*3),dheight-(16*6*1));
-  ngui_move_button("Ictrl" ,dwidth-(16*6*1),dheight-(16*6*3));
-  ngui_move_button("Itab"  ,dwidth-(16*6*1),dheight-(16*6*1));
-      
-  ngui_move_button("Iup"   ,dwidth-(16*6*2),dheight-(16*6*3));
-  ngui_move_button("Idown" ,dwidth-(16*6*2),dheight-(16*6*1));
-  ngui_move_button("Ileft" ,dwidth-(16*6*3),dheight-(16*6*2));
-  ngui_move_button("Iright",dwidth-(16*6*1),dheight-(16*6*2));
-      
-  ngui_move_button("Ipaste",dwidth-(16*6*2),dheight-(16*6*2));
-  
-  // check if close overlaps with escape
-  if((display_height-(16*6*3)) > 80) {
-    ngui_move_button("Iclose",dwidth-(16*6*1)     ,0);
-  } else {
-    ngui_move_button("Iclose",dwidth-(16*6*4),dheight-(16*6*3));
-  }
-  ngui_move_button("Ikbshow",display_width_abs-(16*7),display_height_abs-(5*16));
 }
 
 bool redraw_req=true;
@@ -790,14 +760,16 @@ void sdl_render_thread() {
       display_width_abs = display_width;
       display_height_abs = display_height;
       
+      #ifdef IOS_BUILD
       if(SDL_IsScreenKeyboardShown(screen)) {
         display_width  = display_width_last_kb;
         display_height = display_height_last_kb;
-        reposition_buttons();
+        virtual_buttons_reposition();
       } else {
-        reposition_buttons();
-        disable_virtual_kb();
+        virtual_buttons_reposition();
+        virtual_buttons_disable();
       }
+      #endif
 
       redraw_required();
     }
@@ -880,6 +852,8 @@ int last_text_point_x = -1;
 int last_text_point_y = -1;
 void process_mouse_event(SDL_Event *event) {
   
+
+  #ifdef IOS_BUILD
   if(event->type == SDL_FINGERMOTION) {
    
      SDL_Touch *t = SDL_GetTouch(event->tfinger.touchId);
@@ -905,25 +879,17 @@ void process_mouse_event(SDL_Event *event) {
        return; // prevent select code from running.
      } else {
        select_disable=false;
-       // select text
-//       select_start_scroll_offset = scroll_offset;
-//       select_start_x = event->button.x;
-//       select_start_y = event->button.y;
-//       select_end_x = event->button.x;
-//       select_end_y = event->button.y;
-//       draw_selection = true;
      }
   }
   
   if(event->type == SDL_FINGERUP) {
-//    draw_selection = false;
   }
-
 
   if(select_disable) {
     draw_selection = false;
     return;
   }
+  #endif
 
   if((event->type != SDL_MOUSEMOTION) && (event->type != SDL_MOUSEBUTTONUP) && (event->type != SDL_MOUSEBUTTONDOWN)) return;
 
@@ -1081,176 +1047,159 @@ void sdl_read_thread(SDL_Event *event) {
 
   process_mouse_event(event);
     
-/*  if(event->type == SDL_QUIT) {
+  // I can't remember what effect this has on the iOS build, so it's not used there for now.
+  #ifndef IOS_BUILD
+  if(event->type == SDL_QUIT) {
     hterm_quit = true;
     return;
   }
-*/
-    if(forced_recreaterenderer>1) forced_recreaterenderer--;
+  #endif
+
+  if(forced_recreaterenderer>1) forced_recreaterenderer--;
     
-    if((forced_recreaterenderer==1) ||
-       ((event->type == SDL_WINDOWEVENT) &&
-       ((event->window.event == SDL_WINDOWEVENT_RESIZED) || (event->window.event == SDL_WINDOWEVENT_RESTORED)))
-      ) {
-        forced_recreaterenderer=0;
-        SDL_GetWindowSize(screen,&display_width_abs,&display_height_abs);
+  if((forced_recreaterenderer==1) ||
+     ((event->type == SDL_WINDOWEVENT) &&
+     ((event->window.event == SDL_WINDOWEVENT_RESIZED) || (event->window.event == SDL_WINDOWEVENT_RESTORED)))
+    ) {
+      forced_recreaterenderer=0;
+      SDL_GetWindowSize(screen,&display_width_abs,&display_height_abs);
 
-        display_width  = event->window.data1;
-        display_height = event->window.data2;
-
-        if(SDL_IsScreenKeyboardShown(screen)) {
-          display_width  = display_width_last_kb;
-          display_height = display_height_last_kb;
-        }
-        regis_resize(display_width_abs,display_height_abs);
-        inline_data_resize(display_width_abs,display_height_abs);
-
-        SDL_DestroyRenderer(renderer);
-        renderer = SDL_CreateRenderer(screen, -1, SDL_RENDERER_ACCELERATED);
-        ngui_set_renderer(renderer, redraw_required);
-        nunifont_initcache();
-        SDL_StartTextInput();
-
-        terminal_resize();
-        SDL_RaiseWindow(screen);
-        if(SDL_IsScreenKeyboardShown(screen)) {
-          reposition_buttons();
-        } else {
-          reposition_buttons();
-          disable_virtual_kb();
-        }
-        redraw_required();
-    }
-    
-    if((event->type == SDL_WINDOWEVENT) && (event->window.event == SDL_WINDOWEVENT_MOVED)) {
-      int w = event->window.data1;
-      int h = event->window.data2;
-
-      display_width  = w;
-      display_height = h;
+      display_width  = event->window.data1;
+      display_height = event->window.data2;
 
       if(SDL_IsScreenKeyboardShown(screen)) {
-        display_width_last_kb  = w;
-        display_height_last_kb = h;
+        display_width  = display_width_last_kb;
+        display_height = display_height_last_kb;
       }
+      regis_resize(display_width_abs,display_height_abs);
+      inline_data_resize(display_width_abs,display_height_abs);
+
+      SDL_DestroyRenderer(renderer);
+      renderer = SDL_CreateRenderer(screen, -1, SDL_RENDERER_ACCELERATED);
+      ngui_set_renderer(renderer, redraw_required);
+      nunifont_initcache();
+      SDL_StartTextInput();
+
       terminal_resize();
-      
-      if(SDL_IsScreenKeyboardShown(screen)) {
-        reposition_buttons();
-      } else {
-        reposition_buttons();
-        disable_virtual_kb();
-      }
-    }
-    
-    if(event->type == SDL_TEXTINPUT) {
-        char buffer[255];
-        
-        strcpy(buffer, event->text.text);
-        
-        if(buffer[0] == 10) buffer[0]=13; // hack round return sending 10, which causes issues for e.g. nano.
-                                          // really this should be a full utf8 decode/reencode.
-        
-        if(hterm_next_key_ctrl == true) {
-          int i=buffer[0];
-          if(i>=97) i = i-97+65;
-          i-=64;
-          buffer[0]=i;
-          hterm_next_key_ctrl = false;
-        }
+      SDL_RaiseWindow(screen);
 
-        if(hterm_next_key_alt == true) {
-          char buf[4];
-          buf[0] = 0x1b;
-          buf[1] = 0;
-          c_write(buf,1);
-          hterm_next_key_alt = false;
-        }
+      #ifdef IOS_BUILD
+      if(SDL_IsScreenKeyboardShown(screen)) {
+        virtual_buttons_reposition();
+      } else {
+        virtual_buttons_reposition();
+        virtual_buttons_disable();
+      }
+      #endif
+      redraw_required();
+  }
+    
+  if((event->type == SDL_WINDOWEVENT) && (event->window.event == SDL_WINDOWEVENT_MOVED)) {
+    int w = event->window.data1;
+    int h = event->window.data2;
+
+    display_width  = w;
+    display_height = h;
+
+    if(SDL_IsScreenKeyboardShown(screen)) {
+      display_width_last_kb  = w;
+      display_height_last_kb = h;
+    }
+    terminal_resize();
+      
+    #ifdef IOS_BUILD
+    if(SDL_IsScreenKeyboardShown(screen)) {
+      virtual_buttons_reposition();
+    } else {
+      virtual_buttons_reposition();
+      virtual_buttons_disable();
+    }
+    #endif
+  }
+  
+  if(event->type == SDL_TEXTINPUT) {
+    char buffer[255];
+        
+    strcpy(buffer, event->text.text);
+        
+    if(buffer[0] == 10) buffer[0]=13; // hack round return sending 10, which causes issues for e.g. nano.
+                                        // really this should be a full utf8 decode/reencode.
+        
+      if(hterm_next_key_ctrl == true) {
+        int i=buffer[0];
+        if(i>=97) i = i-97+65;
+        i-=64;
+        buffer[0]=i;
+        hterm_next_key_ctrl = false;
+      }
+
+      if(hterm_next_key_alt == true) {
+        char buf[4];
+        buf[0] = 0x1b;
+        buf[1] = 0;
+        c_write(buf,1);
+        hterm_next_key_alt = false;
+      }
                 
         
-        c_write(buffer,strlen(buffer));
-    }
+      c_write(buffer,strlen(buffer));
+  }
     
-    if(event->type == SDL_TEXTEDITING) {
-    }
+  if(event->type == SDL_TEXTEDITING) {
+  }
 
-    if(event->type == SDL_KEYDOWN) {
- 
- //int index = keyToIndex(event.key.keysym);
-   SDL_Scancode scancode = event->key.keysym.scancode;
-/*        if(scancode == SDL_SCANCODE_RETURN) {
-            char buf[4];
-            buf[0] = 13;
-            buf[1] = 0;
-
-            c_write(buf,1);
-        }
-*/        
-        if(scancode == SDL_SCANCODE_DELETE) {
-            char buf[4];
-            buf[0] = 127;
-            buf[1] = 0;
-            
-            c_write(buf,1);
-        }
- 
-//    }
-        
-      scroll_offset = 0;
-//      if(event.key.keysym.sym == SDLK_LSHIFT) continue;
-//      if(event.key.keysym.sym == SDLK_RSHIFT) continue;
-      if(scancode == SDL_SCANCODE_LEFT) {
-        char buf[4];
-        buf[0] = 0x1b;
-        buf[1] = 'O';
-        buf[2] = 'D';
-        buf[3] = 0;
-        c_write(buf,3);
-      } else 
-      if(scancode == SDL_SCANCODE_RIGHT) {
-        char buf[4];
-        buf[0] = 0x1b;
-        buf[1] = 'O';
-        buf[2] = 'C';
-        buf[3] = 0;
-        c_write(buf,3);
-      } else 
-      if(scancode == SDL_SCANCODE_UP) {
-        char buf[4];
-        buf[0] = 0x1b;
-        buf[1] = 'O';
-        buf[2] = 'A';
-        buf[3] = 0;
-        c_write(buf,3);
-      } else 
-      if(scancode == SDL_SCANCODE_DOWN) {
-        char buf[4];
-        buf[0] = 0x1b;
-        buf[1] = 'O';
-        buf[2] = 'B';
-        buf[3] = 0;
-        c_write(buf,3);
-      } else {
-  //    if((event.key.keysym.sym == SDLK_p) && (keystate[SDLK_LCTRL])) {
-
-        // perform text paste
-  //      uint8_t *text = paste_text();
-  //      if(text != 0) {
-  //        c_write(text,strlen(text));
-  ////        free(text);
-  //      }
- //     } else {
- 
-        // normal character
-/*        char buf[2];
-        buf[0] = event->key.keysym.sym;
-        buf[1]=0;
-        if(buf[0] != 0) {
-        c_write(buf,1);
-        }*/
-   // //  }
+  if(event->type == SDL_KEYDOWN) {
+   
+     SDL_Scancode scancode = event->key.keysym.scancode;
+     if(scancode == SDL_SCANCODE_DELETE) {
+       char buf[4];
+       buf[0] = 127;
+       buf[1] = 0;
+       c_write(buf,1);
+     }
+   
+     scroll_offset = 0;
+     if(scancode == SDL_SCANCODE_LEFT) {
+       char buf[4];
+       buf[0] = 0x1b;
+       buf[1] = 'O';
+       buf[2] = 'D';
+       buf[3] = 0;
+       c_write(buf,3);
+     } else 
+       if(scancode == SDL_SCANCODE_RIGHT) {
+       char buf[4];
+       buf[0] = 0x1b;
+       buf[1] = 'O';
+       buf[2] = 'C';
+       buf[3] = 0;
+       c_write(buf,3);
+     } else 
+     if(scancode == SDL_SCANCODE_UP) {
+       char buf[4];
+       buf[0] = 0x1b;
+       buf[1] = 'O';
+       buf[2] = 'A';
+       buf[3] = 0;
+       c_write(buf,3);
+     } else 
+     if(scancode == SDL_SCANCODE_DOWN) {
+       char buf[4];
+       buf[0] = 0x1b;
+       buf[1] = 'O';
+       buf[2] = 'B';
+       buf[3] = 0;
+       c_write(buf,3);
+     } else {
+       if((event.key.keysym.sym == SDLK_p) && (keystate[SDLK_LCTRL])) 
+       // perform text paste
+       uint8_t *text = paste_text();
+       if(text != 0) {
+         c_write(text,strlen(text));
+         //free(text);
+       }
     }
-    }
+  }
 
 /*
     if(event->type == SDL_VIDEORESIZE) {
@@ -1322,90 +1271,19 @@ void receive_ssh_info(char *o1,char *o2,char *o3) {
   strcpy(ssh_password,o3);
 
   ssh_received=true;
-
-//  ngui_delete_info_prompt(prompt_id);
 }
-
-void virtual_kb_up(char *c) {
-  SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_UP);
-  SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_UP);
-}
-
-void virtual_kb_down(char *c) {
-  SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_DOWN);
-  SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_DOWN);
-}
-
-void virtual_kb_left(char *c) {
-  SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_LEFT);
-  SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_LEFT);
-}
-
-void virtual_kb_right(char *c) {
-  SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_RIGHT);
-  SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_RIGHT);
-}
-
-void virtual_kb_esc(char *c) {
-  char text[5];
-  text[0] = 27;
-  text[1] = 0;
-  SDL_SendKeyboardText(text);
-  SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_ESCAPE);
-  SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_ESCAPE);
-}
-
-void virtual_kb_ctrl(char *c) {
-  hterm_next_key_ctrl=true;
-//  SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_CTRL);
-}
-
-void virtual_kb_alt(char *c) {
-  hterm_next_key_alt=true;
-//  SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_RALT);
-//  SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_RALT);
-}
-
-void virtual_kb_tab(char *c) {
-  char text[5];
-  text[0] = '\t';
-  text[1] = 0;
-  SDL_SendKeyboardText(text);
-  SDL_SendKeyboardKey(SDL_PRESSED,SDL_SCANCODE_TAB);
-  SDL_SendKeyboardKey(SDL_RELEASED,SDL_SCANCODE_TAB);
-}
-
-void virtual_kb_paste(char *c) {
-  // perform text paste
-  uint8_t *text = paste_text();
-  if(text != 0) {
-    c_write(text,strlen(text));
-//    free(text);
-  }
-}
-
-void virtual_kb_kbshow(char *c) {
-  SDL_StartTextInput();
-}
-
-void virtual_kb_close(char *c) {
-  c_close();
-}
-
 
 int main(int argc, char **argv) {
     
-  connection_type = CONNECTION_LOCAL; // replace with commandline lookup
-  if(argc > 1) {
-    if(strcmp(argv[1],"ssh") == 0) {
-      connection_type = CONNECTION_SSH; // replace with commandline lookup
-    }
-  }
   // iPhone version only supports ssh connections.
-  #ifdef IPHONE_BUILD
+  #ifdef IOS_BUILD
     connection_type = CONNECTION_SSH;
   #endif
-    
+
+  #ifdef UNIX_BUILD
+    connection_type = CONNECTION_LOCAL; // replace with commandline lookup
+  #endif
+
   if(connection_type == CONNECTION_LOCAL) {
     c_open   = &local_open;
     c_close  = &local_close;
@@ -1419,7 +1297,7 @@ int main(int argc, char **argv) {
     c_write  = &ssh_write;
     c_read   = &ssh_read;
     c_resize = &ssh_resize;
-  }    
+  }
     
   do_sdl_init();
   regis_init(display_width_abs,display_height_abs);
@@ -1427,29 +1305,9 @@ int main(int argc, char **argv) {
   
   ngui_set_renderer(renderer, redraw_required);
   
-  // set intial button positions, these should get overwritten almost right away anyway.
-  int dwidth  = display_width -(display_width %16);
-  int dheight = display_height-(display_height%16);
-  ngui_add_button(dwidth-(16*6*3),dheight-(16*6*3),"Iesc"  ,virtual_kb_esc  );
-  ngui_add_button(dwidth-(16*6*3),dheight-(16*6*1),"Ialt"  ,virtual_kb_alt  );
-  ngui_add_button(dwidth-(16*6*1),dheight-(16*6*3),"Ictrl" ,virtual_kb_ctrl );
-  ngui_add_button(dwidth-(16*6*1),dheight-(16*6*1),"Itab"  ,virtual_kb_tab  );
-
-  ngui_add_button(dwidth-(16*6*2),dheight-(16*6*3),"Iup"   ,virtual_kb_up   );
-  ngui_add_button(dwidth-(16*6*2),dheight-(16*6*1),"Idown" ,virtual_kb_down );
-  ngui_add_button(dwidth-(16*6*3),dheight-(16*6*2),"Ileft" ,virtual_kb_left );
-  ngui_add_button(dwidth-(16*6*1),dheight-(16*6*2),"Iright",virtual_kb_right);
-
-  ngui_add_button(dwidth-(16*6*2),dheight-(16*6*2),"Ipaste",virtual_kb_paste);
-
-  // check if close overlaps with escape
-  if((display_height-(16*6*3)) > 80) {
-    ngui_add_button(dwidth-(16*6*1),               0,"Iclose" ,virtual_kb_close);
-  } else {
-    ngui_add_button(dwidth-(16*6*4),dheight-(16*6*3),"Iclose" ,virtual_kb_close);
-  }
-  ngui_add_button(display_width_abs-(16*7),display_height_abs-(5*16),"Ikbshow",virtual_kb_kbshow);
-
+  #ifdef IOS_BUILD
+    virtual_buttons_add();
+  #endif
     
   nunifont_load_staticmap(__fontmap_static,__widthmap_static,__fontmap_static_len,__widthmap_static_len);
 
@@ -1459,9 +1317,9 @@ int main(int argc, char **argv) {
   
   vterm_initialisation();
 
-
-
+  #ifdef IOS_BUILD
   begin_background_task();
+  #endif
   for(;;) {
     console_read_init();
     sdl_render_thread();
@@ -1474,11 +1332,19 @@ int main(int argc, char **argv) {
     SDL_StopTextInput();
     
     SDL_Quit(); // need this to allow me to draw server selection screen.
+
+    #ifndef IOS_BUILD
+      return 0;
+    #endif
+
+    // iOS builds return you to the selection screen which requires this reinitialisation.
+    #ifdef IOS_BUILD
     do_sdl_init();
     ngui_set_renderer(renderer, redraw_required);
     nunifont_initcache();
     vterm_free(vt);
     vterm_initialisation();
+    #endif
   }
 
   return 0;

@@ -1,4 +1,0 @@
-1. Checkout sdl sourcecode.
-2. Build project in XCode, build for archive.
-3. right click libsdl.a, show in finder.
-4. grab this file, put it in your project directory. Grab the header files.
