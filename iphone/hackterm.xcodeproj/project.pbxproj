@@ -20,9 +20,7 @@
 		D55144AA170EF5DD0034E376 /* ios57.png in Resources */ = {isa = PBXBuildFile; fileRef = D55144A9170EF5DD0034E376 /* ios57.png */; };
 		D55144B0170EF6580034E376 /* ios72.png in Resources */ = {isa = PBXBuildFile; fileRef = D55144AF170EF6580034E376 /* ios72.png */; };
 		D55144B2170EF6640034E376 /* ios144.png in Resources */ = {isa = PBXBuildFile; fileRef = D55144B1170EF6640034E376 /* ios144.png */; };
-		D5B5C90416C9529700DD079C /* hterm.png in Resources */ = {isa = PBXBuildFile; fileRef = D5B5C90316C9529700DD079C /* hterm.png */; };
-		D5B5C90616C952DF00DD079C /* hterm57.png in Resources */ = {isa = PBXBuildFile; fileRef = D5B5C90516C952DF00DD079C /* hterm57.png */; };
-		D5B5C90716C95CB100DD079C /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D5ED0D1416A57A0D003F887B /* Default-568h@2x.png */; };
+		D55144B9170FEACA0034E376 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D5ED0D1416A57A0D003F887B /* Default-568h@2x.png */; };
 		D5D443C716E948EA001C2385 /* recentrw.m in Sources */ = {isa = PBXBuildFile; fileRef = D5D443C616E948EA001C2385 /* recentrw.m */; };
 		D5ED0D8416A57FD6003F887B /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0D8316A57FD6003F887B /* main.c */; };
 		D5ED0DBD16A582CB003F887B /* encoding.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0DB216A582CA003F887B /* encoding.c */; };
@@ -81,11 +79,6 @@
 		D5ED0E5116A5A10C003F887B /* transport.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0E3C16A5A10C003F887B /* transport.c */; };
 		D5ED0E5216A5A10C003F887B /* userauth.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0E3D16A5A10C003F887B /* userauth.c */; };
 		D5ED0E5316A5A10C003F887B /* version.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0E3E16A5A10C003F887B /* version.c */; };
-		D5ED0F2A16A5A5DB003F887B /* doxyfile in Resources */ = {isa = PBXBuildFile; fileRef = D5ED0EA416A5A5DB003F887B /* doxyfile */; };
-		D5ED0F2B16A5A5DB003F887B /* doxyfile in Resources */ = {isa = PBXBuildFile; fileRef = D5ED0EA816A5A5DB003F887B /* doxyfile */; };
-		D5ED0F2C16A5A5DB003F887B /* SDL_config.h.cmake in Resources */ = {isa = PBXBuildFile; fileRef = D5ED0EB016A5A5DB003F887B /* SDL_config.h.cmake */; };
-		D5ED0F2D16A5A5DB003F887B /* SDL_config.h.in in Resources */ = {isa = PBXBuildFile; fileRef = D5ED0EB116A5A5DB003F887B /* SDL_config.h.in */; };
-		D5ED0F2E16A5A5DB003F887B /* SDL_config.h.in in Resources */ = {isa = PBXBuildFile; fileRef = D5ED0EF916A5A5DB003F887B /* SDL_config.h.in */; };
 		D5ED0F3116A5A5FE003F887B /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D5ED0F2F16A5A5FE003F887B /* libcrypto.a */; };
 		D5ED0F3216A5A5FE003F887B /* libssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D5ED0F3016A5A5FE003F887B /* libssl.a */; };
 		D5ED0F3416A5A641003F887B /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D5ED0F3316A5A641003F887B /* libz.dylib */; };
@@ -96,8 +89,6 @@
 		FD15FD6B0E086911003BDF25 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D3623EB0D0F72F000981E51 /* CoreGraphics.framework */; };
 		FD15FD6C0E086911003BDF25 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDB96ED30DEFC9C700FAF19F /* OpenGLES.framework */; };
 		FD15FD6D0E086911003BDF25 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDB96EDF0DEFC9DC00FAF19F /* QuartzCore.framework */; };
-		FD925B1A0E0F276600E92347 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = FD925B180E0F276600E92347 /* Icon.png */; };
-		FDB651D00E43D1AD00F688B5 /* icon.bmp in Resources */ = {isa = PBXBuildFile; fileRef = FDB651CC0E43D19800F688B5 /* icon.bmp */; };
 		FDF0D7A90E12D53500247964 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDF0D71D0E12D2AB00247964 /* CoreAudio.framework */; };
 		FDF0D7AA0E12D53500247964 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDF0D7220E12D31800247964 /* AudioToolbox.framework */; };
 /* End PBXBuildFile section */
@@ -110,12 +101,12 @@
 			remoteGlobalIDString = FD6526630DE8FCCB002AD96B;
 			remoteInfo = libSDL;
 		};
-		D550D13316C00DBF000D4D6A /* PBXContainerItemProxy */ = {
+		D55144B7170FEA4D0034E376 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D550D12716C00DBE000D4D6A /* SDL.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 006E982211955059001DE610;
-			remoteInfo = testsdl;
+			proxyType = 1;
+			remoteGlobalIDString = FD6526620DE8FCCB002AD96B;
+			remoteInfo = libSDL;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -296,8 +287,6 @@
 		D5ED0EAD16A5A5DB003F887B /* SDL_blendmode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_blendmode.h; sourceTree = "<group>"; };
 		D5ED0EAE16A5A5DB003F887B /* SDL_clipboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_clipboard.h; sourceTree = "<group>"; };
 		D5ED0EAF16A5A5DB003F887B /* SDL_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_config.h; sourceTree = "<group>"; };
-		D5ED0EB016A5A5DB003F887B /* SDL_config.h.cmake */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SDL_config.h.cmake; sourceTree = "<group>"; };
-		D5ED0EB116A5A5DB003F887B /* SDL_config.h.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SDL_config.h.in; sourceTree = "<group>"; };
 		D5ED0EB216A5A5DB003F887B /* SDL_config_android.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_config_android.h; sourceTree = "<group>"; };
 		D5ED0EB316A5A5DB003F887B /* SDL_config_iphoneos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_config_iphoneos.h; sourceTree = "<group>"; };
 		D5ED0EB416A5A5DB003F887B /* SDL_config_macosx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_config_macosx.h; sourceTree = "<group>"; };
@@ -369,7 +358,6 @@
 		D5ED0EF616A5A5DB003F887B /* SDL_clipboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_clipboard.h; sourceTree = "<group>"; };
 		D5ED0EF716A5A5DB003F887B /* SDL_compat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_compat.h; sourceTree = "<group>"; };
 		D5ED0EF816A5A5DB003F887B /* SDL_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_config.h; sourceTree = "<group>"; };
-		D5ED0EF916A5A5DB003F887B /* SDL_config.h.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SDL_config.h.in; sourceTree = "<group>"; };
 		D5ED0EFA16A5A5DB003F887B /* SDL_config_android.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_config_android.h; sourceTree = "<group>"; };
 		D5ED0EFB16A5A5DB003F887B /* SDL_config_iphoneos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_config_iphoneos.h; sourceTree = "<group>"; };
 		D5ED0EFC16A5A5DB003F887B /* SDL_config_macosx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_config_macosx.h; sourceTree = "<group>"; };
@@ -601,7 +589,6 @@
 			isa = PBXGroup;
 			children = (
 				D550D13216C00DBF000D4D6A /* libSDL2.a */,
-				D550D13416C00DBF000D4D6A /* testsdl.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -712,7 +699,6 @@
 				D5ED0EF616A5A5DB003F887B /* SDL_clipboard.h */,
 				D5ED0EF716A5A5DB003F887B /* SDL_compat.h */,
 				D5ED0EF816A5A5DB003F887B /* SDL_config.h */,
-				D5ED0EF916A5A5DB003F887B /* SDL_config.h.in */,
 				D5ED0EFA16A5A5DB003F887B /* SDL_config_android.h */,
 				D5ED0EFB16A5A5DB003F887B /* SDL_config_iphoneos.h */,
 				D5ED0EFC16A5A5DB003F887B /* SDL_config_macosx.h */,
@@ -778,8 +764,6 @@
 				D5ED0EAD16A5A5DB003F887B /* SDL_blendmode.h */,
 				D5ED0EAE16A5A5DB003F887B /* SDL_clipboard.h */,
 				D5ED0EAF16A5A5DB003F887B /* SDL_config.h */,
-				D5ED0EB016A5A5DB003F887B /* SDL_config.h.cmake */,
-				D5ED0EB116A5A5DB003F887B /* SDL_config.h.in */,
 				D5ED0EB216A5A5DB003F887B /* SDL_config_android.h */,
 				D5ED0EB316A5A5DB003F887B /* SDL_config_iphoneos.h */,
 				D5ED0EB416A5A5DB003F887B /* SDL_config_macosx.h */,
@@ -894,6 +878,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				D55144B8170FEA4D0034E376 /* PBXTargetDependency */,
 			);
 			name = hackterm;
 			productName = BMPTest;
@@ -941,13 +926,6 @@
 			remoteRef = D550D13116C00DBF000D4D6A /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		D550D13416C00DBF000D4D6A /* testsdl.app */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.application;
-			path = testsdl.app;
-			remoteRef = D550D13316C00DBF000D4D6A /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -955,21 +933,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDB651D00E43D1AD00F688B5 /* icon.bmp in Resources */,
-				FD925B1A0E0F276600E92347 /* Icon.png in Resources */,
-				D5ED0F2A16A5A5DB003F887B /* doxyfile in Resources */,
-				D5ED0F2B16A5A5DB003F887B /* doxyfile in Resources */,
-				D5ED0F2C16A5A5DB003F887B /* SDL_config.h.cmake in Resources */,
-				D5ED0F2D16A5A5DB003F887B /* SDL_config.h.in in Resources */,
-				D5ED0F2E16A5A5DB003F887B /* SDL_config.h.in in Resources */,
-				D5B5C90416C9529700DD079C /* hterm.png in Resources */,
-				D5B5C90616C952DF00DD079C /* hterm57.png in Resources */,
-				D5B5C90716C95CB100DD079C /* Default-568h@2x.png in Resources */,
 				D51E1A9D16D92F6D0005E06C /* ServerSelect.xib in Resources */,
 				D55144A5170EF5D80034E376 /* ios114.png in Resources */,
 				D55144AA170EF5DD0034E376 /* ios57.png in Resources */,
 				D55144B0170EF6580034E376 /* ios72.png in Resources */,
 				D55144B2170EF6640034E376 /* ios144.png in Resources */,
+				D55144B9170FEACA0034E376 /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1052,45 +1021,57 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		D55144B8170FEA4D0034E376 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = libSDL;
+			targetProxy = D55144B7170FEA4D0034E376 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					armv6,
-					armv7,
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_THUMB_SUPPORT = NO;
 				HEADER_SEARCH_PATHS = ../../include;
-				IPHONEOS_DEPLOYMENT_TARGET = 3.1.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
 				PRELINK_LIBS = "";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = "armv7 armv7s";
 			};
 			name = Debug;
 		};
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					armv6,
-					armv7,
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_THUMB_SUPPORT = NO;
 				HEADER_SEARCH_PATHS = ../../include;
-				IPHONEOS_DEPLOYMENT_TARGET = 3.1.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
 				PRELINK_LIBS = "";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = "armv7 armv7s";
 			};
 			name = Release;
 		};
 		FD15FCB50E086866003BDF25 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -1116,14 +1097,17 @@
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = "armv7 armv7s";
 			};
 			name = Debug;
 		};
 		FD15FCB60E086866003BDF25 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_THUMB_SUPPORT = NO;
 				HEADER_SEARCH_PATHS = (
 					./utf8proc,
@@ -1154,6 +1138,7 @@
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = "armv7 armv7s";
 			};
 			name = Release;
 		};

@@ -16,7 +16,7 @@
 		<dict>
 			<key>CFBundleIconFiles</key>
 			<array>
-				<string></string>
+				<string>ios57.png</string>
 				<string>ios114.png</string>
 				<string>ios57.png</string>
 				<string>ios72.png</string>
@@ -27,13 +27,15 @@
 		</dict>
 	</dict>
 	<key>CFBundleIdentifier</key>
-	<string>org.sgenomics.${PRODUCT_NAME:identifier}</string>
+	<string>uk.co.sgenomics.hterm</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>${PRODUCT_NAME}</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
