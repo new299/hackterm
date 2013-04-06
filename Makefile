@@ -4,7 +4,8 @@ ifeq ($(UNAME), Linux)
 OPTS = -DLOCAL_ENABLE
 endif
 ifeq ($(UNAME), Darwin)
-OPTS = -L/opt/local/lib -I/opt/local/include -framework Cocoa -lSDLmain -Wl,-framework,Cocoa
+SDLOPTS =  -lm -liconv -Wl,-framework,OpenGL  -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-framework,AudioUnit
+OPTS = -DOSX_BUILD -DLOCAL_ENABLE -framework CoreAudio -framework Cocoa -framework OpenGL -lSDLmain -Wl,-framework,Cocoa -Wl,-framework,OpenGL $(SDLOPTS)
 endif
 
 LIBVTERMC = ./libvterm/src/parser.c  ./libvterm/src/screen.c  ./libvterm/src/input.c   ./libvterm/src/vterm.c   ./libvterm/src/unicode.c ./libvterm/src/state.c   ./libvterm/src/encoding.c ./libvterm/src/pen.c
@@ -16,10 +17,17 @@ LIBSDLC = ./libsdl
 OURC = main.c base64.c inlinedata.c regis.c nunifont.c nsdl.c ngui.c ssh.c local.c ngui_info_prompt.c ngui_textlabel.c ngui_textbox.c ngui_button.c
 
 hterm_mac: main.c nunifont.c nunifont.h *.c *.h
-	cd libsdl
-	./configure
-	make
-	gcc -g -std=gnu99 $(LIBVTERMC) $(OURC) $(LIBSSH2C) $(OPTS) -o hterm -I./libvterm/include -lpng -lSDL -lutil -lcrypto -I./libssh2/include  
+	#cd libsdl
+	#./configure
+	#make
+	#cd libpng
+	#./configure
+	#make
+	#find . -name *.dylib | xargs rm
+	gcc -g -std=gnu99 $(LIBVTERMC) $(OURC) $(LIBSSH2C) $(OPTS) ./utf8proc/utf8proc.c -o hterm -I./libpng -I./utf8proc -I./libvterm/include -I./libsdl/include -L./libsdl/build -L./libpng/.libs -L./libsdl/build/.libs -lpng15 -lSDL2 -lutil -lcrypto -I./libssh2/include -lz 
+#	install_name_tool -change /usr/local/lib/libpng15.15.dylib @executable_path/libpng15.15.dylib ./hterm
+#	install_name_tool -change /usr/local/lib/libSDL2-2.0.0.dylib @executable_path/libSDL2-2.0.0.dylib ./hterm
+	
 
 unifont_conv: unifont_conv.c nunifont.c
 	gcc -g -std=gnu99 unifont_conv.c nunifont.c -o unifont_conv

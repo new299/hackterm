@@ -6,7 +6,7 @@ SDL_Surface *ngui_renderer;
   
 void (*ngui_redraw_required_callback)();
 
-void ngui_set_renderer(SDL_Renderer *s,void *redraw_callback) {
+void ngui_set_renderer(struct SDL_Renderer *s,void *redraw_callback) {
   ngui_renderer = s;
   ngui_redraw_required_callback = redraw_callback;
 }

@@ -155,11 +155,11 @@ void regis_processor(const char *cmd,int cmdlen) {
   for(;;) {
     command = regis_process_command(command);
 
-    #ifndef IPHONE_BUILD
+    #ifdef LINUX_BUILD
     clock_gettime(CLOCK_MONOTONIC,&regis_last_render);
     #endif
     
-    #ifdef IPHONE_BUILD
+    #if defined(IPHONE_BUILD) || defined(OSX_BUILD)
     #if _POSIX_TIMERS > 0
     clock_gettime(CLOCK_REALTIME, &tp);
     #else
@@ -169,7 +169,6 @@ void regis_processor(const char *cmd,int cmdlen) {
     regis_last_render.tv_nsec = tv.tv_usec*1000;
     #endif
     #endif
-
 
     int clen = cmdlen-(command-cmd);
     if(clen<2) return;
@@ -186,11 +185,11 @@ bool regis_recent() {
  
   struct timespec current_time;
   
-  #ifndef IPHONE_BUILD
+  #ifdef LINUX_BUILD
   clock_gettime(CLOCK_MONOTONIC,&current_time);
   #endif
   
-  #ifdef IPHONE_BUILD
+  #if defined(IPHONE_BUILD) || defined(OSX_BUILD)
   #if _POSIX_TIMERS > 0
   clock_gettime(CLOCK_REALTIME, &tp);
   #else

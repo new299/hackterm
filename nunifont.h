@@ -1,7 +1,7 @@
 #ifndef NUNIFONT
 #define NUNIFONT
 
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 // These funtions are used for loading and saving static font data, rather than using the unifont hex files.
 void nunifont_init(); // usually init is automatically called if required, this require unifont.hex in the same directory.

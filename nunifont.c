@@ -1,7 +1,7 @@
 #include "nunifont.h"
 #include <stdio.h>
 #include <string.h>
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include <stdbool.h>
 #include <limits.h>
 #include "uthash.h"
@@ -174,7 +174,7 @@ void draw_character_surface(SDL_Surface *screen,int x,int y,int w,uint32_t cin,u
 
 void draw_character(void *screen,int x,int y,int w,uint32_t cin,uint32_t bg,uint32_t fg,int bold,int underline,int italic,int strike) {
 
-    SDL_Texture *texture;
+    SDL_Texture *texture=0;
  
     lookup_key_t chr;
     chr.c = cin;
@@ -198,27 +198,23 @@ void draw_character(void *screen,int x,int y,int w,uint32_t cin,uint32_t bg,uint
     
       int bpp=32;                /* bits per pixel for desired format */
     
-      SDL_Surface *converted = SDL_CreateRGBSurface(SDL_HWSURFACE, w, 16, bpp, Rmask, Gmask, Bmask, Amask);
+ //     SDL_Surface *converted = SDL_CreateRGBSurface(0,w,16,32,0,0,0,0);
+      SDL_Surface *converted = SDL_CreateRGBSurface(SDL_SWSURFACE, w, 16, bpp, Rmask, Gmask, Bmask, Amask);
     
       if(converted == NULL) {
-        // conversion failure.
+        printf("failed to create surface\n");
       }
       
       draw_character_surface(converted,0,0,w,cin,bg,fg,bold,underline,italic,strike);
 
+ //     texture = SDL_CreateTexture(screen,converted->format,0,w,16);
+ //     (((uint32_t *) (converted->pixels))[0]) = 0xFFFFFFFF;
+ //     SDL_UpdateTexture(texture,NULL,converted->pixels,w*4);
       texture = SDL_CreateTextureFromSurface(screen, converted);
+   // SDL_Rect dstRect = { x, y, w, 16 };
+   // SDL_RenderCopy(screen, texture, NULL, &dstRect);
     
-      uint32_t format;
-      int access;
-      int ww;
-      int hh;
-      int v = SDL_QueryTexture(texture,
-                       &format,
-                       &access,
-                       &ww,
-                       &hh);
-    
-      SDL_FreeSurface(converted);
+     // SDL_FreeSurface(converted);
 
       mchr = malloc(sizeof(char_render_t));
       mchr->c = cin;
@@ -232,17 +228,17 @@ void draw_character(void *screen,int x,int y,int w,uint32_t cin,uint32_t bg,uint
         
       HASH_ADD( hh, display_cache, c, char_render_t_keylen, mchr);
     }
-    
+
     SDL_Rect dstRect = { x, y, w, 16 };
     SDL_RenderCopy(screen, mchr->texture, NULL, &dstRect);
 }
 
 void draw_space_surface(void *screen,int x,int y,int w,uint32_t bg,uint32_t fg) {
-    SDL_Rect rect;
-    rect.w = w;
-    rect.h = 16;
-    rect.x = x;
-    rect.y = y;
+  SDL_Rect rect;
+  rect.w = w;
+  rect.h = 16;
+  rect.x = x;
+  rect.y = y;
 
   for(size_t c_y=0;c_y<16;c_y++) {
     for(size_t c_x=0;c_x<w;c_x++) {
@@ -253,29 +249,29 @@ void draw_space_surface(void *screen,int x,int y,int w,uint32_t bg,uint32_t fg) 
 
 void draw_space_renderer(void *renderer,int x,int y,int w,uint32_t bg,uint32_t fg) {
     
-    SDL_Rect rect;
-    rect.w = w;
-    rect.h = 16;
-    rect.x = x;
-    rect.y = y;
+  SDL_Rect rect;
+  rect.w = w;
+  rect.h = 16;
+  rect.x = x;
+  rect.y = y;
     
-    uint32_t  Rmask = 0xff000000;
-    uint32_t  Gmask = 0x00ff0000;
-    uint32_t  Bmask = 0x0000ff00;
-    uint32_t  Amask = 0x000000ff;
+  uint32_t  Rmask = 0xff000000;
+  uint32_t  Gmask = 0x00ff0000;
+  uint32_t  Bmask = 0x0000ff00;
+  uint32_t  Amask = 0x000000ff;
     
 //    uint32_t Rmask = 0xff000000;
 //    uint32_t Gmask = 0x00ff0000;
 //    uint32_t Bmask = 0x0000ff00;
 //   uint32_t Amask = 0x000000ff;
     
-    int r=(bg & Rmask)>>24;
-    int g=(bg & Gmask)>>16;
-    int b=(bg & Bmask)>>8;
-    int a=(bg & Amask);
+  int r=(bg & Rmask)>>24;
+  int g=(bg & Gmask)>>16;
+  int b=(bg & Bmask)>>8;
+  int a=(bg & Amask);
     
-    SDL_SetRenderDrawColor(renderer,r,g,b,a);
-    SDL_RenderFillRect(renderer, &rect);
+  SDL_SetRenderDrawColor(renderer,r,g,b,a);
+  SDL_RenderFillRect(renderer, &rect);
 }
 
 //void draw_space_h(void *screen,int x,int y,int w,uint32_t bg,uint32_t fg) {

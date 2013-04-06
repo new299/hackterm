@@ -449,7 +449,7 @@ Copyright (C) 2010 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/Users/new/gitcode/hackterm/iphone/libpng'
+ac_pwd='/Users/new/gitcode/hackterm/libpng'
 srcdir='.'
 INSTALL='/usr/bin/install -c'
 MKDIR_P='./install-sh -c -d'
@@ -904,7 +904,7 @@ S["MAINTAINER_MODE_FALSE"]=""
 S["MAINTAINER_MODE_TRUE"]="#"
 S["am__untar"]="${AMTAR} xf -"
 S["am__tar"]="${AMTAR} chof - \"$$tardir\""
-S["AMTAR"]="${SHELL} /Users/new/gitcode/hackterm/iphone/libpng/missing --run tar"
+S["AMTAR"]="${SHELL} /Users/new/gitcode/hackterm/libpng/missing --run tar"
 S["am__leading_dot"]="."
 S["SET_MAKE"]=""
 S["AWK"]="awk"
@@ -912,12 +912,12 @@ S["mkdir_p"]="$(top_builddir)/./install-sh -c -d"
 S["MKDIR_P"]="./install-sh -c -d"
 S["INSTALL_STRIP_PROGRAM"]="$(install_sh) -c -s"
 S["STRIP"]="strip"
-S["install_sh"]="${SHELL} /Users/new/gitcode/hackterm/iphone/libpng/install-sh"
-S["MAKEINFO"]="${SHELL} /Users/new/gitcode/hackterm/iphone/libpng/missing --run makeinfo"
-S["AUTOHEADER"]="${SHELL} /Users/new/gitcode/hackterm/iphone/libpng/missing --run autoheader"
-S["AUTOMAKE"]="${SHELL} /Users/new/gitcode/hackterm/iphone/libpng/missing --run automake-1.11"
-S["AUTOCONF"]="${SHELL} /Users/new/gitcode/hackterm/iphone/libpng/missing --run autoconf"
-S["ACLOCAL"]="${SHELL} /Users/new/gitcode/hackterm/iphone/libpng/missing --run aclocal-1.11"
+S["install_sh"]="${SHELL} /Users/new/gitcode/hackterm/libpng/install-sh"
+S["MAKEINFO"]="${SHELL} /Users/new/gitcode/hackterm/libpng/missing --run makeinfo"
+S["AUTOHEADER"]="${SHELL} /Users/new/gitcode/hackterm/libpng/missing --run autoheader"
+S["AUTOMAKE"]="${SHELL} /Users/new/gitcode/hackterm/libpng/missing --run automake-1.11"
+S["AUTOCONF"]="${SHELL} /Users/new/gitcode/hackterm/libpng/missing --run autoconf"
+S["ACLOCAL"]="${SHELL} /Users/new/gitcode/hackterm/libpng/missing --run aclocal-1.11"
 S["VERSION"]="1.5.13"
 S["PACKAGE"]="libpng"
 S["CYGPATH_W"]="echo"

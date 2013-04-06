@@ -69,50 +69,6 @@ uint32_t nsdl_getpoint(void *screen,int x,int y) {
 }
 */
 
-/*
-void nsdl_rectangle_hashed(void *screen,int sx,int sy,int ex,int ey,uint32_t value) {
-
-  int n=0;
-
-  for(int x=sx;x<=ex;x++) {
-    for(int y=sy;y<=ey;y++) {
-     
-      if(n%2 == 0) {
-        nsdl_point(screen,x,y,value);
-      }
-      n++;
-    }
-    n=x%2;
-  }
-
-}
-*/
-
-void nsdl_rectangle_shade(void *screen,int sx,int sy,int ex,int ey,uint32_t value_start,uint32_t value_end) {
-  
-  int shade=value_start;
-  int shade_inc = ((value_end-value_start)/(ex-sx))/2;
-
-  for(int x=sx;x<=ex;x++) {
-    for(int y=sy;y<=ey;y++) {
-      uint32_t v = nsdl_getpoint(screen,x,y);
-      nsdl_point(screen,x,y,v^shade);
-    }
-    if(x==(sx+((ex-sx)/2))) { shade_inc = 0 - shade_inc; }
-    shade += shade_inc;
-  }
-}
-
-void nsdl_rectangle_softalph(void *screen,int sx,int sy,int ex,int ey,uint32_t value) {
-  int shade=value;
-
-  for(int x=sx;x<ex;x++) {
-    for(int y=sy;y<ey;y++) {
-      uint32_t v = nsdl_getpoint(screen,x,y);
-      nsdl_point(screen,x,y,v^value);
-    }
-  }
-}
 
 void nsdl_rectangle_wire(void *screen,int sx,int sy,int ex,int ey,uint8_t r,uint8_t g,uint8_t b,uint8_t a) {
 

@@ -1,13 +1,12 @@
 //#define _POSIX_C_SOURCE 199309L
 //#define _BSD_SOURCE
-#define LOCAL_ENABLE
 
 #include "fontmap_static.h"
 #include "widthmap_static.h"
 
+#include "nunifont.h"
 #include <string.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_thread.h>
+#include <SDL.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <sys/stat.h>
@@ -23,7 +22,6 @@
 #include "vterm.h"
 #include <locale.h>
 
-#include "nunifont.h"
 #include <limits.h>
 
 #include "nsdl.h"
@@ -68,8 +66,8 @@ int display_height_last_kb=0;
 int display_width_abs;
 int display_height_abs;
 
-SDL_Window  *screen=1;
-SDL_Renderer *renderer=1;
+struct SDL_Window  *screen=1;
+struct SDL_Renderer *renderer=1;
 
 bool draw_selection = false;
 int draw_fade_selection=0;
@@ -649,17 +647,29 @@ void do_sdl_init() {
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE , 8);
     SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
+
+    #ifdef OSX_BUILD
+//    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+    #endif
     
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    #ifdef IOS_BUILD
     screen=SDL_CreateWindow(NULL, 0, 0, 0, 0,SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
+    #endif
+    #if defined(OSX_BUILD) || defined(LINUX_BUILD)
+    screen=SDL_CreateWindow("hterm", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600,SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    printf("screen is %u\n",screen);
+    #endif
  
     #ifdef IOS_BUILD
       ios_connect();
     #endif
     
+    #ifdef IOS_BUILD
     SDL_GetWindowSize(screen,&display_width,&display_height);
     display_width_abs  = display_width;
     display_height_abs = display_height;
+    #endif
 
     if (screen == 0) {
       printf("Could not initialize Window");
@@ -671,7 +681,7 @@ void do_sdl_init() {
     
     SDL_SetRenderDrawBlendMode(renderer,
                                SDL_BLENDMODE_BLEND);
-    SDL_SetRenderDrawColor(renderer,0x00,0x00,0x00,0xff);
+    SDL_SetRenderDrawColor(renderer,0x00,0x00,0xff,0xff);
     SDL_RenderClear(renderer);
     set_system_bg(255);//alpha always 255
 }
@@ -733,6 +743,7 @@ void sdl_render_thread() {
   SDL_StartTextInput();
   
   for(;;) {
+
     if(redraw_req) {
       redraw_req=false; // should go first as draw can itself trigger a redraw.
       redraw_screen();
@@ -784,7 +795,9 @@ void redraw_required() {
 
 uint8_t *paste_text() {
 
+  #ifdef IOS_BUILD
   return iphone_paste();
+  #endif
 
 /*
   uint8_t *paste_data = malloc(sizeof(uint8_t)*10240);
@@ -824,7 +837,9 @@ void copy_text(uint16_t *itext,int len) {
     text[pos+4]=0;
   }
   
+  #ifdef IOS_BUILD
   iphone_copy(text);
+  #endif
 
 /*
   FILE *w1 = popen("xclip -selection c","w");
@@ -896,14 +911,16 @@ void process_mouse_event(SDL_Event *event) {
   int mouse_x = event->motion.x;
   int mouse_y = event->motion.y;
 
-  if(event->button.button == SDL_BUTTON_WHEELUP) {
-    scroll_offset++;
-    redraw_required();
-  } else
-  if(event->button.button == SDL_BUTTON_WHEELDOWN) {
-    scroll_offset--;
-    if(scroll_offset < 0) scroll_offset = 0;
-    redraw_required();
+  if(event->type == SDL_MOUSEWHEEL) {
+
+    if(event->wheel.y > 0) {
+      scroll_offset++;
+      redraw_required();
+    } else {
+      scroll_offset--;
+      if(scroll_offset < 0) scroll_offset = 0;
+      redraw_required();
+    }
   } else
   if(event->type == SDL_MOUSEMOTION    ) {
 
@@ -1123,7 +1140,7 @@ void sdl_read_thread(SDL_Event *event) {
     strcpy(buffer, event->text.text);
         
     if(buffer[0] == 10) buffer[0]=13; // hack round return sending 10, which causes issues for e.g. nano.
-                                        // really this should be a full utf8 decode/reencode.
+                                      // really this should be a full utf8 decode/reencode.
         
       if(hterm_next_key_ctrl == true) {
         int i=buffer[0];
@@ -1157,6 +1174,15 @@ void sdl_read_thread(SDL_Event *event) {
        buf[1] = 0;
        c_write(buf,1);
      }
+
+     #ifdef OSX_BUILD 
+     if(scancode == SDL_SCANCODE_RETURN) {
+       char buf[4];
+       buf[0] = 13;
+       buf[1] = 0;
+       c_write(buf,1);
+     }
+     #endif
    
      scroll_offset = 0;
      if(scancode == SDL_SCANCODE_LEFT) {
@@ -1191,13 +1217,13 @@ void sdl_read_thread(SDL_Event *event) {
        buf[3] = 0;
        c_write(buf,3);
      } else {
-       if((event.key.keysym.sym == SDLK_p) && (keystate[SDLK_LCTRL])) 
+       //if((event.key.keysym.sym == SDLK_p) && (keystate[SDLK_LCTRL])) 
        // perform text paste
-       uint8_t *text = paste_text();
-       if(text != 0) {
-         c_write(text,strlen(text));
-         //free(text);
-       }
+       //uint8_t *text = paste_text();
+       //if(text != 0) {
+       //  c_write(text,strlen(text));
+         ////free(text);
+       //}
     }
   }
 
@@ -1280,7 +1306,7 @@ int main(int argc, char **argv) {
     connection_type = CONNECTION_SSH;
   #endif
 
-  #ifdef UNIX_BUILD
+  #if defined(OSX_BUILD) || defined(LINUX_BUILD)
     connection_type = CONNECTION_LOCAL; // replace with commandline lookup
   #endif
 
@@ -1323,10 +1349,16 @@ int main(int argc, char **argv) {
   for(;;) {
     console_read_init();
     sdl_render_thread();
+   
+    #ifdef IOS_BUILD
     display_server_select_setactive(false);
+    #endif
+
     c_close();
-  
+
+    #ifdef IOS_BUILD
     display_server_select_closedlg();
+    #endif
   
     hterm_quit=false;
     SDL_StopTextInput();
