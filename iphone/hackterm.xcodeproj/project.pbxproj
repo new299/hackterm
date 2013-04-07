@@ -116,31 +116,29 @@
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D51E1A9C16D92F6D0005E06C /* ServerSelect.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ServerSelect.xib; sourceTree = "<group>"; };
-		D51E1AA116D954540005E06C /* sslaunch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sslaunch.h; path = ../sslaunch.h; sourceTree = "<group>"; };
-		D51E1AA216D954540005E06C /* sslaunch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = sslaunch.m; path = ../sslaunch.m; sourceTree = "<group>"; };
-		D51E1AA416D96A840005E06C /* ServerSelectUIView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ServerSelectUIView.h; path = ../ServerSelectUIView.h; sourceTree = "<group>"; };
-		D51E1AA516D96A850005E06C /* ServerSelectUIView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ServerSelectUIView.m; path = ../ServerSelectUIView.m; sourceTree = "<group>"; };
-		D51E1AA716DABC9F0005E06C /* RecentItemsDataSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RecentItemsDataSource.h; path = ../RecentItemsDataSource.h; sourceTree = "<group>"; };
-		D51E1AA816DABC9F0005E06C /* RecentItemsDataSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RecentItemsDataSource.m; path = ../RecentItemsDataSource.m; sourceTree = "<group>"; };
-		D52AC64B16E6B87F00016D01 /* iphone_pasteboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = iphone_pasteboard.h; path = ../iphone_pasteboard.h; sourceTree = "<group>"; };
-		D52AC64C16E6B87F00016D01 /* iphone_pasteboard.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = iphone_pasteboard.m; path = ../iphone_pasteboard.m; sourceTree = "<group>"; };
+		D51E1AA116D954540005E06C /* sslaunch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sslaunch.h; sourceTree = "<group>"; };
+		D51E1AA216D954540005E06C /* sslaunch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = sslaunch.m; sourceTree = "<group>"; };
+		D51E1AA416D96A840005E06C /* ServerSelectUIView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ServerSelectUIView.h; sourceTree = "<group>"; };
+		D51E1AA516D96A850005E06C /* ServerSelectUIView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ServerSelectUIView.m; sourceTree = "<group>"; };
+		D51E1AA716DABC9F0005E06C /* RecentItemsDataSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RecentItemsDataSource.h; sourceTree = "<group>"; };
+		D51E1AA816DABC9F0005E06C /* RecentItemsDataSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RecentItemsDataSource.m; sourceTree = "<group>"; };
+		D52AC64B16E6B87F00016D01 /* iphone_pasteboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iphone_pasteboard.h; sourceTree = "<group>"; };
+		D52AC64C16E6B87F00016D01 /* iphone_pasteboard.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iphone_pasteboard.m; sourceTree = "<group>"; };
 		D52AC65116E7AB8400016D01 /* utf8proc_data.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = utf8proc_data.c; path = ../utf8proc/utf8proc_data.c; sourceTree = "<group>"; };
 		D52AC65216E7AB8400016D01 /* utf8proc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = utf8proc.c; path = ../utf8proc/utf8proc.c; sourceTree = "<group>"; };
-		D5329CFA1702C7CE00122CFD /* DisconnectAlertDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DisconnectAlertDelegate.h; path = ../DisconnectAlertDelegate.h; sourceTree = "<group>"; };
-		D5329CFB1702C7CE00122CFD /* DisconnectAlertDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DisconnectAlertDelegate.m; path = ../DisconnectAlertDelegate.m; sourceTree = "<group>"; };
+		D5329CFA1702C7CE00122CFD /* DisconnectAlertDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DisconnectAlertDelegate.h; sourceTree = "<group>"; };
+		D5329CFB1702C7CE00122CFD /* DisconnectAlertDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DisconnectAlertDelegate.m; sourceTree = "<group>"; };
 		D5329D001703B9E700122CFD /* nsdl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nsdl.h; path = ../nsdl.h; sourceTree = "<group>"; };
-		D550D12716C00DBE000D4D6A /* SDL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SDL.xcodeproj; path = "SDL/Xcode-iOS/SDL/SDL.xcodeproj"; sourceTree = "<group>"; };
+		D550D12716C00DBE000D4D6A /* SDL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SDL.xcodeproj; path = "../libsdl/Xcode-iOS/SDL/SDL.xcodeproj"; sourceTree = "<group>"; };
 		D55144A4170EF5D80034E376 /* ios114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ios114.png; sourceTree = "<group>"; };
 		D55144A9170EF5DD0034E376 /* ios57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ios57.png; sourceTree = "<group>"; };
 		D55144AB170EF6440034E376 /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Portrait~ipad.png"; sourceTree = "<group>"; };
 		D55144AD170EF6480034E376 /* Default-Portrait@2x~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Portrait@2x~ipad.png"; sourceTree = "<group>"; };
 		D55144AF170EF6580034E376 /* ios72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ios72.png; sourceTree = "<group>"; };
 		D55144B1170EF6640034E376 /* ios144.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ios144.png; sourceTree = "<group>"; };
-		D552B48A170C4FBF009CF4FB /* recentrw.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = recentrw.h; path = ../recentrw.h; sourceTree = "<group>"; };
+		D552B48A170C4FBF009CF4FB /* recentrw.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = recentrw.h; sourceTree = "<group>"; };
 		D552B48E170C84CC009CF4FB /* ssh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ssh.h; path = ../ssh.h; sourceTree = "<group>"; };
-		D5B5C90316C9529700DD079C /* hterm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hterm.png; sourceTree = "<group>"; };
-		D5B5C90516C952DF00DD079C /* hterm57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hterm57.png; sourceTree = "<group>"; };
-		D5D443C616E948EA001C2385 /* recentrw.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = recentrw.m; path = ../recentrw.m; sourceTree = "<group>"; };
+		D5D443C616E948EA001C2385 /* recentrw.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = recentrw.m; sourceTree = "<group>"; };
 		D5ED0D1416A57A0D003F887B /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		D5ED0D8316A57FD6003F887B /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = main.c; path = ../main.c; sourceTree = SOURCE_ROOT; };
 		D5ED0DB216A582CA003F887B /* encoding.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = encoding.c; path = ../libvterm/src/encoding.c; sourceTree = SOURCE_ROOT; };
@@ -482,8 +480,6 @@
 				D51E1AA416D96A840005E06C /* ServerSelectUIView.h */,
 				D51E1AA516D96A850005E06C /* ServerSelectUIView.m */,
 				D51E1AA216D954540005E06C /* sslaunch.m */,
-				D5B5C90516C952DF00DD079C /* hterm57.png */,
-				D5B5C90316C9529700DD079C /* hterm.png */,
 				D550D12716C00DBE000D4D6A /* SDL.xcodeproj */,
 				D5ED0F3716A5A6D1003F887B /* kex.c */,
 				D5ED0F3516A5A677003F887B /* png.c */,
