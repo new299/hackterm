@@ -125,7 +125,7 @@ char *regis_process_cmd_vector(char *cmd) {
 
   //regis_lines_push(pen_x,pen_y,new_x,new_y,0xFFFFFFFF);
   SDL_mutexP(regis_mutex);
-  nsdl_line(regis_layer,pen_x,pen_y,new_x,new_y,0xFFFFFFFF);
+  nsdl_lineS(regis_layer,pen_x,pen_y,new_x,new_y,0xFFFFFFFF);
   SDL_mutexV(regis_mutex);
   pen_x = new_x;
   pen_y = new_y;

@@ -18,15 +18,15 @@ SDL_Surface *inline_data_layer = 0;
 
 char *inline_magic = "HTERMFILEXFER";
 
-void inline_data_init(int width,int height) {
+void inline_data_init(int swidth,int sheight) {
 
   base64_init();
-  inline_data_layer = SDL_CreateRGBSurface(SDL_HWSURFACE,width,height,32,0x000000FF,0x0000FF00,0x00FF0000,0xFF000000);
+  inline_data_layer = SDL_CreateRGBSurface(SDL_SWSURFACE,swidth,sheight,32,0x000000FF,0x0000FF00,0x00FF0000,0xFF000000);
 }
 
-void inline_data_resize(int width,int height) {
+void inline_data_resize(int swidth,int sheight) {
   SDL_FreeSurface(inline_data_layer);
-  inline_data_layer = SDL_CreateRGBSurface(SDL_SWSURFACE,width,height,32,0x000000FF,0x0000FF00,0x00FF0000,0xFF000000);
+  inline_data_layer = SDL_CreateRGBSurface(SDL_SWSURFACE,swidth,sheight,32,0x000000FF,0x0000FF00,0x00FF0000,0xFF000000);
 }
 
 int width, height;
@@ -72,7 +72,6 @@ void info_callback(png_structp png_ptr, png_infop info) {
     pixel_depth = 8;
   }
 
-  
   int row_bytes = png_get_rowbytes(png_ptr,info);
 
   row_pointers = malloc(sizeof(png_bytep *) * height);
@@ -83,7 +82,7 @@ void info_callback(png_structp png_ptr, png_infop info) {
   png_start_read_image(png_ptr);
 }
 
-int inlineget_pixel(char *row,int pixel_depth,int idx) {
+int32_t inlineget_pixel(void *row,int pixel_depth,int idx) {
 
   if(pixel_depth == 1) {
     int pos  = pixel_depth*idx;
@@ -94,7 +93,7 @@ int inlineget_pixel(char *row,int pixel_depth,int idx) {
     int value = 0;
     for(int n=0;n<pixel_depth;n++) {
       value = value << 1;
-      if(row[byte] & (1 << (8-bit))) value |= (value + 1);
+      if(((uint8_t *)row)[byte] & (1 << (8-bit))) value |= (value + 1);
       bit++;
       if(bit > 8) {bit=0; byte++;}
     }
@@ -112,14 +111,15 @@ void row_callback(png_structp png_ptr, png_bytep new_row, png_uint_32 row_num, i
   if(row_num >= height) {
     // bad row number
   }
-  
+
   png_progressive_combine_row(png_ptr, row_pointers[row_num], new_row);
   for(int n=0;n<width;n++) {
-    int pixel = inlineget_pixel(row_pointers[row_num],pixel_depth,n);
+    uint32_t pixel = inlineget_pixel(new_row,pixel_depth,n);
     
     if(pixel_depth == 1) {
       if(pixel!=0) pixel = 0xFFFFFFFF;
     }
+
     nsdl_pointS(inline_data_layer,n,row_num,pixel);
   }
 }
@@ -242,7 +242,6 @@ int inline_data_receive(char *data,int length) {
   int pos = buffer_search(inline_magic);
 
   if(pos < 0) return 0;
-
 
   processing_png=true;
 

@@ -5,70 +5,31 @@
 // require initialisation function
 void nsdl_init() {}
 
-/*
-void nsdl_point(void *screen,int x,int y,uint32_t value) {
-
-  SDL_Rect rect;
-  rect.w = 1;
-  rect.h = 1;
-  rect.x = x;
-  rect.y = y;
-    
-  SDL_SetRenderDrawColor(screen, rand()%233, rand()%232, rand()%232, 255);
-  SDL_RenderFillRect(screen, &rect);
-    
- // int bpp = screen->format->BytesPerPixel;
- // uint8_t *p = (uint8_t *) screen->pixels + (y * screen->pitch) + (x * bpp);
-
-  #ifdef __APPLE__
- // p += 1;
-  #endif
-
-//  if((x<0)||(y<0)|| (x>=screen->w)||(y>=screen->h)) return;
-
-//  *(uint32_t *) p = value;
-}
-*/
-
 void nsdl_pointS(SDL_Surface *screen,int x,int y,uint32_t value) {
 
-  SDL_Rect rect;
-  rect.w = 1;
-  rect.h = 1;
-  rect.x = x;
-  rect.y = y;
-    
-//  SDL_SetRenderDrawColor(screen, rand()%233, rand()%232, rand()%232, 255);
-//  SDL_RenderFillRect(screen, &rect);
-    
   int bpp = screen->format->BytesPerPixel;
-  uint8_t *p = (uint8_t *) screen->pixels + (y * screen->pitch) + (x * bpp);
 
-  #ifdef __APPLE__
- // p += 1;
+  #ifdef OSX_BUILD
+  // not sure why, but OSX isn't setting bytes per pixel correctly.
+  bpp=4;
   #endif
+
+  uint8_t *p = (uint8_t *) screen->pixels + (y * screen->pitch) + (x * bpp);
 
   if((x<0)||(y<0)|| (x>=screen->w)||(y>=screen->h)) return;
 
   *(uint32_t *) p = value;
 }
-/*
 
-uint32_t nsdl_getpoint(void *screen,int x,int y) {
+uint32_t nsdl_getpointS(SDL_Surface *screen,int x,int y) {
 
-////  int bpp = screen->format->BytesPerPixel;
-////  uint8_t *p = (uint8_t *) screen->pixels + (y * screen->pitch) + (x * bpp);
-////
-////  #ifdef __APPLE__
-////  p += 1;
-////  #endif
+  int bpp = screen->format->BytesPerPixel;
+  uint8_t *p = (uint8_t *) screen->pixels + (y * screen->pitch) + (x * bpp);
 
-////  if((x<0)||(y<0)|| (x>=screen->w)||(y>=screen->h)) return 0;
+  if((x<0)||(y<0)|| (x>=screen->w)||(y>=screen->h)) return 0;
 
-////  return (*(uint32_t *)p);
+  return (*(uint32_t *)p);
 }
-*/
-
 
 void nsdl_rectangle_wire(void *screen,int sx,int sy,int ex,int ey,uint8_t r,uint8_t g,uint8_t b,uint8_t a) {
 
@@ -79,10 +40,7 @@ void nsdl_rectangle_wire(void *screen,int sx,int sy,int ex,int ey,uint8_t r,uint
   SDL_RenderDrawLine(screen,ex,ey,ex,sy);
 }
 
-void nsdl_line(void *screen,int start_x,int start_y,int end_x,int end_y,int color) {
-
-  //SDL_SetRenderDrawColor(screen, rand()%233, rand()%232, rand()%232, 255);
-  //SDL_RenderDrawLine(screen,start_x,start_y,end_x,end_y);
+void nsdl_lineS(void *screen,int start_x,int start_y,int end_x,int end_y,int color) {
 
   // Bresenham's
   int cx = start_x;

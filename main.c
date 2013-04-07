@@ -126,12 +126,12 @@ void regis_render() {
   }
 }
 
-void inline_data_render() {                                        
+void inline_data_render() {
 
   if(inline_data_layer != 0) {
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, inline_data_layer);
     
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
+    int res = SDL_RenderCopy(renderer, texture, NULL, NULL);
     SDL_DestroyTexture(texture);
   }
 }
@@ -399,10 +399,8 @@ VTermParserCallbacks cb_parser = {
 
 void terminal_resize() {
 
-  printf("resizing to: %d %d\n",display_width,display_height);
   rows = display_height/16;
   cols = display_width/8;
-  printf("new cols rows: %d %d\n",cols,rows);
     
   if(c_resize != NULL) (*c_resize)(cols,rows);
 
@@ -651,7 +649,7 @@ void do_sdl_init() {
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
 
     #ifdef OSX_BUILD
-//    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+//      SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 0 );
     #endif
     
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
@@ -660,7 +658,6 @@ void do_sdl_init() {
     #endif
     #if defined(OSX_BUILD) || defined(LINUX_BUILD)
     screen=SDL_CreateWindow("hterm", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600,SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-    printf("screen is %u\n",screen);
     #endif
  
     #ifdef IOS_BUILD
@@ -766,7 +763,8 @@ void sdl_render_thread() {
       
     console_poll();
     if(hterm_quit == true) return;
-
+ 
+    #ifdef IOS_BUILD
     if((SDL_IsScreenKeyboardShown(screen) != last_kb_shown) &&
        (last_kb_shown != -3)) {
       SDL_GetWindowSize(screen,&display_width,&display_height);
@@ -787,6 +785,7 @@ void sdl_render_thread() {
       redraw_required();
     }
     last_kb_shown = SDL_IsScreenKeyboardShown(screen);
+    #endif
   }
 }
 
@@ -1328,6 +1327,10 @@ int main(int argc, char **argv) {
   }
     
   do_sdl_init();
+  SDL_GetWindowSize(screen,&display_width,&display_height);
+  display_width_abs = display_width;
+  display_height_abs = display_height;
+
   regis_init(display_width_abs,display_height_abs);
   inline_data_init(display_width_abs,display_height_abs);
   
@@ -1339,9 +1342,6 @@ int main(int argc, char **argv) {
     
   nunifont_load_staticmap(__fontmap_static,__widthmap_static,__fontmap_static_len,__widthmap_static_len);
 
-  SDL_GetWindowSize(screen,&display_width,&display_height);
-  display_width_abs = display_width;
-  display_height_abs = display_height;
   
   vterm_initialisation();
 
