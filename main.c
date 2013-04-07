@@ -1188,6 +1188,12 @@ void sdl_read_thread(SDL_Event *event) {
      }
 
      #if defined(OSX_BUILD) || defined(LINUX_BUILD)
+     if(scancode == SDL_SCANCODE_ESCAPE) {
+       char buf[4];
+       buf[0] = 27;
+       buf[1] = 0;
+       c_write(buf,1);
+     }
      if(scancode == SDL_SCANCODE_RETURN) {
        char buf[4];
        buf[0] = 13;
