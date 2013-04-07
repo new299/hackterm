@@ -879,7 +879,7 @@ void process_mouse_event(SDL_Event *event) {
      if(t->num_fingers != 0) {
      }
 
-     if(t->max_fingers == 2) {
+     if(t->num_fingers == 2) {
        select_disable=true;
        int delta = event->tfinger.dy;
        delta_sum += delta;
@@ -909,11 +909,12 @@ void process_mouse_event(SDL_Event *event) {
   }
   #endif
 
-  if((event->type != SDL_MOUSEMOTION) && (event->type != SDL_MOUSEBUTTONUP) && (event->type != SDL_MOUSEBUTTONDOWN)) return;
+  if((event->type != SDL_MOUSEMOTION) && (event->type != SDL_MOUSEBUTTONUP) && (event->type != SDL_MOUSEBUTTONDOWN) && (event->type != SDL_MOUSEWHEEL)) return;
 
   int mouse_x = event->motion.x;
   int mouse_y = event->motion.y;
 
+  #if defined(OSX_BUILD) || defined(LINUX_BUILD)
   if(event->type == SDL_MOUSEWHEEL) {
 
     if(event->wheel.y > 0) {
@@ -925,6 +926,7 @@ void process_mouse_event(SDL_Event *event) {
       redraw_required();
     }
   } else
+  #endif
   if(event->type == SDL_MOUSEMOTION    ) {
 
     if(draw_selection == true) {

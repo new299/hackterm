@@ -4,7 +4,7 @@ ifeq ($(UNAME), Linux)
 OPTS = -DLOCAL_ENABLE
 endif
 ifeq ($(UNAME), Darwin)
-SDLOPTS =  -lm -liconv -Wl,-framework,OpenGL  -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-framework,AudioUnit
+SDLOPTS =  -lm -liconv -Wl,-framework,OpenGL  -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-framework,AudioUnit -I./osx
 OPTS = -DOSX_BUILD -DLOCAL_ENABLE -framework CoreAudio -framework Cocoa -framework OpenGL -lSDLmain -Wl,-framework,Cocoa -Wl,-framework,OpenGL $(SDLOPTS)
 endif
 
@@ -24,9 +24,7 @@ hterm_mac: main.c nunifont.c nunifont.h *.c *.h
 	#./configure
 	#make
 	#find . -name *.dylib | xargs rm
-	gcc -g -std=gnu99 $(LIBVTERMC) $(OURC) $(LIBSSH2C) $(OPTS) ./utf8proc/utf8proc.c -o hterm -I./libpng -I./utf8proc -I./libvterm/include -I./libsdl/include -L./libsdl/build -L./libpng/.libs -L./libsdl/build/.libs -lpng15 -lSDL2 -lutil -lcrypto -I./libssh2/include -lz 
-#	install_name_tool -change /usr/local/lib/libpng15.15.dylib @executable_path/libpng15.15.dylib ./hterm
-#	install_name_tool -change /usr/local/lib/libSDL2-2.0.0.dylib @executable_path/libSDL2-2.0.0.dylib ./hterm
+	gcc -O3 -std=gnu99 $(LIBVTERMC) $(OURC) $(LIBSSH2C) $(OPTS) ./utf8proc/utf8proc.c -o hterm -I./libpng -I./utf8proc -I./libvterm/include -I./libsdl/include -L./libsdl/build -L./libpng/.libs -L./libsdl/build/.libs -lpng15 -lSDL2 -lutil -lcrypto -I./libssh2/include -lz 
 	
 
 unifont_conv: unifont_conv.c nunifont.c

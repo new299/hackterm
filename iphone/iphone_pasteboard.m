@@ -1,4 +1,5 @@
-#import "UIPasteboard.h"
+#include "iphone_pasteboard.h"
+#include <UIKit/UIPasteboard.h>
 
 void iphone_copy(char *text) {
 
