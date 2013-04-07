@@ -1,5 +1,5 @@
 #include "nsdl.h"
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include <stdint.h>
 
 // require initialisation function

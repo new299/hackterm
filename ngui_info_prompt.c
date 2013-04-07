@@ -3,7 +3,7 @@
 #include "ngui_textbox.h"
 #include "ngui_button.h"
 #include <string.h>
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include "nunifont.h"
 #include <stdbool.h>
 

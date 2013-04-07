@@ -4,8 +4,7 @@
 #define _POSIX_C_SOURCE 199309L
 #define _BSD_SOURCE
 
-#include <SDL/SDL.h>       
-#include <SDL/SDL_thread.h>
+#include <SDL.h>
 #include <stdint.h>   
 #include <stdio.h>    
 #include <stdbool.h>

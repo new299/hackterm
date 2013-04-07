@@ -1,6 +1,5 @@
 #include <stdbool.h>
-#include <SDL/SDL.h>       
-#include <SDL/SDL_thread.h>
+#include <SDL.h>
 #include <time.h>
 
 extern SDL_Surface *inline_data_layer;

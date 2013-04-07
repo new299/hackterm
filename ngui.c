@@ -1,5 +1,5 @@
 #include <string.h>
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include "nunifont.h"
 
 SDL_Surface *ngui_renderer;

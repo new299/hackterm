@@ -7,11 +7,11 @@
 //
 
 #import "ServerSelectUIView.h"
-#include "iphone/sdl/src/video/SDL_sysvideo.h"
-#include "iphone/sdl/include/SDL_video.h"
-#include "iphone/sdl/src/video/uikit/SDL_uikitopenglview.h"
-#include "iphone/sdl/src/video/uikit/SDL_uikitwindow.h"
-#include "iphone/sdl/src/video/uikit/SDL_uikitmodes.h"
+#include "../libsdl/src/video/SDL_sysvideo.h"
+#include "../libsdl/include/SDL_video.h"
+#include "../libsdl/src/video/uikit/SDL_uikitopenglview.h"
+#include "../libsdl/src/video/uikit/SDL_uikitwindow.h"
+#include "../libsdl/src/video/uikit/SDL_uikitmodes.h"
 #import "RecentItemsDataSource.h"
 #include "recentrw.h"
 #include "DisconnectAlertDelegate.h"

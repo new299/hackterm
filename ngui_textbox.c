@@ -1,5 +1,5 @@
 #include <string.h>
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include "nsdl.h"
 #include "nunifont.h"
 #include "ngui.h"

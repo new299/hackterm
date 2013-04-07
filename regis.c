@@ -4,8 +4,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "regis.h"
-#include <SDL/SDL.h>       
-#include <SDL/SDL_thread.h>
+#include <SDL.h>
 #include <time.h>
 #include "nunifont.h"
 

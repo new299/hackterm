@@ -1,7 +1,6 @@
 #include "inlinedata.h"
 #include <stdbool.h>
-#include <SDL/SDL.h>       
-#include <SDL/SDL_thread.h>
+#include <SDL.h>
 #include <time.h>
 #include <unistd.h>
 #include <stdlib.h>

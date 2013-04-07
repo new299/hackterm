@@ -1,6 +1,6 @@
 #ifndef NSDL_H
 #define NSDL_H
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 void nsdl_point(void *screen,int x,int y,uint32_t value);
 void nsdl_rectangle_hashed(void *screen,int sx,int sy,int ex,int ey,uint32_t value);

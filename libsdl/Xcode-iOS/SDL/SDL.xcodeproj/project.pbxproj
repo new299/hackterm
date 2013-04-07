@@ -322,7 +322,7 @@
 		AA75586A1595D55500BBD41B /* SDL_blendmode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_blendmode.h; sourceTree = "<group>"; };
 		AA75586B1595D55500BBD41B /* SDL_clipboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_clipboard.h; sourceTree = "<group>"; };
 		AA75586C1595D55500BBD41B /* SDL_config_iphoneos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_config_iphoneos.h; sourceTree = "<group>"; };
-		AA75586D1595D55500BBD41B /* SDL_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_config.h; sourceTree = "<group>"; };
+		AA75586D1595D55500BBD41B /* SDL_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_config.h; path = ../../iphone/SDL_config.h; sourceTree = "<group>"; };
 		AA75586E1595D55500BBD41B /* SDL_copying.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_copying.h; sourceTree = "<group>"; };
 		AA75586F1595D55500BBD41B /* SDL_cpuinfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_cpuinfo.h; sourceTree = "<group>"; };
 		AA7558701595D55500BBD41B /* SDL_endian.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_endian.h; sourceTree = "<group>"; };
@@ -1423,8 +1423,13 @@
 		FD6526640DE8FCCB002AD96B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
+				HEADER_SEARCH_PATHS = /Users/new/gitcode/hackterm/iphone;
 				PRODUCT_NAME = SDL2;
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
@@ -1432,8 +1437,13 @@
 		FD6526650DE8FCCB002AD96B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
+				HEADER_SEARCH_PATHS = /Users/new/gitcode/hackterm/iphone;
 				PRODUCT_NAME = SDL2;
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
