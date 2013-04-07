@@ -37,7 +37,8 @@ int local_open(char *a,char *b,char *c) {
   printf("fd: %d",fd);
   if(pid == 0) {
     char args[3];
-    args[0] = "/bin/bash";
+    char *shell = getenv("SHELL");
+    args[0] = shell;
     args[1] =""; 
     args[2] = 0;
 

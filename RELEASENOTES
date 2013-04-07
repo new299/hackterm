@@ -1,6 +1,18 @@
-iOS Version 1
--------------
+Version 2.0
+-----------
 
+Port back to desktop/MacOSX.
+* MacOSX: Repeat doesn't work for all keys (e for example works, t doesn't) (now seems to be working after changing other things!).
+* MacOSX: Launch usershell not bash.
+* MacOSX: escape key.
+* MacOSX: regis rendering crashs app.
+* MacOSX: inline png doesn't work.
+* MacOSX: control keys don't work.
+
+Version 1.0
+-----------
+
+This was the first complete iOS build, fixes below relate to iOS.
 * remove Bookmark if not implemented.
 * remove debug output
 * virtual button fadeout on press, highlight when ctrl selected.
