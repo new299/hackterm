@@ -116,6 +116,8 @@ void scroll_buffer_get(size_t line_number,VTermScreenCell **line,int *len);
 bool hterm_next_key_ctrl=false;
 bool hterm_next_key_alt =false;
 
+bool hterm_ctrl_pressed=false;
+
 void regis_render() {
 
   if(!regis_cleared()) {
@@ -1142,7 +1144,7 @@ void sdl_read_thread(SDL_Event *event) {
         
     if(buffer[0] == 10) buffer[0]=13; // hack round return sending 10, which causes issues for e.g. nano.
                                       // really this should be a full utf8 decode/reencode.
-        
+
       if(hterm_next_key_ctrl == true) {
         int i=buffer[0];
         if(i>=97) i = i-97+65;
@@ -1166,6 +1168,16 @@ void sdl_read_thread(SDL_Event *event) {
   if(event->type == SDL_TEXTEDITING) {
   }
 
+  #if defined(OSX_BUILD) || defined(LINUX_BUILD)
+  if(event->type == SDL_KEYUP) {
+     SDL_Scancode scancode = event->key.keysym.scancode;
+     if((scancode == SDL_SCANCODE_LCTRL) || (scancode == SDL_SCANCODE_RCTRL)) {
+       hterm_ctrl_pressed=false;
+       printf("ctrl released\n");
+     }
+  }
+  #endif
+
   if(event->type == SDL_KEYDOWN) {
    
      SDL_Scancode scancode = event->key.keysym.scancode;
@@ -1176,12 +1188,16 @@ void sdl_read_thread(SDL_Event *event) {
        c_write(buf,1);
      }
 
-     #ifdef OSX_BUILD 
+     #if defined(OSX_BUILD) || defined(LINUX_BUILD)
      if(scancode == SDL_SCANCODE_RETURN) {
        char buf[4];
        buf[0] = 13;
        buf[1] = 0;
        c_write(buf,1);
+     }
+     if((scancode == SDL_SCANCODE_LCTRL) || (scancode == SDL_SCANCODE_RCTRL)) {
+       hterm_ctrl_pressed=true;
+       printf("ctrl pressed\n");
      }
      #endif
    
@@ -1217,15 +1233,31 @@ void sdl_read_thread(SDL_Event *event) {
        buf[2] = 'B';
        buf[3] = 0;
        c_write(buf,3);
-     } else {
-       //if((event.key.keysym.sym == SDLK_p) && (keystate[SDLK_LCTRL])) 
-       // perform text paste
-       //uint8_t *text = paste_text();
-       //if(text != 0) {
-       //  c_write(text,strlen(text));
-         ////free(text);
-       //}
-    }
+     }
+     #if defined(OSX_BUILD) || defined (LINUX_BUILD) 
+     else
+     if(hterm_ctrl_pressed && (scancode != SDL_SCANCODE_LCTRL) && (scancode != SDL_SCANCODE_RCTRL)) {
+        int i=event->key.keysym.sym;
+        if(i>=97) i = i-97+65;
+        i-=64;
+        char buf[2];
+        buf[0] = i;
+        buf[1]=0;
+        if(buf[0] != 0) {
+          c_write(buf,1);
+        }
+     }
+     #endif
+
+     // non iOS paste code.
+     //if((event.key.keysym.sym == SDLK_p) && (keystate[SDLK_LCTRL])) 
+     // perform text paste
+     //uint8_t *text = paste_text();
+     //if(text != 0) {
+     //  c_write(text,strlen(text));
+       ////free(text);
+     //}
+     //}
   }
 
 /*
