@@ -1173,7 +1173,6 @@ void sdl_read_thread(SDL_Event *event) {
      SDL_Scancode scancode = event->key.keysym.scancode;
      if((scancode == SDL_SCANCODE_LCTRL) || (scancode == SDL_SCANCODE_RCTRL)) {
        hterm_ctrl_pressed=false;
-       printf("ctrl released\n");
      }
   }
   #endif
@@ -1197,7 +1196,6 @@ void sdl_read_thread(SDL_Event *event) {
      }
      if((scancode == SDL_SCANCODE_LCTRL) || (scancode == SDL_SCANCODE_RCTRL)) {
        hterm_ctrl_pressed=true;
-       printf("ctrl pressed\n");
      }
      #endif
    
