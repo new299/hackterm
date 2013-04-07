@@ -1,7 +1,7 @@
 #ifndef NGUI_BUTTON
 #define NGUI_BUTTON
 
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 void ngui_move_button(char *name,int nx,int ny);
 

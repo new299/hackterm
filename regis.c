@@ -160,7 +160,7 @@ void regis_processor(const char *cmd,int cmdlen) {
     clock_gettime(CLOCK_MONOTONIC,&regis_last_render);
     #endif
     
-    #if defined(IPHONE_BUILD) || defined(OSX_BUILD)
+    #if defined(IOS_BUILD) || defined(OSX_BUILD)
     #if _POSIX_TIMERS > 0
     clock_gettime(CLOCK_REALTIME, &tp);
     #else
@@ -186,7 +186,7 @@ bool regis_recent() {
   clock_gettime(CLOCK_MONOTONIC,&current_time);
   #endif
   
-  #if defined(IPHONE_BUILD) || defined(OSX_BUILD)
+  #if defined(IOS_BUILD) || defined(OSX_BUILD)
   #if _POSIX_TIMERS > 0
   clock_gettime(CLOCK_REALTIME, &tp);
   #else

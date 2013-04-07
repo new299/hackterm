@@ -21,6 +21,7 @@
 		D55144B0170EF6580034E376 /* ios72.png in Resources */ = {isa = PBXBuildFile; fileRef = D55144AF170EF6580034E376 /* ios72.png */; };
 		D55144B2170EF6640034E376 /* ios144.png in Resources */ = {isa = PBXBuildFile; fileRef = D55144B1170EF6640034E376 /* ios144.png */; };
 		D55144B9170FEACA0034E376 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D5ED0D1416A57A0D003F887B /* Default-568h@2x.png */; };
+		D55144CA1711A09A0034E376 /* virtual_buttons.c in Sources */ = {isa = PBXBuildFile; fileRef = D55144C81711A0990034E376 /* virtual_buttons.c */; };
 		D5D443C716E948EA001C2385 /* recentrw.m in Sources */ = {isa = PBXBuildFile; fileRef = D5D443C616E948EA001C2385 /* recentrw.m */; };
 		D5ED0D8416A57FD6003F887B /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0D8316A57FD6003F887B /* main.c */; };
 		D5ED0DBD16A582CB003F887B /* encoding.c in Sources */ = {isa = PBXBuildFile; fileRef = D5ED0DB216A582CA003F887B /* encoding.c */; };
@@ -136,6 +137,8 @@
 		D55144AD170EF6480034E376 /* Default-Portrait@2x~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Portrait@2x~ipad.png"; sourceTree = "<group>"; };
 		D55144AF170EF6580034E376 /* ios72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ios72.png; sourceTree = "<group>"; };
 		D55144B1170EF6640034E376 /* ios144.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ios144.png; sourceTree = "<group>"; };
+		D55144C81711A0990034E376 /* virtual_buttons.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = virtual_buttons.c; path = ../virtual_buttons.c; sourceTree = "<group>"; };
+		D55144C91711A09A0034E376 /* virtual_buttons.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = virtual_buttons.h; path = ../virtual_buttons.h; sourceTree = "<group>"; };
 		D552B48A170C4FBF009CF4FB /* recentrw.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = recentrw.h; sourceTree = "<group>"; };
 		D552B48E170C84CC009CF4FB /* ssh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ssh.h; path = ../ssh.h; sourceTree = "<group>"; };
 		D5D443C616E948EA001C2385 /* recentrw.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = recentrw.m; sourceTree = "<group>"; };
@@ -379,6 +382,8 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				D55144C81711A0990034E376 /* virtual_buttons.c */,
+				D55144C91711A09A0034E376 /* virtual_buttons.h */,
 				D55144B1170EF6640034E376 /* ios144.png */,
 				D55144AF170EF6580034E376 /* ios72.png */,
 				D55144AD170EF6480034E376 /* Default-Portrait@2x~ipad.png */,
@@ -840,6 +845,7 @@
 				D52AC65416E7AB8400016D01 /* utf8proc.c in Sources */,
 				D5D443C716E948EA001C2385 /* recentrw.m in Sources */,
 				D5329CFC1702C7CE00122CFD /* DisconnectAlertDelegate.m in Sources */,
+				D55144CA1711A09A0034E376 /* virtual_buttons.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -918,7 +924,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/lib\"",
 				);
-				OTHER_CFLAGS = "-DIPHONE_BUILD";
+				OTHER_CFLAGS = "-DIOS_BUILD";
 				PRODUCT_NAME = hterm;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -953,7 +959,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/lib\"",
 				);
-				OTHER_CFLAGS = "-DIPHONE_BUILD";
+				OTHER_CFLAGS = "-DIOS_BUILD";
 				PRODUCT_NAME = hterm;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
