@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 199309L
 #define _BSD_SOURCE
 
+#include <string.h>
 #include <stdbool.h>
 #include "regis.h"
 #include <SDL/SDL.h>       
@@ -31,62 +32,64 @@ void regis_clear() {
 }
 
 char *regis_process_cmd_screen(char *cmd) {
-  char *buffer;
-  char *code = strtok_r(cmd+2,")",&buffer);
+  char *code = cmd+2;
+  strsep(&code,")",")");
   if(code == 0) return (cmd+1);
 
-  return code+strlen(code)+1;
+  return code; 
 }
 
 char *regis_process_cmd_text(char *cmd) {
-  char *buffer=0;
+
   char *data=0;
   if(*(cmd+1) == '\'') {
-    data = strtok_r(cmd+2,"\'",&buffer);
+    data = cmd+2;
+    strsep(&data,"\'");
     if(data == 0) return (cmd+1);
 
-    //regis_text_push(pen_x,pen_y,data);
     uint16_t wdata[1000];
-    for(int n=0;(n<1000) && (data[n] != 0);n++) {
-      wdata[n] = data[n];
+    char *odata = cmd+2;
+    for(int n=0;(n<1000) && (odata[n] != 0);n++) {
+      wdata[n] = odata[n];
       wdata[n+1] = 0;
     }
-    SDL_mutexP(regis_mutex);
     draw_unitext_surface(regis_layer,pen_x,pen_y,wdata,0x0,0xFFFFFFFF,0,0,0,0);
-    SDL_mutexV(regis_mutex);
   } else 
   if(*(cmd+1) == '(') {
-    data = strtok_r(cmd+2,")",&buffer);
+    data=cmd+2;
+    strsep(&data,")");
     if(data == 0) return (cmd+1);
   }
   if(data == 0) return (cmd+1);
-  return data+strlen(data)+1;
+  return data;
 }
 
 char *regis_process_cmd_w(char *cmd) {
   char *buffer;
-  char *code = strtok_r(cmd+2,")",&buffer);
+  char *code = cmd+2;
+  strsep(&code,")");
   if(code == 0) return (cmd+1);
   
-  return code+strlen(code)+1;
+  return code;
 }
 
 char *regis_process_cmd_position(char *cmd) {
 
-
   char *buffer;
-  char *xstr = strtok_r(cmd+2,",",&buffer);
+  char *xstr = cmd+2;
+  strsep(&xstr,",");
   if(xstr == 0) return (cmd+1);
-  char *ystr = strtok_r( NULL,"]",&buffer);
+  char *ystr = xstr+1;
+  strsep(&ystr,"]");
   if(ystr == 0) return (cmd+1);
 
-  int new_x = atoi(xstr);
-  int new_y = atoi(ystr);
+  int new_x = atoi(cmd+2);
+  int new_y = atoi(xstr);
 
   pen_x = new_x;
   pen_y = new_y;
 
-  return ystr+strlen(ystr)+1;
+  return ystr;
 }
 
 
@@ -114,23 +117,22 @@ char *regis_process_cmd_vector(char *cmd) {
   if(strncmp(cmd,"v[]",3) == 0) {
     return cmd+3;
   }
-  char *buffer;
-  char *xstr = strtok_r(cmd+2,",",&buffer);
+
+  char *xstr = cmd+2;
+  strsep(&xstr,",");
   if(xstr == 0) return cmd+2;
-  char *ystr = strtok_r( NULL,"]",&buffer);
+
+  char *ystr = xstr;
+  strsep(&ystr,"]");
   if(ystr == 0) return cmd+2;
+  int new_x = atoi(cmd+2);
+  int new_y = atoi(xstr);
 
-  int new_x = atoi(xstr);
-  int new_y = atoi(ystr);
-
-  //regis_lines_push(pen_x,pen_y,new_x,new_y,0xFFFFFFFF);
-  SDL_mutexP(regis_mutex);
   nsdl_lineS(regis_layer,pen_x,pen_y,new_x,new_y,0xFFFFFFFF);
-  SDL_mutexV(regis_mutex);
   pen_x = new_x;
   pen_y = new_y;
 
-  return ystr+strlen(ystr)+1;
+  return ystr;
 }
 
 
@@ -175,11 +177,7 @@ void regis_processor(const char *cmd,int cmdlen) {
     if(command == 0) return;
     if(command[0] == 0) return;
   }
-
 }
- 
-
-
 
 bool regis_recent() {
  
