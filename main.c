@@ -399,8 +399,10 @@ VTermParserCallbacks cb_parser = {
 
 void terminal_resize() {
 
+  printf("resizing to: %d %d\n",display_width,display_height);
   rows = display_height/16;
   cols = display_width/8;
+  printf("new cols rows: %d %d\n",cols,rows);
     
   if(c_resize != NULL) (*c_resize)(cols,rows);
 
@@ -748,7 +750,7 @@ void sdl_render_thread() {
       redraw_req=false; // should go first as draw can itself trigger a redraw.
       redraw_screen();
     } else {
-      SDL_Delay(100);
+      SDL_Delay(10);
     }
 
     SDL_Event event;
@@ -1111,7 +1113,7 @@ void sdl_read_thread(SDL_Event *event) {
       redraw_required();
   }
     
-  if((event->type == SDL_WINDOWEVENT) && (event->window.event == SDL_WINDOWEVENT_MOVED)) {
+  if((event->type == SDL_WINDOWEVENT) && (event->window.event == SDL_WINDOWEVENT_ROTATE)) {
     int w = event->window.data1;
     int h = event->window.data2;
 
@@ -1168,7 +1170,7 @@ void sdl_read_thread(SDL_Event *event) {
   if(event->type == SDL_KEYDOWN) {
    
      SDL_Scancode scancode = event->key.keysym.scancode;
-     if(scancode == SDL_SCANCODE_DELETE) {
+     if((scancode == SDL_SCANCODE_DELETE) || (scancode == SDL_SCANCODE_BACKSPACE)) {
        char buf[4];
        buf[0] = 127;
        buf[1] = 0;

@@ -69,7 +69,7 @@ int local_read(char *buffer,int len) {
 #endif
 }
 
-int local_resize(int rows,int cols) {
+int local_resize(int cols,int rows) {
 #ifdef LOCAL_ENABLE
   struct winsize size = { rows, cols, 0, 0 };
   ioctl(fd, TIOCSWINSZ, &size);

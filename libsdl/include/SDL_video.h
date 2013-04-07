@@ -152,8 +152,9 @@ typedef enum
     SDL_WINDOWEVENT_LEAVE,          /**< Window has lost mouse focus */
     SDL_WINDOWEVENT_FOCUS_GAINED,   /**< Window has gained keyboard focus */
     SDL_WINDOWEVENT_FOCUS_LOST,     /**< Window has lost keyboard focus */
-    SDL_WINDOWEVENT_CLOSE           /**< The window manager requests that the 
+    SDL_WINDOWEVENT_CLOSE,          /**< The window manager requests that the 
                                          window be closed */
+    SDL_WINDOWEVENT_ROTATE          /**< New event type for rotation of iOS */
 } SDL_WindowEventID;
 
 /**

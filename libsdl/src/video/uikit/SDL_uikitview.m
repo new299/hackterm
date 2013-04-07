@@ -320,7 +320,7 @@
   w = (int)(size.width  * displaymodedata->scale);
   h = (int)(size.height * displaymodedata->scale)-(nkb_h*displaymodedata->scale);
 
-  SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MOVED, w, h);//TODO: NW ADD NEW EVENT TYPE
+  SDL_SendWindowEvent(window, SDL_WINDOWEVENT_ROTATE, w, h);//TODO: NW ADD NEW EVENT TYPE
 }
 
 -(void)keyboardWillShow:(NSNotification*)notification {
@@ -388,7 +388,7 @@
   w = (int)(size.width  * displaymodedata->scale);
   h = (int)(size.height * displaymodedata->scale)-(kb_h*displaymodedata->scale);
 
-  SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MOVED, w, h);//TODO: NW ADD NEW EVENT TYPE
+  SDL_SendWindowEvent(window, SDL_WINDOWEVENT_ROTATE, w, h);//TODO: NW ADD NEW EVENT TYPE
 */
 }
 
@@ -407,7 +407,7 @@
   int w, h;
   w = (int)(size.width  * displaymodedata->scale);
   h = (int)(size.height * displaymodedata->scale);
-  SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MOVED, w, h);//TODO: NW ADD NEW EVENT TYPE
+  SDL_SendWindowEvent(window, SDL_WINDOWEVENT_ROTATE, w, h);//TODO: NW ADD NEW EVENT TYPE
 }
 
 -(void)keyboardWillHide:(NSNotification*)notification {
