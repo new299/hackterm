@@ -1212,6 +1212,12 @@ void sdl_read_thread(SDL_Event *event) {
        buf[1] = 0;
        c_write(buf,1);
      }
+     if(scancode == SDL_SCANCODE_TAB) {
+       char buf[4];
+       buf[0] = '\t';
+       buf[1] = 0;
+       c_write(buf,1);
+     }
      if((scancode == SDL_SCANCODE_LCTRL) || (scancode == SDL_SCANCODE_RCTRL)) {
        hterm_ctrl_pressed=true;
      }
@@ -1266,26 +1272,20 @@ void sdl_read_thread(SDL_Event *event) {
      #endif
 
      // non iOS paste code.
-     //if((event.key.keysym.sym == SDLK_p) && (keystate[SDLK_LCTRL])) 
-     // perform text paste
-     //uint8_t *text = paste_text();
-     //if(text != 0) {
-     //  c_write(text,strlen(text));
-       ////free(text);
-     //}
-     //}
+     SDL_Keymod mod = SDL_GetModState();
+     #if defined(OSX_BUILD) || defined (LINUX_BUILD)
+     if(((event->key.keysym.sym == 'v') && (mod | KMOD_CTRL)) || 
+        ((event->key.keysym.sym == 'v') && (mod | KMOD_GUI)) 
+       ) {
+       printf("paste pressed\n");
+       // perform text paste
+       uint8_t *text = paste_text();
+       if(text != 0) {
+        c_write(text,strlen(text));
+       }
+     }
+     #endif
   }
-
-/*
-    if(event->type == SDL_VIDEORESIZE) {
-      new_screen_size_x = event->resize.w;
-      new_screen_size_y = event->resize.h;
-      new_screen_size   = true;
-
-      redraw_required();
-    }
-  }
- */
 }
 
 void timed_repeat() {

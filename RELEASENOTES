@@ -8,6 +8,15 @@ Port back to desktop/MacOSX.
 * MacOSX: regis rendering crashs app.
 * MacOSX: inline png doesn't work.
 * MacOSX: control keys don't work.
+* MacOSX: copypaste
+* MacOSX: tab key not working.
+* MacOSX: scrollback
+* MacOSX: Repeat doesn't work for all keys (e for example works, t doesn't) (now seems to be working after changing other things!).
+* MacOSX: Launch usershell not bash.
+* MacOSX: escape key.
+* MacOSX: regis rendering crashs app.
+* MacOSX: inline png doesn't work.
+* MacOSX: control keys don't work.
 
 Version 1.0
 -----------

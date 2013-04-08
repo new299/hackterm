@@ -17,7 +17,9 @@ const char *osx_paste() {
 
   NSPasteboard *pb = [NSPasteboard generalPasteboard];
   
-  NSString *nstext = [pb dataForType:NSStringPboardType];
+  NSString *nstext = [pb stringForType:NSStringPboardType];
+
+  if(nstext == 0) return 0;
 
   return [nstext cStringUsingEncoding:NSUTF8StringEncoding];
 
