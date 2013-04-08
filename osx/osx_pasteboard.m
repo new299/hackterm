@@ -1,21 +1,21 @@
 #include "osx_pasteboard.h"
-#include <UIKit/UIPasteboard.h>
+#include <AppKit/NSPasteboard.h>
 
-void iphone_copy(char *text) {
+void osx_copy(char *text) {
 
   NSPasteboard *pb = [NSPasteboard generalPasteboard];
 
   NSString *nstext = [NSString stringWithCString:text encoding:NSUTF8StringEncoding];
-  [pasteBoard declareTypes:[[[NSArray]] arrayWithObjects:NSStringPboardType, nil] owner:nil];
+  [pb declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
 
   if(nstext != nil) {
     [pb setString:nstext forType:NSStringPboardType];
   }
 }
 
-const char *iphone_paste() {
+const char *osx_paste() {
 
-  NSPasteboard *pb = [UIPasteboard generalPasteboard];
+  NSPasteboard *pb = [NSPasteboard generalPasteboard];
   
   NSString *nstext = [pb dataForType:NSStringPboardType];
 

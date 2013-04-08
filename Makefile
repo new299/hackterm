@@ -14,7 +14,7 @@ LIBSSH2C = ./libssh2/src/agent.c    ./libssh2/src/transport.c ./libssh2/src/vers
 
 LIBSDLC = ./libsdl
 
-OURC = main.c base64.c inlinedata.c regis.c nunifont.c nsdl.c ngui.c ssh.c local.c ngui_info_prompt.c ngui_textlabel.c ngui_textbox.c ngui_button.c
+OURC = main.c base64.c inlinedata.c regis.c nunifont.c nsdl.c ngui.c ssh.c local.c ngui_info_prompt.c ngui_textlabel.c ngui_textbox.c ngui_button.c ./osx/osx_pasteboard.m
 
 hterm_mac: main.c nunifont.c nunifont.h *.c *.h
 	#cd libsdl

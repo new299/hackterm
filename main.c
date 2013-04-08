@@ -39,6 +39,10 @@
 #include "virtual_buttons.h"
 #endif
 
+#ifdef OSX_BUILD
+#include "osx_pasteboard.h"
+#endif
+
 #define CONNECTION_LOCAL 1
 #define CONNECTION_SSH   2
 
@@ -802,6 +806,10 @@ uint8_t *paste_text() {
   return iphone_paste();
   #endif
 
+  #ifdef OSX_BUILD
+  return osx_paste();
+  #endif
+
 /*
   uint8_t *paste_data = malloc(sizeof(uint8_t)*10240);
 
@@ -830,7 +838,6 @@ void copy_text(uint16_t *itext,int len) {
   size_t pos=0;
   char text[20000];
   for(int n=0;n<len;n++) {
-  
     size_t s = utf8proc_encode_char(itext[n],text+pos);
     pos+=s;
     text[pos  ]=0;
@@ -844,6 +851,9 @@ void copy_text(uint16_t *itext,int len) {
   iphone_copy(text);
   #endif
 
+  #ifdef OSX_BUILD
+  osx_copy(text);
+  #endif
 /*
   FILE *w1 = popen("xclip -selection c","w");
   if(w1!=NULL) {
