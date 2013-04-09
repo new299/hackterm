@@ -84,7 +84,10 @@ int ssh_open_preshell(char *hostname,char *username,char *password,char *fingerp
   int set=1;
   
   //If you don't set this you'll get a sigpipe on lock on iOS.
+  #ifndef LINUX_BUILD
+  // Not currently using 
   setsockopt(sock,SOL_SOCKET,SO_NOSIGPIPE,(void *)&set,sizeof(int));
+  #endif
 
   //sin.sin_family = AF_INET;
   sin.sin_port = htons(22);

@@ -32,7 +32,7 @@ void regis_clear() {
 
 char *regis_process_cmd_screen(char *cmd) {
   char *code = cmd+2;
-  strsep(&code,")",")");
+  strsep(&code,")");
   if(code == 0) return (cmd+1);
 
   return code; 
@@ -157,10 +157,10 @@ void regis_processor(const char *cmd,int cmdlen) {
     command = regis_process_command(command);
 
     #ifdef LINUX_BUILD
-    clock_gettime(CLOCK_MONOTONIC,&regis_last_render);
+ //   clock_gettime(CLOCK_MONOTONIC,&regis_last_render);
     #endif
     
-    #if defined(IOS_BUILD) || defined(OSX_BUILD)
+    #if defined(IOS_BUILD) || defined(OSX_BUILD) || defined(LINUX_BUILD)
     #if _POSIX_TIMERS > 0
     clock_gettime(CLOCK_REALTIME, &tp);
     #else
@@ -183,10 +183,10 @@ bool regis_recent() {
   struct timespec current_time;
   
   #ifdef LINUX_BUILD
-  clock_gettime(CLOCK_MONOTONIC,&current_time);
+  //clock_gettime(CLOCK_MONOTONIC,&current_time);
   #endif
   
-  #if defined(IOS_BUILD) || defined(OSX_BUILD)
+  #if defined(IOS_BUILD) || defined(OSX_BUILD) || defined(LINUX_BUILD)
   #if _POSIX_TIMERS > 0
   clock_gettime(CLOCK_REALTIME, &tp);
   #else

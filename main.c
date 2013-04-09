@@ -648,6 +648,8 @@ void do_sdl_init() {
         return;
     }
     
+
+    #if defined(OSX_BUILD) || defined(IOS_BUILD)
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE  , 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE , 8);
@@ -659,6 +661,7 @@ void do_sdl_init() {
     #endif
     
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    #endif
     #ifdef IOS_BUILD
     screen=SDL_CreateWindow(NULL, 0, 0, 0, 0,SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
     #endif
@@ -677,7 +680,8 @@ void do_sdl_init() {
     #endif
 
     if (screen == 0) {
-      printf("Could not initialize Window");
+      printf("Could not initialize Window\n");
+      printf("Error: %s\n",SDL_GetError());
     }
     
     renderer = SDL_CreateRenderer(screen, -1, SDL_RENDERER_ACCELERATED);
@@ -1206,6 +1210,9 @@ void sdl_read_thread(SDL_Event *event) {
        buf[1] = 0;
        c_write(buf,1);
      }
+     #endif
+
+     #if defined(OSX_BUILD)
      if(scancode == SDL_SCANCODE_RETURN) {
        char buf[4];
        buf[0] = 13;
@@ -1218,6 +1225,9 @@ void sdl_read_thread(SDL_Event *event) {
        buf[1] = 0;
        c_write(buf,1);
      }
+     #endif
+
+     #if defined(OSX_BUILD) || defined(LINUX_BUILD)
      if((scancode == SDL_SCANCODE_LCTRL) || (scancode == SDL_SCANCODE_RCTRL)) {
        hterm_ctrl_pressed=true;
      }
@@ -1277,7 +1287,6 @@ void sdl_read_thread(SDL_Event *event) {
      if(((event->key.keysym.sym == 'v') && (mod & KMOD_CTRL)) || 
         ((event->key.keysym.sym == 'v') && (mod & KMOD_GUI)) 
        ) {
-       printf("paste pressed\n");
        // perform text paste
        uint8_t *text = paste_text();
        if(text != 0) {
