@@ -1274,8 +1274,8 @@ void sdl_read_thread(SDL_Event *event) {
      // non iOS paste code.
      SDL_Keymod mod = SDL_GetModState();
      #if defined(OSX_BUILD) || defined (LINUX_BUILD)
-     if(((event->key.keysym.sym == 'v') && (mod | KMOD_CTRL)) || 
-        ((event->key.keysym.sym == 'v') && (mod | KMOD_GUI)) 
+     if(((event->key.keysym.sym == 'v') && (mod & KMOD_CTRL)) || 
+        ((event->key.keysym.sym == 'v') && (mod & KMOD_GUI)) 
        ) {
        printf("paste pressed\n");
        // perform text paste
