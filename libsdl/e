@@ -1,0 +1,271 @@
+checking build system type... x86_64-apple-darwin11.4.2
+checking host system type... x86_64-apple-darwin11.4.2
+checking how to print strings... printf
+checking for gcc... clang
+checking whether the C compiler works... yes
+checking for C compiler default output file name... a.out
+checking for suffix of executables... 
+checking whether we are cross compiling... no
+checking for suffix of object files... o
+checking whether we are using the GNU C compiler... yes
+checking whether clang accepts -g... yes
+checking for clang option to accept ISO C89... none needed
+checking for a sed that does not truncate output... /usr/bin/sed
+checking for grep that handles long lines and -e... /usr/bin/grep
+checking for egrep... /usr/bin/grep -E
+checking for fgrep... /usr/bin/grep -F
+checking for ld used by clang... /usr/bin/ld
+checking if the linker (/usr/bin/ld) is GNU ld... no
+checking for BSD- or MS-compatible name lister (nm)... /usr/bin/nm
+checking the name lister (/usr/bin/nm) interface... BSD nm
+checking whether ln -s works... yes
+checking the maximum length of command line arguments... 196608
+checking whether the shell understands some XSI constructs... yes
+checking whether the shell understands "+="... yes
+checking how to convert x86_64-apple-darwin11.4.2 file names to x86_64-apple-darwin11.4.2 format... func_convert_file_noop
+checking how to convert x86_64-apple-darwin11.4.2 file names to toolchain format... func_convert_file_noop
+checking for /usr/bin/ld option to reload object files... -r
+checking for objdump... no
+checking how to recognize dependent libraries... pass_all
+checking for dlltool... no
+checking how to associate runtime and link libraries... printf %s\n
+checking for ar... ar
+checking for archiver @FILE support... no
+checking for strip... strip
+checking for ranlib... ranlib
+checking for gawk... no
+checking for mawk... no
+checking for nawk... no
+checking for awk... awk
+checking command to parse /usr/bin/nm output from clang object... ok
+checking for sysroot... no
+checking for mt... no
+checking if : is a manifest tool... no
+checking for dsymutil... dsymutil
+checking for nmedit... nmedit
+checking for lipo... lipo
+checking for otool... otool
+checking for otool64... no
+checking for -single_module linker flag... yes
+checking for -exported_symbols_list linker flag... yes
+checking for -force_load linker flag... yes
+checking how to run the C preprocessor... clang -E
+checking for ANSI C header files... yes
+checking for sys/types.h... yes
+checking for sys/stat.h... yes
+checking for stdlib.h... yes
+checking for string.h... yes
+checking for memory.h... yes
+checking for strings.h... yes
+checking for inttypes.h... yes
+checking for stdint.h... yes
+checking for unistd.h... yes
+checking for dlfcn.h... yes
+checking for objdir... .libs
+checking if clang supports -fno-rtti -fno-exceptions... yes
+checking for clang option to produce PIC... -fno-common -DPIC
+checking if clang PIC flag -fno-common -DPIC works... yes
+checking if clang static flag -static works... no
+checking if clang supports -c -o file.o... yes
+checking if clang supports -c -o file.o... (cached) yes
+checking whether the clang linker (/usr/bin/ld) supports shared libraries... yes
+checking dynamic linker characteristics... darwin11.4.2 dyld
+checking how to hardcode library paths into programs... immediate
+checking whether stripping libraries is possible... yes
+checking if libtool supports shared libraries... yes
+checking whether to build shared libraries... yes
+checking whether to build static libraries... yes
+checking for gcc... (cached) clang
+checking whether we are using the GNU C compiler... (cached) yes
+checking whether clang accepts -g... (cached) yes
+checking for clang option to accept ISO C89... (cached) none needed
+checking for g++... g++
+checking whether we are using the GNU C++ compiler... yes
+checking whether g++ accepts -g... yes
+checking how to run the C++ preprocessor... g++ -E
+checking for ld used by g++... /usr/bin/ld
+checking if the linker (/usr/bin/ld) is GNU ld... no
+checking whether the g++ linker (/usr/bin/ld) supports shared libraries... yes
+checking for g++ option to produce PIC... -fno-common -DPIC
+checking if g++ PIC flag -fno-common -DPIC works... yes
+checking if g++ static flag -static works... no
+checking if g++ supports -c -o file.o... yes
+checking if g++ supports -c -o file.o... (cached) yes
+checking whether the g++ linker (/usr/bin/ld) supports shared libraries... yes
+checking dynamic linker characteristics... darwin11.4.2 dyld
+checking how to hardcode library paths into programs... immediate
+checking for a BSD-compatible install... /usr/bin/install -c
+checking whether make sets $(MAKE)... yes
+checking for windres... no
+checking for an ANSI C-conforming const... yes
+checking for inline... inline
+checking for working volatile... yes
+checking for GCC -MMD -MT option... yes
+checking for ANSI C header files... (cached) yes
+checking for sys/types.h... (cached) yes
+checking stdio.h usability... yes
+checking stdio.h presence... yes
+checking for stdio.h... yes
+checking for stdlib.h... (cached) yes
+checking stddef.h usability... yes
+checking stddef.h presence... yes
+checking for stddef.h... yes
+checking stdarg.h usability... yes
+checking stdarg.h presence... yes
+checking for stdarg.h... yes
+checking malloc.h usability... no
+checking malloc.h presence... no
+checking for malloc.h... no
+checking for memory.h... (cached) yes
+checking for string.h... (cached) yes
+checking for strings.h... (cached) yes
+checking for inttypes.h... (cached) yes
+checking for stdint.h... (cached) yes
+checking ctype.h usability... yes
+checking ctype.h presence... yes
+checking for ctype.h... yes
+checking math.h usability... yes
+checking math.h presence... yes
+checking for math.h... yes
+checking iconv.h usability... yes
+checking iconv.h presence... yes
+checking for iconv.h... yes
+checking signal.h usability... yes
+checking signal.h presence... yes
+checking for signal.h... yes
+checking for size_t... yes
+checking for M_PI in math.h... yes
+checking for working alloca.h... yes
+checking for alloca... yes
+checking for working memcmp... yes
+checking for working strtod... yes
+checking for mprotect... yes
+checking for malloc... yes
+checking for calloc... yes
+checking for realloc... yes
+checking for free... yes
+checking for getenv... yes
+checking for setenv... yes
+checking for putenv... yes
+checking for unsetenv... yes
+checking for qsort... yes
+checking for abs... yes
+checking for bcopy... yes
+checking for memset... yes
+checking for memcpy... yes
+checking for memmove... yes
+checking for strlen... yes
+checking for strlcpy... yes
+checking for strlcat... yes
+checking for strdup... yes
+checking for _strrev... no
+checking for _strupr... no
+checking for _strlwr... no
+checking for strchr... yes
+checking for strrchr... yes
+checking for strstr... yes
+checking for itoa... no
+checking for _ltoa... no
+checking for _uitoa... no
+checking for _ultoa... no
+checking for strtol... yes
+checking for strtoul... yes
+checking for _i64toa... no
+checking for _ui64toa... no
+checking for strtoll... yes
+checking for strtoull... yes
+checking for atoi... yes
+checking for atof... yes
+checking for strcmp... yes
+checking for strncmp... yes
+checking for _stricmp... no
+checking for strcasecmp... yes
+checking for _strnicmp... no
+checking for strncasecmp... yes
+checking for sscanf... yes
+checking for snprintf... yes
+checking for vsnprintf... yes
+checking for fseeko... yes
+checking for fseeko64... no
+checking for sigaction... yes
+checking for setjmp... yes
+checking for nanosleep... yes
+checking for sysconf... yes
+checking for sysctlbyname... yes
+checking for pow in -lm... yes
+checking for atan... yes
+checking for atan2... yes
+checking for ceil... yes
+checking for copysign... yes
+checking for cos... yes
+checking for cosf... yes
+checking for fabs... yes
+checking for floor... yes
+checking for log... yes
+checking for pow... yes
+checking for scalbn... yes
+checking for sin... yes
+checking for sinf... yes
+checking for sqrt... yes
+checking for iconv_open in -liconv... yes
+checking for iconv... yes
+checking for struct sigaction.sa_sigaction... yes
+checking size of void*... 8
+checking for GCC builtin atomic operations... yes
+checking for GCC -mmmx option... yes
+checking for GCC -m3dnow option... no
+checking for GCC -msse option... yes
+checking for GCC -msse2 option... yes
+checking for Altivec with GCC altivec.h and -maltivec option... no
+checking for Altivec with GCC -maltivec option... no
+checking for Altivec with GCC altivec.h and -faltivec option... no
+checking for Altivec with GCC -faltivec option... no
+checking for GCC -fvisibility=hidden option... yes
+checking for dlopen... yes
+checking for dlopen in -lc... yes
+checking for Cocoa framework... yes
+checking for X... libraries /usr/X11R6/lib, headers /usr/X11R6/include
+checking whether -R must be followed by a space... neither works
+checking for gethostbyname... yes
+checking for connect... yes
+checking for remove... yes
+checking for shmat... yes
+checking for IceConnectionNumber in -lICE... yes
+-- dynamic libX11 -> /usr/X11R6/lib/libX11.6.dylib
+-- dynamic libX11ext -> /usr/X11R6/lib/libXext.6.dylib
+checking for const parameter to XextAddDisplay... no
+checking for XGenericEvent... yes
+checking for XkbKeycodeToKeysym in -lX11... yes
+checking for X11/Xcursor/Xcursor.h... yes
+-- dynamic libXcursor -> /usr/X11R6/lib/libXcursor.1.dylib
+checking for X11/extensions/Xinerama.h... yes
+-- dynamic libXinerama -> /usr/X11R6/lib/libXinerama.1.dylib
+checking for X11/extensions/XInput2.h... yes
+-- dynamic libXi -> /usr/X11R6/lib/libXi.6.dylib
+checking for xinput2 multitouch... no
+checking for X11/extensions/Xrandr.h... yes
+-- dynamic libXrandr -> /usr/X11R6/lib/libXrandr.2.dylib
+checking for X11/extensions/scrnsaver.h... yes
+-- dynamic libXss -> /usr/X11R6/lib/libXss.1.dylib
+checking for X11/extensions/shape.h... yes
+checking for X11/extensions/xf86vmode.h... yes
+-- dynamic libXxf86vm -> /usr/X11R6/lib/libXxf86vm.1.dylib
+checking for OpenGL (GLX) support... yes
+checking for pthreads... yes
+checking for recursive mutexes... yes
+checking for pthread semaphores... yes
+checking for sem_timedwait... no
+checking for pthread_spin_trylock... no
+checking for pthread_np.h... no
+checking for pthread_setname_np... yes
+checking for pthread_set_name_np... no
+checking for GCC -Wall option... yes
+checking for necessary GCC -Wno-multichar option... no
+configure: creating ./config.status
+config.status: creating Makefile
+config.status: creating sdl2-config
+config.status: creating SDL2.spec
+config.status: creating sdl2.pc
+config.status: creating include/SDL_config.h
+config.status: include/SDL_config.h is unchanged
+config.status: executing libtool commands
