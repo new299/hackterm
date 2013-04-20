@@ -16,4 +16,8 @@ void draw_unitext_fancy_surface(void *screen,int x,int y,const uint16_t *text, u
 void draw_unitext_fancy_renderer(void *screen,int x,int y,const uint16_t *text, uint32_t bg,uint32_t fg, unsigned int bold, unsigned int underline, unsigned int italic, unsigned int blink, unsigned int reverse, unsigned int strike, unsigned int font);
 void nunifont_blinktimer();
 
+extern int nunifont_width;
+extern int nunifont_height;
+extern int nunifont_space;
+
 #endif

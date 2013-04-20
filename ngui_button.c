@@ -27,16 +27,16 @@ void ngui_receive_event_button(SDL_Event *event, ngui_button_data *d) {
     int y = event->button.y;
     
     if(d->text[0] == 'I') {
-      if((x > (d->x)) && (x < ((d->x)+(16*6))) &&
-         (y > (d->y)) && (y < ((d->y)+(16*6)))) {
+      if((x > (d->x)) && (x < ((d->x)+(nunifont_height*6))) &&
+         (y > (d->y)) && (y < ((d->y)+(nunifont_height*6)))) {
         d->callback("press");
         d->shine=20;
         ngui_redraw_required();
       }
     }
     
-    if((x > (d->x-d->x_padding)) && (x < ((d->x)+(strlen(d->text)*8)+d->x_padding)) &&
-       (y > (d->y-d->y_padding)) && (y < ((d->y)+16+d->y_padding))) {
+    if((x > (d->x-d->x_padding)) && (x < ((d->x)+(strlen(d->text)*nunifont_width)+d->x_padding)) &&
+       (y > (d->y-d->y_padding)) && (y < ((d->y)+nunifont_height+d->y_padding))) {
       d->callback("press");
       d->shine=20;
       ngui_redraw_required();
@@ -71,8 +71,8 @@ void draw_kbshow_icon(int x,int y,int shine) {
   
   rect.x = x;
   rect.y = y;
-  rect.w = 7*16;
-  rect.h = 5*16;
+  rect.w = 7*nunifont_height;
+  rect.h = 5*nunifont_height;
  
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
 
@@ -88,20 +88,20 @@ void draw_kbshow_icon(int x,int y,int shine) {
   }
   SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
 
-  rect.x = x; rect.y = y; rect.w = 16; rect.h = 16;
+  rect.x = x; rect.y = y; rect.w = nunifont_height; rect.h = nunifont_height;
   SDL_RenderDrawRect(ngui_renderer,&rect);
-  rect.x = x+(16*2); rect.y = y; rect.w = 16; rect.h = 16;
+  rect.x = x+(nunifont_height*2); rect.y = y; rect.w = nunifont_height; rect.h = nunifont_height;
   SDL_RenderDrawRect(ngui_renderer,&rect);
-  rect.x = x+(16*4); rect.y = y; rect.w = 16; rect.h = 16;
+  rect.x = x+(nunifont_height*4); rect.y = y; rect.w = nunifont_height; rect.h = nunifont_height;
   SDL_RenderDrawRect(ngui_renderer,&rect);
-  rect.x = x+(16*6); rect.y = y; rect.w = 16; rect.h = 16;
+  rect.x = x+(nunifont_height*6); rect.y = y; rect.w = nunifont_height; rect.h = nunifont_height;
   SDL_RenderDrawRect(ngui_renderer,&rect);
 
-  rect.x = x+(16*1); rect.y = y+(16*2); rect.w = 16; rect.h = 16;
+  rect.x = x+(nunifont_height*1); rect.y = y+(nunifont_height*2); rect.w = nunifont_height; rect.h = nunifont_height;
   SDL_RenderDrawRect(ngui_renderer,&rect);
-  rect.x = x+(16*3); rect.y = y+(16*2); rect.w = 16; rect.h = 16;
+  rect.x = x+(nunifont_height*3); rect.y = y+(nunifont_height*2); rect.w = nunifont_height; rect.h = nunifont_height;
   SDL_RenderDrawRect(ngui_renderer,&rect);
-  rect.x = x+(16*5); rect.y = y+(16*2); rect.w = 16; rect.h = 16;
+  rect.x = x+(nunifont_height*5); rect.y = y+(nunifont_height*2); rect.w = nunifont_height; rect.h = nunifont_height;
   SDL_RenderDrawRect(ngui_renderer,&rect);
 }
 
@@ -111,8 +111,8 @@ void draw_close_icon(int x,int y,int shine) {
   
   rect.x = x;
   rect.y = y;
-  rect.w = 6*16;
-  rect.h = 5*16;
+  rect.w = 6*nunifont_height;
+  rect.h = 5*nunifont_height;
   
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
 
@@ -131,25 +131,25 @@ void draw_close_icon(int x,int y,int shine) {
 
 
   // X
-  SDL_RenderDrawLine(ngui_renderer,x+(16*1),y+(16*0),x+(16*1),y+(16*1));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*1),y+(16*1),x+(16*2),y+(16*1));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*1),x+(16*2),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*2),x+(16*3),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*2),x+(16*3),y+(16*3));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*3),x+(16*4),y+(16*3));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*3),x+(16*4),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*4),x+(16*5),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*4),x+(16*5),y+(16*5));
+  //SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*1),y+(nunifont_height*0),x+(nunifont_height*1),y+(nunifont_height*1));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*1),y+(nunifont_height*1),x+(nunifont_height*2),y+(nunifont_height*1));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*1),x+(nunifont_height*2),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*2),x+(nunifont_height*3),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*3),y+(nunifont_height*2),x+(nunifont_height*3),y+(nunifont_height*3));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*3),y+(nunifont_height*3),x+(nunifont_height*4),y+(nunifont_height*3));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*3),x+(nunifont_height*4),y+(nunifont_height*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*4),x+(nunifont_height*5),y+(nunifont_height*4));
+  //SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*5),y+(nunifont_height*4),x+(nunifont_height*5),y+(nunifont_height*5));
 
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*0),x+(16*5),y+(16*1));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*1),x+(16*4),y+(16*1));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*1),x+(16*4),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*2),x+(16*3),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*2),x+(16*3),y+(16*3));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*3),x+(16*2),y+(16*3));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*3),x+(16*2),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*4),x+(16*1),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*1),y+(16*4),x+(16*1),y+(16*5));
+  //SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*5),y+(nunifont_height*0),x+(nunifont_height*5),y+(nunifont_height*1));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*5),y+(nunifont_height*1),x+(nunifont_height*4),y+(nunifont_height*1));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*1),x+(nunifont_height*4),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*2),x+(nunifont_height*3),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*3),y+(nunifont_height*2),x+(nunifont_height*3),y+(nunifont_height*3));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*3),y+(nunifont_height*3),x+(nunifont_height*2),y+(nunifont_height*3));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*3),x+(nunifont_height*2),y+(nunifont_height*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*4),x+(nunifont_height*1),y+(nunifont_height*4));
+  //SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*1),y+(nunifont_height*4),x+(nunifont_height*1),y+(nunifont_height*5));
 }
 
 void draw_paste_icon(int x,int y,int shine) {
@@ -158,8 +158,8 @@ void draw_paste_icon(int x,int y,int shine) {
   
   rect.x = x;
   rect.y = y;
-  rect.w = 6*16;
-  rect.h = 6*16;
+  rect.w = 6*nunifont_height;
+  rect.h = 6*nunifont_height;
   
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
 
@@ -176,21 +176,21 @@ void draw_paste_icon(int x,int y,int shine) {
   SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
 
   // P
-  SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*2),x   ,y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*2),x   ,y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*3),x+16,y+(16*3));
-  SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*2),x+16,y+(16*3));
+  SDL_RenderDrawLine(ngui_renderer,x+nunifont_height,y+(nunifont_height*2),x   ,y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x   ,y+(nunifont_height*2),x   ,y+(nunifont_height*4));
+  SDL_RenderDrawLine(ngui_renderer,x   ,y+(nunifont_height*3),x+nunifont_height,y+(nunifont_height*3));
+  SDL_RenderDrawLine(ngui_renderer,x+nunifont_height,y+(nunifont_height*2),x+nunifont_height,y+(nunifont_height*3));
 
   // S
-  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*2),x+(16*2),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*2),x+(16*2),y+(16*3));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*3),x+(16*3),y+(16*3));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*3),x+(16*3),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*4),x+(16*2),y+(16*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*3),y+(nunifont_height*2),x+(nunifont_height*2),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*2),x+(nunifont_height*2),y+(nunifont_height*3));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*3),x+(nunifont_height*3),y+(nunifont_height*3));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*3),y+(nunifont_height*3),x+(nunifont_height*3),y+(nunifont_height*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*3),y+(nunifont_height*4),x+(nunifont_height*2),y+(nunifont_height*4));
   
   // T
-  SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*2),x+(16*4),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*2),x+(16*5),y+(16*4)-1);
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*6),y+(nunifont_height*2),x+(nunifont_height*4),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*5),y+(nunifont_height*2),x+(nunifont_height*5),y+(nunifont_height*4)-1);
 }
 
 void draw_esc_icon(int x,int y,int shine) {
@@ -200,8 +200,8 @@ void draw_esc_icon(int x,int y,int shine) {
   
   rect.x = x;
   rect.y = y;
-  rect.w = 6*16;
-  rect.h = 6*16;
+  rect.w = 6*nunifont_height;
+  rect.h = 6*nunifont_height;
   
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
 
@@ -217,22 +217,22 @@ void draw_esc_icon(int x,int y,int shine) {
   }
   SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
   // E
-  SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*0),x   ,y+(16*0));
-  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*0),x   ,y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*2),x+16,y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*1),x+16,y+(16*1));
+  SDL_RenderDrawLine(ngui_renderer,x+nunifont_height,y+(nunifont_height*0),x   ,y+(nunifont_height*0));
+  SDL_RenderDrawLine(ngui_renderer,x   ,y+(nunifont_height*0),x   ,y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x   ,y+(nunifont_height*2),x+nunifont_height,y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x   ,y+(nunifont_height*1),x+nunifont_height,y+(nunifont_height*1));
   
   // S
-  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*0),x+(16*2),y+(16*0));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*0),x+(16*2),y+(16*1));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*1),x+(16*3),y+(16*1));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*1),x+(16*3),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*2),x+(16*2),y+(16*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*3),y+(nunifont_height*0),x+(nunifont_height*2),y+(nunifont_height*0));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*0),x+(nunifont_height*2),y+(nunifont_height*1));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*1),x+(nunifont_height*3),y+(nunifont_height*1));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*3),y+(nunifont_height*1),x+(nunifont_height*3),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*3),y+(nunifont_height*2),x+(nunifont_height*2),y+(nunifont_height*2));
   
   // C
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*0),x+(16*4),y+(16*0));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*0),x+(16*4),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*2),x+(16*5),y+(16*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*5),y+(nunifont_height*0),x+(nunifont_height*4),y+(nunifont_height*0));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*0),x+(nunifont_height*4),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*2),x+(nunifont_height*5),y+(nunifont_height*2));
 
 }
 
@@ -242,8 +242,8 @@ void draw_tab_icon  (int x,int y,int shine){
   
   rect.x = x;
   rect.y = y;
-  rect.w = 6*16;
-  rect.h = 6*16;
+  rect.w = 6*nunifont_height;
+  rect.h = 6*nunifont_height;
   
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
   SDL_RenderDrawRect(ngui_renderer,&rect);
@@ -258,23 +258,23 @@ void draw_tab_icon  (int x,int y,int shine){
   }
   SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
   // T
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*4),x   ,y+(16*4));  // Top line
-  SDL_RenderDrawLine(ngui_renderer,x+16    ,y+(16*4),x+16,y+(16*6)-1);
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*4),x   ,y+(nunifont_height*4));  // Top line
+  SDL_RenderDrawLine(ngui_renderer,x+nunifont_height    ,y+(nunifont_height*4),x+nunifont_height,y+(nunifont_height*6)-1);
   
   // A
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*4),x+(16*3),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*4),x+(16*3),y+(16*6)-1);
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*4),x+(16*4),y+(16*6)-1);
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*5),x+(16*3),y+(16*5));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*4),x+(nunifont_height*3),y+(nunifont_height*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*3),y+(nunifont_height*4),x+(nunifont_height*3),y+(nunifont_height*6)-1);
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*4),x+(nunifont_height*4),y+(nunifont_height*6)-1);
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*5),x+(nunifont_height*3),y+(nunifont_height*5));
 
   // B
-  SDL_RenderDrawLine(ngui_renderer,x+(16*6)-2,y+(16*4),x+(16*5),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*4),x+(16*5),y+(16*6)-1);
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*6)-1,x+(16*6)-2,y+(16*6)-1);
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*6)-2,y+(nunifont_height*4),x+(nunifont_height*5),y+(nunifont_height*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*5),y+(nunifont_height*4),x+(nunifont_height*5),y+(nunifont_height*6)-1);
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*5),y+(nunifont_height*6)-1,x+(nunifont_height*6)-2,y+(nunifont_height*6)-1);
   
-  SDL_RenderDrawLine(ngui_renderer,x+(16*6)-1,y+(16*6)-1,x+(16*6)-1,y+(16*5)+2);
-  SDL_RenderDrawLine(ngui_renderer,x+(16*6)-1,y+(16*5)-2,x+(16*6)-1,y+(16*4)+1);
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*5),x+(16*6)-2,y+(16*5));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*6)-1,y+(nunifont_height*6)-1,x+(nunifont_height*6)-1,y+(nunifont_height*5)+2);
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*6)-1,y+(nunifont_height*5)-2,x+(nunifont_height*6)-1,y+(nunifont_height*4)+1);
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*5),y+(nunifont_height*5),x+(nunifont_height*6)-2,y+(nunifont_height*5));
 }
 
 void draw_alt_icon  (int x,int y,int shine) {
@@ -284,8 +284,8 @@ void draw_alt_icon  (int x,int y,int shine) {
   
   rect.x = x;
   rect.y = y;
-  rect.w = 6*16;
-  rect.h = 6*16;
+  rect.w = 6*nunifont_height;
+  rect.h = 6*nunifont_height;
 
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
   SDL_RenderDrawRect(ngui_renderer,&rect);
@@ -300,18 +300,18 @@ void draw_alt_icon  (int x,int y,int shine) {
   }
   SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
   // A
-  SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*4),x   ,y+(16*4));  // Top line
-  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*4),x   ,y+(16*6)-1);  // Down line
-  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*5),x+16,y+(16*5));  // Midline
-  SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*4),x+16,y+(16*6)-1);  // Right down line
+  SDL_RenderDrawLine(ngui_renderer,x+nunifont_height,y+(nunifont_height*4),x   ,y+(nunifont_height*4));  // Top line
+  SDL_RenderDrawLine(ngui_renderer,x   ,y+(nunifont_height*4),x   ,y+(nunifont_height*6)-1);  // Down line
+  SDL_RenderDrawLine(ngui_renderer,x   ,y+(nunifont_height*5),x+nunifont_height,y+(nunifont_height*5));  // Midline
+  SDL_RenderDrawLine(ngui_renderer,x+nunifont_height,y+(nunifont_height*4),x+nunifont_height,y+(nunifont_height*6)-1);  // Right down line
   
   // L
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*4),x+(16*2),y+(16*6)-1); // left
-  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*6)-1,x+(16*2),y+(16*6)-1); //bottom
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*4),x+(nunifont_height*2),y+(nunifont_height*6)-1); // left
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*3),y+(nunifont_height*6)-1,x+(nunifont_height*2),y+(nunifont_height*6)-1); //bottom
   
   // T
-  SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*4),x+(16*4),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*4),x+(16*5),y+(16*6)-1);
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*6),y+(nunifont_height*4),x+(nunifont_height*4),y+(nunifont_height*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*5),y+(nunifont_height*4),x+(nunifont_height*5),y+(nunifont_height*6)-1);
 }
 
 
@@ -322,8 +322,8 @@ void draw_ctrl_icon (int x,int y,int shine){
   
   rect.x = x;
   rect.y = y;
-  rect.w = 6*16;
-  rect.h = 6*16;
+  rect.w = 6*nunifont_height;
+  rect.h = 6*nunifont_height;
   
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
   SDL_RenderDrawRect(ngui_renderer,&rect);
@@ -338,17 +338,17 @@ void draw_ctrl_icon (int x,int y,int shine){
   }
   SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
   // C
-  SDL_RenderDrawLine(ngui_renderer,x+16,y+(16*0),x   ,y+(16*0));
-  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*0),x   ,y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x   ,y+(16*2),x+16,y+(16*2));
+  SDL_RenderDrawLine(ngui_renderer,x+nunifont_height,y+(nunifont_height*0),x   ,y+(nunifont_height*0));
+  SDL_RenderDrawLine(ngui_renderer,x   ,y+(nunifont_height*0),x   ,y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x   ,y+(nunifont_height*2),x+nunifont_height,y+(nunifont_height*2));
   
   // T
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*0),x+(16*2)   ,y+(16*0));  // Top line
-  SDL_RenderDrawLine(ngui_renderer,x+(16*3),y+(16*0),x+(16*3),y+(16*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*0),x+(nunifont_height*2)   ,y+(nunifont_height*0));  // Top line
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*3),y+(nunifont_height*0),x+(nunifont_height*3),y+(nunifont_height*2));
 
   // L
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*0),x+(16*5),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*2),x+(16*6),y+(16*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*5),y+(nunifont_height*0),x+(nunifont_height*5),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*5),y+(nunifont_height*2),x+(nunifont_height*6),y+(nunifont_height*2));
 
 }
 
@@ -358,8 +358,8 @@ void draw_up_icon(int x,int y,int shine){
   
   rect.x = x;
   rect.y = y;
-  rect.w = 6*16;
-  rect.h = 6*16;
+  rect.w = 6*nunifont_height;
+  rect.h = 6*nunifont_height;
   
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
   SDL_RenderDrawRect(ngui_renderer,&rect);
@@ -374,18 +374,18 @@ void draw_up_icon(int x,int y,int shine){
   }
 
   SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y       ,x+(16*4),y       );
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y       ,x+(16*4),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*2),x+(16*5),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*2),x+(16*5),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*4),x+(16*6),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*4),x+(16*6),y+(16*6));
-  //SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*6),x+(16*0),y+(16*6));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*0),y+(16*6),x+(16*0),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*0),y+(16*4),x+(16*1),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*1),y+(16*4),x+(16*1),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*1),y+(16*2),x+(16*2),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*2),x+(16*2),y+(16*0));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y       ,x+(nunifont_height*4),y       );
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y       ,x+(nunifont_height*4),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*2),x+(nunifont_height*5),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*5),y+(nunifont_height*2),x+(nunifont_height*5),y+(nunifont_height*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*5),y+(nunifont_height*4),x+(nunifont_height*6),y+(nunifont_height*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*6),y+(nunifont_height*4),x+(nunifont_height*6),y+(nunifont_height*6));
+  //SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*6),y+(nunifont_height*6),x+(nunifont_height*0),y+(nunifont_height*6));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*0),y+(nunifont_height*6),x+(nunifont_height*0),y+(nunifont_height*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*0),y+(nunifont_height*4),x+(nunifont_height*1),y+(nunifont_height*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*1),y+(nunifont_height*4),x+(nunifont_height*1),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*1),y+(nunifont_height*2),x+(nunifont_height*2),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*2),x+(nunifont_height*2),y+(nunifont_height*0));
 }
 
 void draw_down_icon(int x,int y,int shine){
@@ -395,8 +395,8 @@ void draw_down_icon(int x,int y,int shine){
   
   rect.x = x;
   rect.y = y;
-  rect.w = 6*16;
-  rect.h = 6*16;
+  rect.w = 6*nunifont_height;
+  rect.h = 6*nunifont_height;
   
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
   SDL_RenderDrawRect(ngui_renderer,&rect);
@@ -410,18 +410,18 @@ void draw_down_icon(int x,int y,int shine){
     }
   }
   SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*6)-1,x+(16*4),y+(16*6)-1);
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*6)-1,x+(16*4),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*4),x+(16*5),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*4),x+(16*5),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*5),y+(16*2),x+(16*6),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*2),x+(16*6),y+(16*0));
-  //SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*0),x+(16*0),y+(16*0));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*0),y+(16*0),x+(16*0),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*0),y+(16*2),x+(16*1),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*1),y+(16*2),x+(16*1),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*1),y+(16*4),x+(16*2),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*4),x+(16*2),y+(16*6)-1);
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*6)-1,x+(nunifont_height*4),y+(nunifont_height*6)-1);
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*6)-1,x+(nunifont_height*4),y+(nunifont_height*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*4),x+(nunifont_height*5),y+(nunifont_height*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*5),y+(nunifont_height*4),x+(nunifont_height*5),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*5),y+(nunifont_height*2),x+(nunifont_height*6),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*6),y+(nunifont_height*2),x+(nunifont_height*6),y+(nunifont_height*0));
+  //SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*6),y+(nunifont_height*0),x+(nunifont_height*0),y+(nunifont_height*0));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*0),y+(nunifont_height*0),x+(nunifont_height*0),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*0),y+(nunifont_height*2),x+(nunifont_height*1),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*1),y+(nunifont_height*2),x+(nunifont_height*1),y+(nunifont_height*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*1),y+(nunifont_height*4),x+(nunifont_height*2),y+(nunifont_height*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*4),x+(nunifont_height*2),y+(nunifont_height*6)-1);
 }
 
 void draw_right_icon(int x,int y,int shine){
@@ -430,8 +430,8 @@ void draw_right_icon(int x,int y,int shine){
   
   rect.x = x;
   rect.y = y;
-  rect.w = 6*16;
-  rect.h = 6*16;
+  rect.w = 6*nunifont_height;
+  rect.h = 6*nunifont_height;
   
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
   SDL_RenderDrawRect(ngui_renderer,&rect);
@@ -445,17 +445,17 @@ void draw_right_icon(int x,int y,int shine){
     }
   }
   SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
-  SDL_RenderDrawLine(ngui_renderer,x+(16*6)-1,y+(16*2),x+(16*6)-1,y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*4),x+(16*4),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*4),x+(16*4),y+(16*5));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*5),x+(16*2),y+(16*5));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*5),x+(16*2),y+(16*6));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*6),x+(16*0),y+(16*6));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*0),y+(16*0),x+(16*2),y+(16*0));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*0),x+(16*2),y+(16*1));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*1),x+(16*4),y+(16*1));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*1),x+(16*4),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*2),x+(16*6),y+(16*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*6)-1,y+(nunifont_height*2),x+(nunifont_height*6)-1,y+(nunifont_height*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*6),y+(nunifont_height*4),x+(nunifont_height*4),y+(nunifont_height*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*4),x+(nunifont_height*4),y+(nunifont_height*5));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*5),x+(nunifont_height*2),y+(nunifont_height*5));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*5),x+(nunifont_height*2),y+(nunifont_height*6));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*6),x+(nunifont_height*0),y+(nunifont_height*6));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*0),y+(nunifont_height*0),x+(nunifont_height*2),y+(nunifont_height*0));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*0),x+(nunifont_height*2),y+(nunifont_height*1));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*1),x+(nunifont_height*4),y+(nunifont_height*1));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*1),x+(nunifont_height*4),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*2),x+(nunifont_height*6),y+(nunifont_height*2));
 
 }
 
@@ -466,8 +466,8 @@ void draw_left_icon(int x,int y,int shine){
   
   rect.x = x;
   rect.y = y;
-  rect.w = 6*16;
-  rect.h = 6*16;
+  rect.w = 6*nunifont_height;
+  rect.h = 6*nunifont_height;
   
   SDL_SetRenderDrawColor(ngui_renderer,0x50,0x50,0x50,0xFF);
   SDL_RenderDrawRect(ngui_renderer,&rect);
@@ -481,18 +481,18 @@ void draw_left_icon(int x,int y,int shine){
     }
   }
   SDL_SetRenderDrawColor(ngui_renderer,col,col,col,0xFF);
-  SDL_RenderDrawLine(ngui_renderer,x+(16*0),y+(16*4),x+(16*0),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*0),y+(16*2),x+(16*2),y+(16*2));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*2),x+(16*2),y+(16*1));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*1),x+(16*4),y+(16*1));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*1),x+(16*4),y+(16*0));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*0),x+(16*6),y+(16*0));
-  //SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*0),x+(16*6),y+(16*6));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*6),y+(16*6),x+(16*4),y+(16*6));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*6),x+(16*4),y+(16*5));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*4),y+(16*5),x+(16*2),y+(16*5));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*5),x+(16*2),y+(16*4));
-  SDL_RenderDrawLine(ngui_renderer,x+(16*2),y+(16*4),x+(16*0),y+(16*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*0),y+(nunifont_height*4),x+(nunifont_height*0),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*0),y+(nunifont_height*2),x+(nunifont_height*2),y+(nunifont_height*2));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*2),x+(nunifont_height*2),y+(nunifont_height*1));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*1),x+(nunifont_height*4),y+(nunifont_height*1));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*1),x+(nunifont_height*4),y+(nunifont_height*0));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*0),x+(nunifont_height*6),y+(nunifont_height*0));
+  //SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*6),y+(nunifont_height*0),x+(nunifont_height*6),y+(nunifont_height*6));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*6),y+(nunifont_height*6),x+(nunifont_height*4),y+(nunifont_height*6));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*6),x+(nunifont_height*4),y+(nunifont_height*5));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*4),y+(nunifont_height*5),x+(nunifont_height*2),y+(nunifont_height*5));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*5),x+(nunifont_height*2),y+(nunifont_height*4));
+  SDL_RenderDrawLine(ngui_renderer,x+(nunifont_height*2),y+(nunifont_height*4),x+(nunifont_height*0),y+(nunifont_height*4));
   
 }
 
@@ -520,15 +520,15 @@ void ngui_render_button(ngui_button_data *d) {
   if(ustrcmp(text,"Imenu"  ) == 0) { draw_menu_icon  (d->x,d->y,d->shine); notext=true;}
   if(d->shine > 0) {d->shine--; ngui_redraw_required();}
 
-//  nsdl_rectangle_shade(ngui_screen,d->x-d->x_padding,d->y-d->y_padding,d->x+(strlen(d->text))*8+d->x_padding,d->y+16+d->y_padding,1000,10000);
+//  nsdl_rectangle_shade(ngui_screen,d->x-d->x_padding,d->y-d->y_padding,d->x+(strlen(d->text))*nunifont_width+d->x_padding,d->y+nunifont_height+d->y_padding,1000,10000);
 
   if(!notext) {
     SDL_Rect rect;
   
     rect.x = d->x-d->x_padding;
     rect.y = d->y-d->y_padding;
-    rect.w = (strlen(d->text))*8+d->x_padding;
-    rect.h = 16+d->y_padding;
+    rect.w = (strlen(d->text))*nunifont_width+d->x_padding;
+    rect.h = nunifont_height+d->y_padding;
   
     SDL_RenderDrawRect(ngui_renderer,&rect);
   

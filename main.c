@@ -34,6 +34,8 @@
 #include "ngui.h"
 #include "utf8proc.h"
 
+
+
 #ifdef IOS_BUILD
 #include "iphone_pasteboard.h"
 #include "virtual_buttons.h"
@@ -47,10 +49,6 @@
 #define CONNECTION_SSH   2
 
 void redraw_required();
-
-int font_width  = 8;
-int font_height = 16;
-int font_space  = 0;
 
 static VTerm *vt;
 static VTermScreen *vts;
@@ -227,8 +225,8 @@ void draw_row(VTermScreenCell *row,int crow,int ypos,int glen) {
     //}
     //c_screen_data[crow][n] = row[n];
       
-    xpos+=(font_width+font_space);
-    if(row[n].width == 2) {xpos +=(font_width+font_space);n++;}
+    xpos+=(nunifont_width+nunifont_space);
+    if(row[n].width == 2) {xpos +=(nunifont_width+nunifont_space);n++;}
   }
 
 }
@@ -405,8 +403,8 @@ VTermParserCallbacks cb_parser = {
 
 void terminal_resize() {
 
-  rows = display_height/16;
-  cols = display_width/8;
+  rows = display_height/nunifont_height;
+  cols = display_width/nunifont_width;
     
   if(c_resize != NULL) (*c_resize)(cols,rows);
 
@@ -430,24 +428,23 @@ void redraw_text() {
     int glen=0;
     VTermScreenCell *rowdata=grab_row(trow,&dont_free,&glen);
 
-    if(rowdata != 0) draw_row(rowdata,trow,row*(font_height+font_space),glen);
+    if(rowdata != 0) draw_row(rowdata,trow,row*(nunifont_height+nunifont_space),glen);
     
     int cursorx=0;
     int cursory=0;
     cursor_position(&cursorx,&cursory);
     if(cursory == trow) {
-      int width=font_width+font_space;
+      int width=nunifont_width+nunifont_space;
       if((cursorx < cols) && (cursory < rows) && (rowdata != 0)) {
-        if(rowdata[cursorx].width == 2) width+=(font_width+font_space);
+        if(rowdata[cursorx].width == 2) width+=(nunifont_width+nunifont_space);
 
          SDL_SetRenderDrawColor(renderer,0xEF,0xEF,0xEF,0xA0);
          SDL_Rect r;
-         r.x = cursorx*(font_width+font_space);
-         r.y = row*(font_height+font_space);
+         r.x = cursorx*(nunifont_width+nunifont_space);
+         r.y = row*(nunifont_height+nunifont_space);
          r.w = width;
-         r.h = font_height+font_space;
+         r.h = nunifont_height+nunifont_space;
          SDL_RenderFillRect(renderer,&r);
-
       }
     }
 
@@ -462,10 +459,10 @@ void mouse_to_select_box(int   sx,int   sy,int so,
   //  if(sx > ex) {int t=ex;ex=sx;sx=t;}
   //  if(sy > ey) {int t=ey;ey=sy;sy=t;}
     
-    *stx=floor(((float)sx/(font_width +font_space)));
-    *etx=ceil( ((float)ex/(font_width +font_space)));
-    *sty=floor(((float)sy/(font_height+font_space)))-so;
-    *ety=ceil( ((float)ey/(font_height+font_space)))-eo;
+    *stx=floor(((float)sx/(nunifont_width +nunifont_space)));
+    *etx=ceil( ((float)ex/(nunifont_width +nunifont_space)));
+    *sty=floor(((float)sy/(nunifont_height+nunifont_space)))-so;
+    *ety=ceil( ((float)ey/(nunifont_height+nunifont_space)))-eo;
     
     if(*stx==0) {
     }
@@ -559,35 +556,35 @@ void redraw_selection() {
     int sselect_text_end_y   = select_text_end_y   + scroll_offset;
     int sselect_text_start_y = select_text_start_y + scroll_offset;
 
-    int sx=select_text_start_x*(font_width+font_space);
-    int sy=sselect_text_start_y*(font_height+font_space);
-    int ex=select_text_end_x*(font_width+font_space);
-    int ey=sselect_text_end_y*(font_height+font_space)-1;
+    int sx=select_text_start_x*(nunifont_width+nunifont_space);
+    int sy=sselect_text_start_y*(nunifont_height+nunifont_space);
+    int ex=select_text_end_x*(nunifont_width+nunifont_space);
+    int ey=sselect_text_end_y*(nunifont_height+nunifont_space)-1;
 
     SDL_SetRenderDrawColor(renderer, color, color, color,color);
    
     // start line
     if(select_text_start_y!=select_text_end_y) { // only draw central block bound for non-central lines.
-      SDL_RenderDrawLine(renderer,0,sy+(font_height+font_space),sx,sy+(font_height+font_space));
+      SDL_RenderDrawLine(renderer,0,sy+(nunifont_height+nunifont_space),sx,sy+(nunifont_height+nunifont_space));
       SDL_RenderDrawLine(renderer,sx,sy,display_width-1,sy);
     } else {
       SDL_RenderDrawLine(renderer,sx,sy,ex,sy);
     }
-    SDL_RenderDrawLine(renderer,sx,sy,sx,sy+(font_height+font_space));
+    SDL_RenderDrawLine(renderer,sx,sy,sx,sy+(nunifont_height+nunifont_space));
     
     // end line
     if(select_text_start_y!=select_text_end_y) { // only draw central block bound for non-central lines.
       SDL_RenderDrawLine(renderer,ex,ey,display_width-1,ey);
-      SDL_RenderDrawLine(renderer,ex,ey+(font_height+font_space),0,ey+(font_height+font_space));
+      SDL_RenderDrawLine(renderer,ex,ey+(nunifont_height+nunifont_space),0,ey+(nunifont_height+nunifont_space));
     } else {
-      SDL_RenderDrawLine(renderer,sx,ey+(font_height+font_space),ex,ey+(font_height+font_space));
+      SDL_RenderDrawLine(renderer,sx,ey+(nunifont_height+nunifont_space),ex,ey+(nunifont_height+nunifont_space));
     }
-    SDL_RenderDrawLine(renderer,ex,ey+(font_height+font_space),ex,ey);
+    SDL_RenderDrawLine(renderer,ex,ey+(nunifont_height+nunifont_space),ex,ey);
 
     // only draw block for non-single lines.
     if(select_text_start_y!=select_text_end_y) {
       // central block
-      SDL_RenderDrawLine(renderer,0              ,sy+(font_height+font_space),0,ey+(font_height+font_space));
+      SDL_RenderDrawLine(renderer,0              ,sy+(nunifont_height+nunifont_space),0,ey+(nunifont_height+nunifont_space));
       SDL_RenderDrawLine(renderer,display_width-1,sy,display_width-1,ey);
     }
   }
@@ -1318,8 +1315,8 @@ void timed_repeat() {
 void vterm_initialisation() {
   vt=0;
 
-  rows = display_height/16;
-  cols = display_width/8;
+  rows = display_height/nunifont_height;
+  cols = display_width/nunifont_width;
 
   vt = vterm_new(rows, cols);
 
@@ -1399,6 +1396,9 @@ int main(int argc, char **argv) {
     
   nunifont_load_staticmap(__fontmap_static,__widthmap_static,__fontmap_static_len,__widthmap_static_len);
 
+  if(display_height_abs > 2000) nunifont_size(32); else
+  if(display_width_abs  > 2000) nunifont_size(32); else
+  nunifont_size(16);
   
   vterm_initialisation();
 

@@ -9,6 +9,7 @@
 #include <stdarg.h>
 #include "nsdl.h"
 #include "base64.h"
+#include "nunifont.h"
 
 #define PNG_DEBUG 3
 #include <png.h>
@@ -214,6 +215,7 @@ int buffer_search(char *v) {
   return -1;
 }
 
+
 int inline_data_receive(char *data,int length) {
 
   if(processing_png == true) {
@@ -238,8 +240,14 @@ int inline_data_receive(char *data,int length) {
 
   file_end=0;
   buffer_push(data,length);
-  int pos = buffer_search(inline_magic);
 
+  int npos = buffer_search("HTERMFNORMAL");
+  if(npos > 0) nunifont_size(16);
+  
+  int dpos = buffer_search("HTERMFDOUBLE");
+  if(dpos > 0) nunifont_size(32);
+  
+  int pos = buffer_search(inline_magic);
   if(pos < 0) return 0;
 
   processing_png=true;
@@ -263,4 +271,5 @@ int inline_data_receive(char *data,int length) {
 
 void inline_data_clear() {
   SDL_FillRect(inline_data_layer,NULL, 0x000000);
+  buffer_clear();
 }
