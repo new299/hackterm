@@ -456,19 +456,19 @@ void mouse_to_select_box(int   sx,int   sy,int so,
                          int   ex,int   ey,int eo,
                          int *stx,int *sty,int *etx,int *ety) {
     
-  //  if(sx > ex) {int t=ex;ex=sx;sx=t;}
-  //  if(sy > ey) {int t=ey;ey=sy;sy=t;}
     
     *stx=floor(((float)sx/(nunifont_width +nunifont_space)));
     *etx=ceil( ((float)ex/(nunifont_width +nunifont_space)));
     *sty=floor(((float)sy/(nunifont_height+nunifont_space)))-so;
     *ety=ceil( ((float)ey/(nunifont_height+nunifont_space)))-eo;
     
-    if(*stx==0) {
-    }
+    if(sy > ey) {*ety=*ety-1; *etx=*etx-1;} else
+    if(sy < ey) {*ety=*ety-1; }
 
-    if(*stx==1) {
-    }
+    if(*sty == *ety){
+      if(*etx < *stx) *etx = *etx - 1;
+      if(*etx > *stx) *etx = *etx + 1;
+    } 
 }
 
 void get_text_region(int text_start_x,int text_start_y,int text_end_x,int text_end_y,uint16_t **itext,int *ilen) {
