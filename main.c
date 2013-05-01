@@ -813,7 +813,7 @@ uint8_t *paste_text() {
   return osx_paste();
   #endif
 
-/*
+  #ifdef LINUX_BUILD
   uint8_t *paste_data = malloc(sizeof(uint8_t)*10240);
 
   FILE *r1 = popen("xclip -o","r");
@@ -831,7 +831,7 @@ uint8_t *paste_text() {
   }
 
   return paste_data;
-*/
+  #endif
 }
 
 void copy_text(uint16_t *itext,int len) {
@@ -857,7 +857,8 @@ void copy_text(uint16_t *itext,int len) {
   #ifdef OSX_BUILD
   osx_copy(text);
   #endif
-/*
+
+  #ifdef LINUX_BUILD
   FILE *w1 = popen("xclip -selection c","w");
   if(w1!=NULL) {
     fprintf(w1,"%s",text);
@@ -868,7 +869,7 @@ void copy_text(uint16_t *itext,int len) {
   if(w2==NULL) return;
   fprintf(w2,"%s",text);
   pclose(w2);
-*/
+  #endif
  
   // execute these two commands on Linux/XWindows by default
   //echo "test" | xclip -selection c
