@@ -7,5 +7,5 @@ Name: libpng
 Description: Loads and saves PNG files
 Version: 1.5.13
 Libs: -L${libdir} -lpng15
-Libs.private: -lz 
+Libs.private: -lm -lz -lm 
 Cflags: -I${includedir}

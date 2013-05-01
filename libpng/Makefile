@@ -199,11 +199,11 @@ AWK = gawk
 CC = gcc
 CCAS = gcc
 CCASDEPMODE = depmode=gcc3
-CCASFLAGS = -g -O2
+CCASFLAGS = -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2
+CFLAGS = -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security
 CPP = gcc -E
-CPPFLAGS = 
+CPPFLAGS = -D_FORTIFY_SOURCE=2
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -230,7 +230,7 @@ INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LD = /usr/bin/ld -m elf_x86_64
-LDFLAGS = 
+LDFLAGS = -Wl,-Bsymbolic-functions -Wl,-z,relro
 LIBOBJS = 
 LIBPNG_DEFINES = -DPNG_CONFIGURE_LIBPNG
 LIBS = -lm -lz -lm 

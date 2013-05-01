@@ -27,17 +27,11 @@ uname -v = #39-Ubuntu SMP Mon May 21 16:52:17 UTC 2012
 /usr/bin/oslevel       = unknown
 /bin/universe          = unknown
 
-PATH: /home/new/perl5/bin
-PATH: /usr/lib/lightdm/lightdm
-PATH: /usr/local/sbin
-PATH: /usr/local/bin
 PATH: /usr/sbin
 PATH: /usr/bin
 PATH: /sbin
 PATH: /bin
-PATH: /usr/games
-PATH: /home/new/utils
-PATH: /home/new/utils/arm/bin
+PATH: /usr/bin/X11
 
 
 ## ----------- ##
@@ -88,35 +82,35 @@ gcc: fatal error: no input files
 compilation terminated.
 configure:3148: $? = 4
 configure:3168: checking whether the C compiler works
-configure:3190: gcc    conftest.c  >&5
+configure:3190: gcc -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 -Wl,-Bsymbolic-functions -Wl,-z,relro conftest.c  >&5
 configure:3194: $? = 0
 configure:3242: result: yes
 configure:3245: checking for C compiler default output file name
 configure:3247: result: a.out
 configure:3253: checking for suffix of executables
-configure:3260: gcc -o conftest    conftest.c  >&5
+configure:3260: gcc -o conftest -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 -Wl,-Bsymbolic-functions -Wl,-z,relro conftest.c  >&5
 configure:3264: $? = 0
 configure:3286: result: 
 configure:3308: checking whether we are cross compiling
-configure:3316: gcc -o conftest    conftest.c  >&5
+configure:3316: gcc -o conftest -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 -Wl,-Bsymbolic-functions -Wl,-z,relro conftest.c  >&5
 configure:3320: $? = 0
 configure:3327: ./conftest
 configure:3331: $? = 0
 configure:3346: result: no
 configure:3351: checking for suffix of object files
-configure:3373: gcc -c   conftest.c >&5
+configure:3373: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:3377: $? = 0
 configure:3398: result: o
 configure:3402: checking whether we are using the GNU C compiler
-configure:3421: gcc -c   conftest.c >&5
+configure:3421: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:3421: $? = 0
 configure:3430: result: yes
 configure:3439: checking whether gcc accepts -g
-configure:3459: gcc -c -g  conftest.c >&5
+configure:3459: gcc -c -g -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:3459: $? = 0
 configure:3500: result: yes
 configure:3517: checking for gcc option to accept ISO C89
-configure:3581: gcc  -c -g -O2  conftest.c >&5
+configure:3581: gcc  -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:3581: $? = 0
 configure:3594: result: none needed
 configure:3625: checking for style of include used by make
@@ -144,9 +138,9 @@ configure:4437: result: /usr/bin/ld
 configure:4444: checking if the linker (/usr/bin/ld) is GNU ld
 configure:4459: result: yes
 configure:4476: checking how to run the C preprocessor
-configure:4507: gcc -E  conftest.c
+configure:4507: gcc -E -D_FORTIFY_SOURCE=2 conftest.c
 configure:4507: $? = 0
-configure:4521: gcc -E  conftest.c
+configure:4521: gcc -E -D_FORTIFY_SOURCE=2 conftest.c
 conftest.c:11:28: fatal error: ac_nonexistent.h: No such file or directory
 compilation terminated.
 configure:4521: $? = 1
@@ -163,9 +157,9 @@ configure: failed program was:
 | /* end confdefs.h.  */
 | #include <ac_nonexistent.h>
 configure:4546: result: gcc -E
-configure:4566: gcc -E  conftest.c
+configure:4566: gcc -E -D_FORTIFY_SOURCE=2 conftest.c
 configure:4566: $? = 0
-configure:4580: gcc -E  conftest.c
+configure:4580: gcc -E -D_FORTIFY_SOURCE=2 conftest.c
 conftest.c:11:28: fatal error: ac_nonexistent.h: No such file or directory
 compilation terminated.
 configure:4580: $? = 1
@@ -190,7 +184,7 @@ configure:4826: result: yes
 configure:4877: checking for BSD- or MS-compatible name lister (nm)
 configure:4926: result: /usr/bin/nm -B
 configure:5056: checking the name lister (/usr/bin/nm -B) interface
-configure:5063: gcc -c -g -O2  conftest.c >&5
+configure:5063: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:5066: /usr/bin/nm -B "conftest.o"
 configure:5069: output
 0000000000000000 B some_variable
@@ -220,7 +214,7 @@ configure:5925: checking for ar
 configure:5941: found /usr/bin/ar
 configure:5952: result: ar
 configure:5989: checking for archiver @FILE support
-configure:6006: gcc -c -g -O2  conftest.c >&5
+configure:6006: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:6006: $? = 0
 configure:6009: ar cru libconftest.a @conftest.lst >&5
 configure:6012: $? = 0
@@ -235,16 +229,16 @@ configure:6189: checking for ranlib
 configure:6205: found /usr/bin/ranlib
 configure:6216: result: ranlib
 configure:6318: checking command to parse /usr/bin/nm -B output from gcc object
-configure:6438: gcc -c -g -O2  conftest.c >&5
+configure:6438: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:6441: $? = 0
 configure:6445: /usr/bin/nm -B conftest.o \| sed -n -e 's/^.*[ ]\([ABCDGIRSTW][ABCDGIRSTW]*\)[ ][ ]*\([_A-Za-z][_A-Za-z0-9]*\)$/\1 \2 \2/p' | sed '/ __gnu_lto/d' \> conftest.nm
 configure:6448: $? = 0
-configure:6514: gcc -o conftest -g -O2   conftest.c conftstm.o >&5
+configure:6514: gcc -o conftest -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 -Wl,-Bsymbolic-functions -Wl,-z,relro conftest.c conftstm.o >&5
 configure:6517: $? = 0
 configure:6555: result: ok
 configure:6592: checking for sysroot
 configure:6622: result: no
-configure:6699: gcc -c -g -O2  conftest.c >&5
+configure:6699: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:6702: $? = 0
 configure:6878: checking for mt
 configure:6894: found /bin/mt
@@ -253,70 +247,70 @@ configure:6928: checking if mt is a manifest tool
 configure:6934: mt '-?'
 configure:6942: result: no
 configure:7580: checking for ANSI C header files
-configure:7600: gcc -c -g -O2  conftest.c >&5
+configure:7600: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:7600: $? = 0
-configure:7673: gcc -o conftest -g -O2   conftest.c  >&5
+configure:7673: gcc -o conftest -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 -Wl,-Bsymbolic-functions -Wl,-z,relro conftest.c  >&5
 configure:7673: $? = 0
 configure:7673: ./conftest
 configure:7673: $? = 0
 configure:7684: result: yes
 configure:7697: checking for sys/types.h
-configure:7697: gcc -c -g -O2  conftest.c >&5
+configure:7697: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:7697: $? = 0
 configure:7697: result: yes
 configure:7697: checking for sys/stat.h
-configure:7697: gcc -c -g -O2  conftest.c >&5
+configure:7697: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:7697: $? = 0
 configure:7697: result: yes
 configure:7697: checking for stdlib.h
-configure:7697: gcc -c -g -O2  conftest.c >&5
+configure:7697: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:7697: $? = 0
 configure:7697: result: yes
 configure:7697: checking for string.h
-configure:7697: gcc -c -g -O2  conftest.c >&5
+configure:7697: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:7697: $? = 0
 configure:7697: result: yes
 configure:7697: checking for memory.h
-configure:7697: gcc -c -g -O2  conftest.c >&5
+configure:7697: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:7697: $? = 0
 configure:7697: result: yes
 configure:7697: checking for strings.h
-configure:7697: gcc -c -g -O2  conftest.c >&5
+configure:7697: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:7697: $? = 0
 configure:7697: result: yes
 configure:7697: checking for inttypes.h
-configure:7697: gcc -c -g -O2  conftest.c >&5
+configure:7697: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:7697: $? = 0
 configure:7697: result: yes
 configure:7697: checking for stdint.h
-configure:7697: gcc -c -g -O2  conftest.c >&5
+configure:7697: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:7697: $? = 0
 configure:7697: result: yes
 configure:7697: checking for unistd.h
-configure:7697: gcc -c -g -O2  conftest.c >&5
+configure:7697: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:7697: $? = 0
 configure:7697: result: yes
 configure:7711: checking for dlfcn.h
-configure:7711: gcc -c -g -O2  conftest.c >&5
+configure:7711: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:7711: $? = 0
 configure:7711: result: yes
 configure:8215: checking for objdir
 configure:8230: result: .libs
 configure:8497: checking if gcc supports -fno-rtti -fno-exceptions
-configure:8515: gcc -c -g -O2  -fno-rtti -fno-exceptions conftest.c >&5
+configure:8515: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 -fno-rtti -fno-exceptions conftest.c >&5
 cc1: warning: command line option '-fno-rtti' is valid for C++/ObjC++ but not for C [enabled by default]
 configure:8519: $? = 0
 configure:8532: result: no
 configure:8859: checking for gcc option to produce PIC
 configure:8866: result: -fPIC -DPIC
 configure:8874: checking if gcc PIC flag -fPIC -DPIC works
-configure:8892: gcc -c -g -O2  -fPIC -DPIC -DPIC conftest.c >&5
+configure:8892: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 -fPIC -DPIC -DPIC conftest.c >&5
 configure:8896: $? = 0
 configure:8909: result: yes
 configure:8938: checking if gcc static flag -static works
 configure:8966: result: yes
 configure:8981: checking if gcc supports -c -o file.o
-configure:9002: gcc -c -g -O2  -o out/conftest2.o conftest.c >&5
+configure:9002: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 -o out/conftest2.o conftest.c >&5
 configure:9006: $? = 0
 configure:9028: result: yes
 configure:9036: checking if gcc supports -c -o file.o
@@ -324,13 +318,13 @@ configure:9083: result: yes
 configure:9116: checking whether the gcc linker (/usr/bin/ld -m elf_x86_64) supports shared libraries
 configure:10269: result: yes
 configure:10306: checking whether -lc should be explicitly linked in
-configure:10314: gcc -c -g -O2  conftest.c >&5
+configure:10314: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:10317: $? = 0
 configure:10332: gcc -shared  -fPIC -DPIC conftest.o  -v -Wl,-soname -Wl,conftest -o conftest 2\>\&1 \| /bin/grep  -lc  \>/dev/null 2\>\&1
 configure:10335: $? = 0
 configure:10349: result: no
 configure:10509: checking dynamic linker characteristics
-configure:11020: gcc -o conftest -g -O2   -Wl,-rpath -Wl,/foo conftest.c  >&5
+configure:11020: gcc -o conftest -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 -Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-rpath -Wl,/foo conftest.c  >&5
 configure:11020: $? = 0
 configure:11242: result: GNU/Linux ld.so
 configure:11349: checking how to hardcode library paths into programs
@@ -344,17 +338,17 @@ configure:11980: result: yes
 configure:11983: checking whether to build static libraries
 configure:11987: result: yes
 configure:12029: checking for a C preprocessor that does not parse its input
-configure:12035: gcc -E  conftest.c
+configure:12035: gcc -E -D_FORTIFY_SOURCE=2 conftest.c
 configure:12035: $? = 0
 configure:12055: result: gcc -E
 configure:12066: checking for ANSI C header files
 configure:12170: result: yes
 configure:12181: checking malloc.h usability
-configure:12181: gcc -c -g -O2  conftest.c >&5
+configure:12181: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:12181: $? = 0
 configure:12181: result: yes
 configure:12181: checking malloc.h presence
-configure:12181: gcc -E  conftest.c
+configure:12181: gcc -E -D_FORTIFY_SOURCE=2 conftest.c
 configure:12181: $? = 0
 configure:12181: result: yes
 configure:12181: checking for malloc.h
@@ -366,13 +360,13 @@ configure:12181: result: yes
 configure:12181: checking for strings.h
 configure:12181: result: yes
 configure:12193: checking for an ANSI C-conforming const
-configure:12258: gcc -c -g -O2  conftest.c >&5
+configure:12258: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:12258: $? = 0
 configure:12265: result: yes
 configure:12273: checking for size_t
-configure:12273: gcc -c -g -O2  conftest.c >&5
+configure:12273: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:12273: $? = 0
-configure:12273: gcc -c -g -O2  conftest.c >&5
+configure:12273: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 conftest.c: In function 'main':
 conftest.c:64:21: error: expected expression before ')' token
 configure:12273: $? = 1
@@ -447,15 +441,15 @@ configure: failed program was:
 | }
 configure:12273: result: yes
 configure:12284: checking whether struct tm is in sys/time.h or time.h
-configure:12304: gcc -c -g -O2  conftest.c >&5
+configure:12304: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:12304: $? = 0
 configure:12311: result: time.h
 configure:12319: checking for C/C++ restrict keyword
-configure:12344: gcc -c -g -O2  conftest.c >&5
+configure:12344: gcc -c -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 conftest.c >&5
 configure:12344: $? = 0
 configure:12352: result: __restrict
 configure:12367: checking for working strtod
-configure:12408: gcc -o conftest -g -O2   conftest.c  >&5
+configure:12408: gcc -o conftest -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 -Wl,-Bsymbolic-functions -Wl,-z,relro conftest.c  >&5
 conftest.c: In function 'main':
 conftest.c:84:12: warning: ignoring return value of 'strtod', declared with attribute warn_unused_result [-Wunused-result]
 configure:12408: $? = 0
@@ -463,14 +457,14 @@ configure:12408: ./conftest
 configure:12408: $? = 0
 configure:12418: result: yes
 configure:12482: checking for memset
-configure:12482: gcc -o conftest -g -O2   conftest.c  >&5
+configure:12482: gcc -o conftest -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 -Wl,-Bsymbolic-functions -Wl,-z,relro conftest.c  >&5
 conftest.c:52:6: warning: conflicting types for built-in function 'memset' [enabled by default]
 configure:12482: $? = 0
 configure:12482: result: yes
 configure:12495: checking for pow
-configure:12495: gcc -o conftest -g -O2   conftest.c  >&5
+configure:12495: gcc -o conftest -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 -Wl,-Bsymbolic-functions -Wl,-z,relro conftest.c  >&5
 conftest.c:53:6: warning: conflicting types for built-in function 'pow' [enabled by default]
-/tmp/cc97pLYe.o: In function `main':
+/tmp/cc33iJtq.o: In function `main':
 /home/new/gitcode/hackterm/libpng/conftest.c:64: undefined reference to `pow'
 collect2: ld returned 1 exit status
 configure:12495: $? = 1
@@ -544,20 +538,20 @@ configure: failed program was:
 | }
 configure:12495: result: no
 configure:12502: checking for pow in -lm
-configure:12527: gcc -o conftest -g -O2   conftest.c -lm   >&5
+configure:12527: gcc -o conftest -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 -Wl,-Bsymbolic-functions -Wl,-z,relro conftest.c -lm   >&5
 conftest.c:37:6: warning: conflicting types for built-in function 'pow' [enabled by default]
 configure:12527: $? = 0
 configure:12536: result: yes
 configure:12560: checking for zlibVersion in -lz
-configure:12585: gcc -o conftest -g -O2   conftest.c -lz  -lm  >&5
+configure:12585: gcc -o conftest -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 -Wl,-Bsymbolic-functions -Wl,-z,relro conftest.c -lz  -lm  >&5
 configure:12585: $? = 0
 configure:12594: result: yes
 configure:12659: checking for feenableexcept in -lm
-configure:12684: gcc -o conftest -g -O2   conftest.c -lm  -lz -lm  >&5
+configure:12684: gcc -o conftest -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 -Wl,-Bsymbolic-functions -Wl,-z,relro conftest.c -lm  -lz -lm  >&5
 configure:12684: $? = 0
 configure:12693: result: yes
 configure:12706: checking for feenableexcept
-configure:12706: gcc -o conftest -g -O2   conftest.c -lm -lz -lm  >&5
+configure:12706: gcc -o conftest -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -D_FORTIFY_SOURCE=2 -Wl,-Bsymbolic-functions -Wl,-z,relro conftest.c -lm -lz -lm  >&5
 configure:12706: $? = 0
 configure:12706: result: yes
 configure:12720: checking if using Solaris linker
@@ -606,14 +600,14 @@ ac_cv_env_CCAS_set=
 ac_cv_env_CCAS_value=
 ac_cv_env_CC_set=
 ac_cv_env_CC_value=
-ac_cv_env_CFLAGS_set=
-ac_cv_env_CFLAGS_value=
-ac_cv_env_CPPFLAGS_set=
-ac_cv_env_CPPFLAGS_value=
+ac_cv_env_CFLAGS_set=set
+ac_cv_env_CFLAGS_value='-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security'
+ac_cv_env_CPPFLAGS_set=set
+ac_cv_env_CPPFLAGS_value=-D_FORTIFY_SOURCE=2
 ac_cv_env_CPP_set=
 ac_cv_env_CPP_value=
-ac_cv_env_LDFLAGS_set=
-ac_cv_env_LDFLAGS_value=
+ac_cv_env_LDFLAGS_set=set
+ac_cv_env_LDFLAGS_value='-Wl,-Bsymbolic-functions -Wl,-z,relro'
 ac_cv_env_LIBS_set=
 ac_cv_env_LIBS_value=
 ac_cv_env_build_alias_set=
@@ -711,11 +705,11 @@ AWK='gawk'
 CC='gcc'
 CCAS='gcc'
 CCASDEPMODE='depmode=gcc3'
-CCASFLAGS='-g -O2'
+CCASFLAGS='-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security'
 CCDEPMODE='depmode=gcc3'
-CFLAGS='-g -O2'
+CFLAGS='-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security'
 CPP='gcc -E'
-CPPFLAGS=''
+CPPFLAGS='-D_FORTIFY_SOURCE=2'
 CYGPATH_W='echo'
 DEFS='-DHAVE_CONFIG_H'
 DEPDIR='.deps'
@@ -739,7 +733,7 @@ INSTALL_PROGRAM='${INSTALL}'
 INSTALL_SCRIPT='${INSTALL}'
 INSTALL_STRIP_PROGRAM='$(install_sh) -c -s'
 LD='/usr/bin/ld -m elf_x86_64'
-LDFLAGS=''
+LDFLAGS='-Wl,-Bsymbolic-functions -Wl,-z,relro'
 LIBOBJS=''
 LIBPNG_DEFINES='-DPNG_CONFIGURE_LIBPNG'
 LIBS='-lm -lz -lm '

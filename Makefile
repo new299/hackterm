@@ -18,13 +18,14 @@ LIBSDLC = ./libsdl
 OURC = main.c base64.c inlinedata.c regis.c nunifont.c nsdl.c ngui.c ssh.c local.c ngui_info_prompt.c ngui_textlabel.c ngui_textbox.c ngui_button.c
 
 hterm: main.c nunifont.c nunifont.h *.c *.h
+	#You'll need to uncomment this for a new build.
 	#cd libsdl ;./configure
 	#make -C ./libsdl
-	#cd libpng ;./configure
-	#make -C ./libpng
+	cd libpng ;./configure
+	make -C ./libpng
 	find . -name *.dylib -exec rm {} \;
 	find . -name *.so* -exec rm {} \;
-	find ./libsdl -name SDL_config.h -exec rm {} \;
+	#don't need this: find ./libsdl -name SDL_config.h -exec rm {} \;
 	gcc -O3 -std=gnu99 $(LIBVTERMC) $(OURC) $(LIBSSH2C) $(OPTS) $(EXTRAC) ./utf8proc/utf8proc.c -o hterm -I./libpng -I./utf8proc -I./libvterm/include -I./libsdl/include -L./libsdl/build -L./libpng/.libs -L./libsdl/build/.libs -lpng15 -lSDL2 -lutil -lcrypto -I./libssh2/include -lz -lm
 	
 
