@@ -19,8 +19,8 @@ OURC = main.c base64.c inlinedata.c regis.c nunifont.c nsdl.c ngui.c ssh.c local
 
 hterm: main.c nunifont.c nunifont.h *.c *.h
 	#You'll need to uncomment this for a new build.
-	#cd libsdl ;./configure
-	#make -C ./libsdl
+	cd libsdl ;./configure
+	make -C ./libsdl
 	cd libpng ;./configure
 	make -C ./libpng
 	find . -name *.dylib -exec rm {} \;
