@@ -1361,29 +1361,7 @@ void receive_ssh_info(char *o1,char *o2,char *o3) {
 }
 
 int main(int argc, char **argv) {
-<<<<<<< HEAD
-
-  //nunifont_init();
-  nunifont_load_staticmap(__fontmap_static,__widthmap_static,__fontmap_static_len,__widthmap_static_len);
-
-  regis_mutex  = SDL_CreateMutex();
-  screen_mutex = SDL_CreateMutex();
-  vterm_mutex  = SDL_CreateMutex();
-  quit_mutex   = SDL_CreateMutex();
-  redraw_sem   = SDL_CreateSemaphore(1);
-  inline_data_mutex = SDL_CreateMutex();
-  cond_quit = SDL_CreateCond();
-
-  int connection_type = CONNECTION_LOCAL; // replace with commandline lookup
-  if(argc > 1) {
-    if(strcmp(argv[1],"ssh") == 0) {
-      connection_type = CONNECTION_SSH; // replace with commandline lookup
-    }
-  }
-  
-=======
     
->>>>>>> iphone
   // iPhone version only supports ssh connections.
   #ifdef IOS_BUILD
     connection_type = CONNECTION_SSH;
