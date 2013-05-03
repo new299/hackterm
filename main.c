@@ -785,7 +785,9 @@ void sdl_render_thread() {
         virtual_buttons_reposition();
       } else {
         virtual_buttons_reposition();
+        #ifndef ITUNES_BUILD
         virtual_buttons_disable();
+        #endif
       }
       #endif
 
@@ -1121,7 +1123,9 @@ void sdl_read_thread(SDL_Event *event) {
         virtual_buttons_reposition();
       } else {
         virtual_buttons_reposition();
+        #ifndef ITUNES_BUILD
         virtual_buttons_disable();
+        #endif
       }
       #endif
       redraw_required();
@@ -1145,7 +1149,9 @@ void sdl_read_thread(SDL_Event *event) {
       virtual_buttons_reposition();
     } else {
       virtual_buttons_reposition();
+      #ifndef ITUNES_BUILD
       virtual_buttons_disable();
+      #endif
     }
     #endif
   }

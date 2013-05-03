@@ -148,4 +148,5 @@ void virtual_buttons_reposition() {
     ngui_move_button("Iclose",dwidth-(doublewidth*6*4),dheight-(nunifont_height*6*3));
   }
   ngui_move_button("Ikbshow",display_width_abs-(doublewidth*7),display_height_abs-(5*nunifont_height));
+  ngui_move_button("Ikbshow",-1000,-1000);
 }

@@ -24,6 +24,7 @@ int modset_rcmd  = 0;
 #define MODCODE1_LCMD  1
 #define MODCODE2_RCMD  1
 
+#ifndef ITUNES_BUILD
 bool any_modkey() {
     if(modset_ralt  == 1) return true;
     if(modset_lctrl == 1) return true;
@@ -49,6 +50,7 @@ void check_code(int keymod,int keymask,int *key) {
         }
     }
 }
+
 
 - (void)sendEvent:(UIEvent *)event {
 
@@ -132,6 +134,7 @@ void check_code(int keymod,int keymask,int *key) {
         }
     }
 }
+#endif
 
 - (BOOL)sendAction:(SEL)action to:(id)target from:(id)sender forEvent:(UIEvent *)event {
     return [super sendAction:action to:target from:sender forEvent:event];

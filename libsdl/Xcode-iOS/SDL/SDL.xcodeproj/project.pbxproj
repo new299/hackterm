@@ -1427,6 +1427,10 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				HEADER_SEARCH_PATHS = /Users/new/gitcode/hackterm/iphone;
+				OTHER_CFLAGS = (
+					"-DIOS_BUILD",
+					"-DITUNES_BUILD",
+				);
 				PRODUCT_NAME = SDL2;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -1441,6 +1445,10 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				HEADER_SEARCH_PATHS = /Users/new/gitcode/hackterm/iphone;
+				OTHER_CFLAGS = (
+					"-DIOS_BUILD",
+					"-DITUNES_BUILD",
+				);
 				PRODUCT_NAME = SDL2;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";

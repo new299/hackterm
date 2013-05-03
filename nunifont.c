@@ -241,7 +241,9 @@ void draw_character(void *screen,int x,int y,int w,uint32_t cin,uint32_t bg,uint
       HASH_ADD( hh, display_cache, c, char_render_t_keylen, mchr);
     }
 
-    SDL_Rect dstRect = { x, y, nunifont_width, nunifont_height };
+    int mw = nunifont_width;
+    if(w==16) mw = nunifont_width*2;
+    SDL_Rect dstRect = { x, y, mw, nunifont_height };
     SDL_RenderCopy(screen, mchr->texture, NULL, &dstRect);
 }
 
