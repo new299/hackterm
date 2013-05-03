@@ -1,19 +1,35 @@
 #include "local.h"
 
 #ifdef LOCAL_ENABLE
-#include <unistd.h>
-#include <pty.h>
+
 #include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+
+#ifdef LINUX_BUILD
+#include <pty.h>
+#endif
+
+#ifdef OSX_BUILD
+#include <util.h>
+#endif 
+
 #endif
 
 int pid;
-int flag;
+int flags;
 int fd;
 
 int local_open(char *a,char *b,char *c) {
 #ifdef LOCAL_ENABLE
   pid = forkpty(&fd,0,0,0);
-  flag = fcntl(fd,F_GETFL,0);
+
+  if(pid == -1) {
+    printf("forkpty failed\n");
+  }
+
+  flags = fcntl(fd,F_GETFL,0);
+  fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 
   char *termset = "TERM=xterm";
   putenv(termset);
@@ -21,11 +37,13 @@ int local_open(char *a,char *b,char *c) {
   printf("fd: %d",fd);
   if(pid == 0) {
     char args[3];
-    args[0] = "/bin/bash";
+    char *shell = getenv("SHELL");
+    args[0] = shell;
     args[1] =""; 
     args[2] = 0;
 
     execl("/bin/bash","bash",NULL);
+    printf("forked\n");
     return 1;
   }
 
@@ -43,11 +61,16 @@ int local_write(char *buffer,int len) {
 
 int local_read(char *buffer,int len) {
 #ifdef LOCAL_ENABLE
-  return read(fd,buffer,len);
+  int res = read(fd,buffer,len);
+
+  if((res == -1) && ((errno == EAGAIN) || (errno == EWOULDBLOCK))) {
+    return 0;
+  }
+  return res;
 #endif
 }
 
-int local_resize(int rows,int cols) {
+int local_resize(int cols,int rows) {
 #ifdef LOCAL_ENABLE
   struct winsize size = { rows, cols, 0, 0 };
   ioctl(fd, TIOCSWINSZ, &size);

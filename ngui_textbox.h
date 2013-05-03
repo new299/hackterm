@@ -2,7 +2,7 @@
 #define NGUI_BUTTON
 
 #include <stdbool.h>
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 int ngui_add_textbox(int x,int y,char *text,bool passwordbox,void *callback);
 

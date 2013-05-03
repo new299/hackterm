@@ -3,7 +3,7 @@
 #include "ngui_textbox.h"
 #include "ngui_button.h"
 #include <string.h>
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include "nunifont.h"
 #include <stdbool.h>
 
@@ -93,6 +93,7 @@ int  ngui_add_info_prompt(int x,int y,
   ngui_info_prompts[ngui_info_prompts_size].p3_opt = p3_opt;
   ngui_info_prompts[ngui_info_prompts_size].callback = callback;
   
+/*
   int l1 = ngui_add_textlabel((ngui_screen->w/2)-(strlen(p1)*8),
                               (ngui_screen->h/2)-(strlen(p1)*8),
                               p1);
@@ -128,7 +129,7 @@ int  ngui_add_info_prompt(int x,int y,
   ngui_info_prompts[ngui_info_prompts_size].textlabel1   = l1;
   ngui_info_prompts[ngui_info_prompts_size].textlabel2   = l2;
   ngui_info_prompts[ngui_info_prompts_size].textlabel3   = l3;
-
+*/
   ngui_info_prompts_size++;
   return ngui_info_prompts_size-1;
 }

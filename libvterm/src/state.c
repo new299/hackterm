@@ -22,7 +22,7 @@ static void putglyph(VTermState *state, const uint32_t chars[], int width, VTerm
     if((*state->callbacks->putglyph)(chars, width, pos, state->cbdata))
       return;
 
-  fprintf(stderr, "libvterm: Unhandled putglyph U+%04x at (%d,%d)\n", chars[0], pos.col, pos.row);
+  //fprintf(stderr, "libvterm: Unhandled putglyph U+%04x at (%d,%d)\n", chars[0], pos.col, pos.row);
 }
 
 static void updatecursor(VTermState *state, VTermPos *oldpos, int cancel_phantom)
@@ -40,7 +40,6 @@ static void updatecursor(VTermState *state, VTermPos *oldpos, int cancel_phantom
 
 static void erase(VTermState *state, VTermRect rect)
 {
-  printf("errase called\n");
   if(state->callbacks && state->callbacks->erase)
     (*state->callbacks->erase)(rect, state->cbdata);
   
@@ -155,10 +154,6 @@ static int on_text(const char bytes[], size_t len, void *user)
   for(int n=0;n<len;n++) codepoints[n]=0;//for some reason it's possible for codepoints to be used with being initialised, discovered during fuzz testing+valgrind. This at least makes it deterministic.
   int npoints = 0;
   size_t eaten = 0;
-
-  if(state->vt->is_utf8) {
-    printf("generally ok\n");
-  }
 
   VTermEncodingInstance *encoding =
     !(bytes[eaten] & 0x80) ? &state->encoding[state->gl_set] :
@@ -296,8 +291,6 @@ static int on_control(unsigned char control, void *user)
   VTermState *state = user;
 
   VTermPos oldpos = state->pos;
-
-  printf("processing control character: %u\n",control);
 
   switch(control) {
   case 0x07: // BEL - ECMA-48 8.3.3

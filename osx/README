@@ -1,0 +1,1 @@
+hterm.app is a shell, in order to build a working bundle copy the hterm binary built in the above directory into hterm.app/Contents/MacOS.

@@ -1,13 +1,13 @@
 #include <string.h>
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include "nunifont.h"
 
-SDL_Surface *ngui_screen;
+SDL_Surface *ngui_renderer;
   
 void (*ngui_redraw_required_callback)();
 
-void ngui_set_screen(SDL_Surface *s,void *redraw_callback) {
-  ngui_screen = s;
+void ngui_set_renderer(struct SDL_Renderer *s,void *redraw_callback) {
+  ngui_renderer = s;
   ngui_redraw_required_callback = redraw_callback;
 }
 

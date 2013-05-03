@@ -1,5 +1,5 @@
 #include <string.h>
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include "nunifont.h"
 #include "ngui.h"
 #include <stdbool.h>
@@ -23,7 +23,7 @@ void ngui_render_textlabel(ngui_textlabel_data *d) {
   uint16_t text[100];
   for(int n=0;n<100;n++) text[n] = d->text[n];
 
-  draw_unitext(ngui_screen,
+  draw_unitext_renderer(ngui_renderer,
               d->x,
               d->y,
               text,

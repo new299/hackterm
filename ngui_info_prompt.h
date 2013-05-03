@@ -1,7 +1,7 @@
 #ifndef NGUI_INFO_PROMPT
 #define NGUI_INFO_PROMPT
 
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 int  ngui_add_info_prompt(int x,int y,
                           const char *p1    ,const char *p2    ,const char *p3,

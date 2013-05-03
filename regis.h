@@ -4,8 +4,7 @@
 #define _POSIX_C_SOURCE 199309L
 #define _BSD_SOURCE
 
-#include <SDL/SDL.h>       
-#include <SDL/SDL_thread.h>
+#include <SDL.h>
 #include <stdint.h>   
 #include <stdio.h>    
 #include <stdbool.h>
@@ -20,6 +19,7 @@ char *regis_process_cmd_text(char *cmd);
 char *regis_process_cmd_w(char *cmd);
 char *regis_process_cmd_position(char *cmd);
 void regis_init(int width,int height);
+void regis_resize(int width,int height);
 char *regis_process_cmd_vector(char *cmd);
 char *regis_process_command(char *cmd);
 void regis_processor(const char *cmd,int cmdlen);
