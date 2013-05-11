@@ -37,7 +37,8 @@ clean:
 	rm -rf hterm
 
 install:
-	cp ./hterm $(DESTDIR)/bin
+	@mkdir -p $(DESTDIR)$(PREFIX)/bin/
+	cp ./hterm $(DESTDIR)$(PREFIX)/bin/
 
 deb: 
 	tar czvf ../hterm_0.0.1.orig.tar.gz ../hackterm
