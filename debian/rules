@@ -2,6 +2,9 @@
 %:
 	dh $@
 
+override_dh_auto_install:
+	dh_auto_install -- PREFIX=/usr
+
 override_dh_install:
 	sed -i "/dependency_libs/ s/'.*'/''/" `find . -name '*.la'`
 	dh_install
