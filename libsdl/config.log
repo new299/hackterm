@@ -28,6 +28,7 @@ uname -v = #39-Ubuntu SMP Mon May 21 16:52:17 UTC 2012
 /bin/universe          = unknown
 
 PATH: /home/new/perl5/bin
+PATH: /opt/Xilinx/14.6/ISE_DS/ISE/bin/lin64
 PATH: /usr/lib/lightdm/lightdm
 PATH: /usr/local/sbin
 PATH: /usr/local/bin
@@ -135,7 +136,7 @@ configure:4424: result: BSD nm
 configure:4427: checking whether ln -s works
 configure:4431: result: yes
 configure:4439: checking the maximum length of command line arguments
-configure:4569: result: 1572864
+configure:4569: result: 3458764513820540925
 configure:4586: checking whether the shell understands some XSI constructs
 configure:4596: result: yes
 configure:4600: checking whether the shell understands "+="
@@ -785,7 +786,7 @@ configure:16704: $? = 0
 configure:16704: result: yes
 configure:16704: checking for strlcpy
 configure:16704: gcc -o conftest -g -O2 -I./include   -I./include    conftest.c  >&5
-/tmp/ccAe7NCL.o: In function `main':
+/tmp/ccCjM3f6.o: In function `main':
 /home/new/gitcode/hackterm/libsdl/conftest.c:93: undefined reference to `strlcpy'
 collect2: ld returned 1 exit status
 configure:16704: $? = 1
@@ -889,7 +890,7 @@ configure: failed program was:
 configure:16704: result: no
 configure:16704: checking for strlcat
 configure:16704: gcc -o conftest -g -O2 -I./include   -I./include    conftest.c  >&5
-/tmp/cc0BufpS.o: In function `main':
+/tmp/ccfkGhna.o: In function `main':
 /home/new/gitcode/hackterm/libsdl/conftest.c:93: undefined reference to `strlcat'
 collect2: ld returned 1 exit status
 configure:16704: $? = 1
@@ -998,7 +999,7 @@ configure:16704: $? = 0
 configure:16704: result: yes
 configure:16704: checking for _strrev
 configure:16704: gcc -o conftest -g -O2 -I./include   -I./include    conftest.c  >&5
-/tmp/cc3nkrZ8.o: In function `main':
+/tmp/cc4QAu1n.o: In function `main':
 /home/new/gitcode/hackterm/libsdl/conftest.c:94: undefined reference to `_strrev'
 collect2: ld returned 1 exit status
 configure:16704: $? = 1
@@ -1103,7 +1104,7 @@ configure: failed program was:
 configure:16704: result: no
 configure:16704: checking for _strupr
 configure:16704: gcc -o conftest -g -O2 -I./include   -I./include    conftest.c  >&5
-/tmp/ccWvZI33.o: In function `main':
+/tmp/ccXMnYer.o: In function `main':
 /home/new/gitcode/hackterm/libsdl/conftest.c:94: undefined reference to `_strupr'
 collect2: ld returned 1 exit status
 configure:16704: $? = 1
@@ -1208,7 +1209,7 @@ configure: failed program was:
 configure:16704: result: no
 configure:16704: checking for _strlwr
 configure:16704: gcc -o conftest -g -O2 -I./include   -I./include    conftest.c  >&5
-/tmp/ccjgelzb.o: In function `main':
+/tmp/ccoSeEFz.o: In function `main':
 /home/new/gitcode/hackterm/libsdl/conftest.c:94: undefined reference to `_strlwr'
 collect2: ld returned 1 exit status
 configure:16704: $? = 1
@@ -1328,7 +1329,7 @@ configure:16704: $? = 0
 configure:16704: result: yes
 configure:16704: checking for itoa
 configure:16704: gcc -o conftest -g -O2 -I./include   -I./include    conftest.c  >&5
-/tmp/cclg2ZvC.o: In function `main':
+/tmp/ccpLzA5M.o: In function `main':
 /home/new/gitcode/hackterm/libsdl/conftest.c:97: undefined reference to `itoa'
 collect2: ld returned 1 exit status
 configure:16704: $? = 1
@@ -1436,7 +1437,7 @@ configure: failed program was:
 configure:16704: result: no
 configure:16704: checking for _ltoa
 configure:16704: gcc -o conftest -g -O2 -I./include   -I./include    conftest.c  >&5
-/tmp/ccZFuGIL.o: In function `main':
+/tmp/ccUHoy9Q.o: In function `main':
 /home/new/gitcode/hackterm/libsdl/conftest.c:97: undefined reference to `_ltoa'
 collect2: ld returned 1 exit status
 configure:16704: $? = 1
@@ -1544,7 +1545,7 @@ configure: failed program was:
 configure:16704: result: no
 configure:16704: checking for _uitoa
 configure:16704: gcc -o conftest -g -O2 -I./include   -I./include    conftest.c  >&5
-/tmp/ccov2dRS.o: In function `main':
+/tmp/ccZFt5MW.o: In function `main':
 /home/new/gitcode/hackterm/libsdl/conftest.c:97: undefined reference to `_uitoa'
 collect2: ld returned 1 exit status
 configure:16704: $? = 1
@@ -1652,7 +1653,7 @@ configure: failed program was:
 configure:16704: result: no
 configure:16704: checking for _ultoa
 configure:16704: gcc -o conftest -g -O2 -I./include   -I./include    conftest.c  >&5
-/tmp/ccD6ZzUW.o: In function `main':
+/tmp/ccbKdnD3.o: In function `main':
 /home/new/gitcode/hackterm/libsdl/conftest.c:97: undefined reference to `_ultoa'
 collect2: ld returned 1 exit status
 configure:16704: $? = 1
@@ -1768,7 +1769,7 @@ configure:16704: $? = 0
 configure:16704: result: yes
 configure:16704: checking for _i64toa
 configure:16704: gcc -o conftest -g -O2 -I./include   -I./include    conftest.c  >&5
-/tmp/ccTUDkP8.o: In function `main':
+/tmp/cc2mYuyj.o: In function `main':
 /home/new/gitcode/hackterm/libsdl/conftest.c:99: undefined reference to `_i64toa'
 collect2: ld returned 1 exit status
 configure:16704: $? = 1
@@ -1878,7 +1879,7 @@ configure: failed program was:
 configure:16704: result: no
 configure:16704: checking for _ui64toa
 configure:16704: gcc -o conftest -g -O2 -I./include   -I./include    conftest.c  >&5
-/tmp/ccE9XVzd.o: In function `main':
+/tmp/ccFDTiFo.o: In function `main':
 /home/new/gitcode/hackterm/libsdl/conftest.c:99: undefined reference to `_ui64toa'
 collect2: ld returned 1 exit status
 configure:16704: $? = 1
@@ -2014,7 +2015,7 @@ configure:16704: $? = 0
 configure:16704: result: yes
 configure:16704: checking for _stricmp
 configure:16704: gcc -o conftest -g -O2 -I./include   -I./include    conftest.c  >&5
-/tmp/ccyiMka2.o: In function `main':
+/tmp/cce2aDNM.o: In function `main':
 /home/new/gitcode/hackterm/libsdl/conftest.c:105: undefined reference to `_stricmp'
 collect2: ld returned 1 exit status
 configure:16704: $? = 1
@@ -2135,7 +2136,7 @@ configure:16704: $? = 0
 configure:16704: result: yes
 configure:16704: checking for _strnicmp
 configure:16704: gcc -o conftest -g -O2 -I./include   -I./include    conftest.c  >&5
-/tmp/ccSOZRmd.o: In function `main':
+/tmp/ccc86vqV.o: In function `main':
 /home/new/gitcode/hackterm/libsdl/conftest.c:106: undefined reference to `_strnicmp'
 collect2: ld returned 1 exit status
 configure:16704: $? = 1
@@ -2296,7 +2297,7 @@ configure:16704: $? = 0
 configure:16704: result: yes
 configure:16704: checking for sysctlbyname
 configure:16704: gcc -o conftest -g -O2 -I./include   -I./include    conftest.c  >&5
-/tmp/ccyZS9Ug.o: In function `main':
+/tmp/ccPV51ZH.o: In function `main':
 /home/new/gitcode/hackterm/libsdl/conftest.c:116: undefined reference to `sysctlbyname'
 collect2: ld returned 1 exit status
 configure:16704: $? = 1
@@ -3135,7 +3136,7 @@ configure:21423: $? = 0
 configure:21429: result: yes
 configure:21433: checking for dlopen in -lc
 configure:21458: gcc -o conftest -g -O2 -I./include   -I./include    conftest.c -lc   -lm >&5
-/tmp/cc9bV4PJ.o: In function `main':
+/tmp/ccAOCbHt.o: In function `main':
 /home/new/gitcode/hackterm/libsdl/conftest.c:115: undefined reference to `dlopen'
 collect2: ld returned 1 exit status
 configure:21458: $? = 1
@@ -6180,7 +6181,7 @@ configure:21201: $? = 0
 configure:21215: result: yes
 configure:21218: checking for pthread_set_name_np
 configure:21238: gcc -o conftest -g -O2 -I./include   -D_REENTRANT  -I./include     conftest.c  -lm -lpthread >&5
-/tmp/ccNA16gb.o: In function `main':
+/tmp/ccWMbZey.o: In function `main':
 /home/new/gitcode/hackterm/libsdl/conftest.c:147: undefined reference to `pthread_set_name_np'
 collect2: ld returned 1 exit status
 configure:21238: $? = 1
@@ -6374,6 +6375,7 @@ config.status:1295: creating sdl2-config
 config.status:1295: creating SDL2.spec
 config.status:1295: creating sdl2.pc
 config.status:1295: creating include/SDL_config.h
+config.status:1470: include/SDL_config.h is unchanged
 config.status:1484: executing libtool commands
 
 ## ---------------- ##
@@ -6590,7 +6592,7 @@ lt_cv_sys_global_symbol_pipe='sed -n -e '\''s/^.*[	 ]\([ABCDGIRSTW][ABCDGIRSTW]*
 lt_cv_sys_global_symbol_to_c_name_address='sed -n -e '\''s/^: \([^ ]*\)[ ]*$/  {\"\1\", (void *) 0},/p'\'' -e '\''s/^[ABCDGIRSTW]* \([^ ]*\) \([^ ]*\)$/  {"\2", (void *) \&\2},/p'\'''
 lt_cv_sys_global_symbol_to_c_name_address_lib_prefix='sed -n -e '\''s/^: \([^ ]*\)[ ]*$/  {\"\1\", (void *) 0},/p'\'' -e '\''s/^[ABCDGIRSTW]* \([^ ]*\) \(lib[^ ]*\)$/  {"\2", (void *) \&\2},/p'\'' -e '\''s/^[ABCDGIRSTW]* \([^ ]*\) \([^ ]*\)$/  {"lib\2", (void *) \&\2},/p'\'''
 lt_cv_sys_global_symbol_to_cdecl='sed -n -e '\''s/^T .* \(.*\)$/extern int \1();/p'\'' -e '\''s/^[ABCDGIRSTW]* .* \(.*\)$/extern char \1;/p'\'''
-lt_cv_sys_max_cmd_len=1572864
+lt_cv_sys_max_cmd_len=3458764513820540925
 lt_cv_to_host_file_cmd=func_convert_file_noop
 lt_cv_to_tool_file_cmd=func_convert_file_noop
 

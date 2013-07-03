@@ -1,5 +1,5 @@
-#ifndef NGUI_BUTTON
-#define NGUI_BUTTON
+#ifndef NGUI_TEXTBOX
+#define NGUI_TEXTBOX
 
 #include <stdbool.h>
 #include <SDL.h>

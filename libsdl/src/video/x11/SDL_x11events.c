@@ -167,10 +167,8 @@ X11_DispatchEvent(_THIS)
     /* filter events catchs XIM events and sends them to the correct
        handler */
     if (XFilterEvent(&xevent, None) == True) {
-#if 0
         printf("Filtered event type = %d display = %d window = %d\n",
                xevent.type, xevent.xany.display, xevent.xany.window);
-#endif
         return;
     }
 
@@ -191,10 +189,8 @@ X11_DispatchEvent(_THIS)
     }
 #endif
 
-#if 0
     printf("type = %d display = %d window = %d\n",
            xevent.type, xevent.xany.display, xevent.xany.window);
-#endif
 
     data = NULL;
     if (videodata && videodata->windowlist) {
@@ -366,40 +362,34 @@ X11_DispatchEvent(_THIS)
 
         /* Have we been iconified? */
     case UnmapNotify:{
-#ifdef DEBUG_XEVENTS
             printf("window %p: UnmapNotify!\n", data);
-#endif
             X11_DispatchUnmapNotify(data);
         }
         break;
 
         /* Have we been restored? */
     case MapNotify:{
-#ifdef DEBUG_XEVENTS
             printf("window %p: MapNotify!\n", data);
-#endif
             X11_DispatchMapNotify(data);
         }
         break;
 
         /* Have we been resized or moved? */
     case ConfigureNotify:{
-#ifdef DEBUG_XEVENTS
             printf("window %p: ConfigureNotify! (position: %d,%d, size: %dx%d)\n", data,
                    xevent.xconfigure.x, xevent.xconfigure.y,
                    xevent.xconfigure.width, xevent.xconfigure.height);
-#endif
-            if (xevent.xconfigure.x != data->last_xconfigure.x ||
-                xevent.xconfigure.y != data->last_xconfigure.y) {
+//            if (xevent.xconfigure.x != data->last_xconfigure.x ||
+//                xevent.xconfigure.y != data->last_xconfigure.y) {
                 SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_MOVED,
                                     xevent.xconfigure.x, xevent.xconfigure.y);
-            }
-            if (xevent.xconfigure.width != data->last_xconfigure.width ||
-                xevent.xconfigure.height != data->last_xconfigure.height) {
+//            }
+//            if (xevent.xconfigure.width != data->last_xconfigure.width ||
+//                xevent.xconfigure.height != data->last_xconfigure.height) {
                 SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_RESIZED,
                                     xevent.xconfigure.width,
                                     xevent.xconfigure.height);
-            }
+//            }
             data->last_xconfigure = xevent.xconfigure;
         }
         break;

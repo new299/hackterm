@@ -645,7 +645,6 @@ void do_sdl_init() {
         return;
     }
     
-
     #if defined(OSX_BUILD) || defined(IOS_BUILD)
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE  , 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -663,7 +662,7 @@ void do_sdl_init() {
     screen=SDL_CreateWindow(NULL, 0, 0, 0, 0,SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
     #endif
     #if defined(OSX_BUILD) || defined(LINUX_BUILD)
-    screen=SDL_CreateWindow("hterm", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600,SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    screen=SDL_CreateWindow("hterm", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1324, 750,SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     #endif
  
     #ifdef IOS_BUILD
@@ -1078,25 +1077,16 @@ void process_mouse_event(SDL_Event *event) {
   }
 }
 
-void sdl_read_thread(SDL_Event *event) {
-  ngui_receive_event(event);
-
-  process_mouse_event(event);
-    
-  // I can't remember what effect this has on the iOS build, so it's not used there for now.
-  #ifndef IOS_BUILD
-  if(event->type == SDL_QUIT) {
-    hterm_quit = true;
-    return;
-  }
-  #endif
-
+void process_resize(SDL_Event *event) {
   if(forced_recreaterenderer>1) forced_recreaterenderer--;
-    
+  
+  printf("event %u\n",event->type);
+
   if((forced_recreaterenderer==1) ||
      ((event->type == SDL_WINDOWEVENT) &&
      ((event->window.event == SDL_WINDOWEVENT_RESIZED) || (event->window.event == SDL_WINDOWEVENT_RESTORED)))
     ) {
+      printf("resize event received\n");
       forced_recreaterenderer=0;
       SDL_GetWindowSize(screen,&display_width_abs,&display_height_abs);
 
@@ -1156,6 +1146,20 @@ void sdl_read_thread(SDL_Event *event) {
     }
     #endif
   }
+}
+
+void sdl_read_thread(SDL_Event *event) {
+  process_resize(event);
+  ngui_receive_event(event);
+  process_mouse_event(event);
+    
+  // I can't remember what effect this has on the iOS build, so it's not used there for now.
+  #ifndef IOS_BUILD
+  if(event->type == SDL_QUIT) {
+    hterm_quit = true;
+    return;
+  }
+  #endif
   
   if(event->type == SDL_TEXTINPUT) {
     char buffer[255];
@@ -1200,12 +1204,14 @@ void sdl_read_thread(SDL_Event *event) {
   if(event->type == SDL_KEYDOWN) {
    
      SDL_Scancode scancode = event->key.keysym.scancode;
+     #if defined(OSX_BUILD) || defined(IOS_BUILD)
      if((scancode == SDL_SCANCODE_DELETE) || (scancode == SDL_SCANCODE_BACKSPACE)) {
        char buf[4];
        buf[0] = 127;
        buf[1] = 0;
        c_write(buf,1);
      }
+     #endif
 
      #if defined(OSX_BUILD) || defined(LINUX_BUILD)
      if(scancode == SDL_SCANCODE_ESCAPE) {

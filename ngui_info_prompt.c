@@ -1,3 +1,4 @@
+#include "ngui.h"
 #include "ngui_info_prompt.h"
 #include "ngui_textlabel.h"
 #include "ngui_textbox.h"
@@ -18,7 +19,7 @@ typedef struct {
   int   p1_opt;
   int   p2_opt;
   int   p3_opt;
-  void (*callback)(char *,char *,char *);
+  void (*callback)(const char *,const char *,const char *);
 
   int textbox1;
   int textbox2;
@@ -91,7 +92,7 @@ int  ngui_add_info_prompt(int x,int y,
   ngui_info_prompts[ngui_info_prompts_size].p1_opt = p1_opt;
   ngui_info_prompts[ngui_info_prompts_size].p2_opt = p2_opt;
   ngui_info_prompts[ngui_info_prompts_size].p3_opt = p3_opt;
-  ngui_info_prompts[ngui_info_prompts_size].callback = callback;
+  ngui_info_prompts[ngui_info_prompts_size].callback = (void (*)(const char *,const char *,const char *)) callback;
   
 /*
   int l1 = ngui_add_textlabel((ngui_screen->w/2)-(strlen(p1)*8),

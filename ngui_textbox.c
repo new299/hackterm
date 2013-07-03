@@ -15,7 +15,7 @@ typedef struct {
   int  width;
   bool selected;
   char text[100];
-  void (*callback)(char *);
+  void (*callback)(const char *);
 } ngui_textbox_data;
 
 int ngui_textboxs_size = 0;
@@ -107,7 +107,7 @@ int ngui_add_textbox(int x,int y,char *text,bool passwordbox,void *callback) {
   ngui_textboxs[ngui_textboxs_size].y_padding = 10;
   ngui_textboxs[ngui_textboxs_size].width     = 8*20;
   strcpy(ngui_textboxs[ngui_textboxs_size].text,text);
-  ngui_textboxs[ngui_textboxs_size].callback = callback;
+  ngui_textboxs[ngui_textboxs_size].callback = (void (*)(const char *)) callback;
 
   ngui_textboxs_size++;
   return ngui_textboxs_size-1;

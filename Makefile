@@ -15,14 +15,14 @@ LIBSSH2C = ./libssh2/src/agent.c    ./libssh2/src/transport.c ./libssh2/src/vers
 
 LIBSDLC = ./libsdl
 
-OURC = main.c base64.c inlinedata.c regis.c nunifont.c nsdl.c ngui.c ssh.c local.c ngui_info_prompt.c ngui_textlabel.c ngui_textbox.c ngui_button.c
+OURC = main.c base64.c inlinedata.c regis.c nunifont.c nsdl.c ngui.c ssh.c local.c ngui_info_prompt.c ngui_textlabel.c ngui_textbox.c ngui_button.c ngui_stringselect.c
 
 hterm: main.c nunifont.c nunifont.h *.c *.h
 	#You'll need to uncomment this for a new build.
-	cd libsdl ;./configure
-	make -C ./libsdl
-	cd libpng ;./configure
-	make -C ./libpng
+	#cd libsdl ;./configure
+	#make -C ./libsdl
+	#cd libpng ;./configure
+	#make -C ./libpng
 	find . -name *.dylib -exec rm {} \;
 	find . -name *.so* -exec rm {} \;
 	#don't need this: find ./libsdl -name SDL_config.h -exec rm {} \;
